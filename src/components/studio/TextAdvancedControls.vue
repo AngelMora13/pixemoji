@@ -14,8 +14,8 @@
 
         <div class="flex items-center gap-2">
           <input
-            v-model="liveFill"
-            @input="$emit('updateFill', liveFill)"
+            :value="liveFill"
+            @input="onFillInput"
             type="color"
             class="w-8 h-8 p-0 rounded-lg border border-[#debfa8] cursor-pointer bg-white shrink-0"
           />
@@ -24,7 +24,7 @@
               v-for="c in ['#ffffff', '#000000', '#facc15', '#ef4444', '#3b82f6', '#10b981']"
               :key="c"
               type="button"
-              @click="liveFill = c; $emit('updateFill', c)"
+              @click="onFillPreset(c)"
               class="w-5 h-5 rounded-md border border-stone-300 cursor-pointer shadow-2xs hover:scale-115 transition-transform"
               :style="{ backgroundColor: c }"
             ></button>
@@ -116,14 +116,7 @@
 
     <!-- PAD 2D DESPLEGABLE CUANDO LA SOMBRA ESTÁ ACTIVA -->
     <div v-if="hasShadow && showShadowPad" class="pt-1 animate-fade-in">
-      <ShadowPad
-        :offset-x="shadowOffsetX"
-        :offset-y="shadowOffsetY"
-        :blur="shadowBlur"
-        :color="shadowColor"
-        :opacity="shadowOpacity"
-        @update="$emit('updateShadow', $event)"
-      />
+      <ShadowPad />
     </div>
   </div>
 </template>
@@ -131,6 +124,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import ShadowPad from './ShadowPad.vue';
+import { useCanvasStudio } from '../../composables/useCanvasStudioContext';
+
+const studio = useCanvasStudio();
 
 const props = defineProps<{
   fill?: string;
@@ -149,63 +145,95 @@ const emit = defineEmits<{
   (e: 'updateShadow', opts: { enabled?: boolean; offsetX?: number; offsetY?: number; blur?: number; color?: string; opacity?: number }): void;
 }>();
 
-const liveFill = ref(props.fill || '#ffffff');
-const hasStroke = ref(Boolean(props.stroke && (props.strokeWidth ?? 0) > 0));
-const liveStrokeColor = ref(props.stroke || '#000000');
-const strokeWidth = ref(props.strokeWidth && props.strokeWidth > 0 ? Math.min(props.strokeWidth, 6) : 3);
+const liveFill = ref('#ffffff');
+const hasStroke = ref(false);
+const liveStrokeColor = ref('#000000');
+const strokeWidth = ref(3);
 
-const hasShadow = ref(Boolean(props.shadowColor && (props.shadowBlur ?? 0) > 0));
+const hasShadow = ref(false);
 const showShadowPad = ref(true);
 
 watch(
-  () => props.fill,
-  (val) => { if (val) liveFill.value = val; }
+  () => props.fill !== undefined ? props.fill : studio?.activeElement.value?.fill,
+  (val) => {
+    if (val) liveFill.value = val;
+  },
+  { immediate: true }
 );
 
 watch(
-  () => [props.stroke, props.strokeWidth],
+  () => [
+    props.stroke !== undefined ? props.stroke : studio?.activeElement.value?.stroke,
+    props.strokeWidth !== undefined ? props.strokeWidth : studio?.activeElement.value?.strokeWidth
+  ],
   ([stroke, width]) => {
     hasStroke.value = Boolean(stroke && (Number(width) > 0));
     if (stroke) liveStrokeColor.value = String(stroke);
     if (Number(width) > 0) strokeWidth.value = Math.min(Number(width), 6);
-  }
+  },
+  { immediate: true }
 );
 
 watch(
-  () => [props.shadowColor, props.shadowBlur],
+  () => [
+    props.shadowColor !== undefined ? props.shadowColor : studio?.activeElement.value?.shadowColor,
+    props.shadowBlur !== undefined ? props.shadowBlur : studio?.activeElement.value?.shadowBlur
+  ],
   ([color, blur]) => {
     hasShadow.value = Boolean(color && Number(blur) > 0);
-  }
+  },
+  { immediate: true }
 );
 
+const onFillInput = (e: Event) => {
+  const color = (e.target as HTMLInputElement).value;
+  liveFill.value = color;
+  studio?.change('fill', color);
+  emit('updateFill', color);
+};
+
+const onFillPreset = (color: string) => {
+  liveFill.value = color;
+  studio?.change('fill', color);
+  emit('updateFill', color);
+};
+
 const onToggleStroke = () => {
-  emit('updateStroke', {
+  const payload = {
     hasStroke: hasStroke.value,
     color: liveStrokeColor.value,
     width: hasStroke.value ? strokeWidth.value : 0
-  });
+  };
+  studio?.change('stroke', payload);
+  emit('updateStroke', payload);
 };
 
 const onStrokeChange = () => {
-  emit('updateStroke', {
+  const payload = {
     hasStroke: true,
     color: liveStrokeColor.value,
     width: strokeWidth.value
-  });
+  };
+  studio?.change('stroke', payload);
+  emit('updateStroke', payload);
 };
 
 const onToggleShadow = () => {
   if (hasShadow.value) {
-    emit('updateShadow', {
+    const payload = {
       enabled: true,
-      offsetX: props.shadowOffsetX || 0,
-      offsetY: props.shadowOffsetY || 4,
-      blur: props.shadowBlur || 10,
-      color: props.shadowColor || '#000000',
-      opacity: props.shadowOpacity || 0.6
-    });
+      offsetX: studio?.activeElement.value?.shadowOffsetX || props.shadowOffsetX || 0,
+      offsetY: studio?.activeElement.value?.shadowOffsetY || props.shadowOffsetY || 4,
+      blur: studio?.activeElement.value?.shadowBlur || props.shadowBlur || 10,
+      color: studio?.activeElement.value?.shadowColor || props.shadowColor || '#000000',
+      opacity: studio?.activeElement.value?.shadowOpacity || props.shadowOpacity || 0.6
+    };
+    studio?.change('shadow', payload);
+    emit('updateShadow', payload);
   } else {
-    emit('updateShadow', { enabled: false });
+    const payload = { enabled: false };
+    studio?.change('shadow', payload);
+    emit('updateShadow', payload);
   }
 };
 </script>

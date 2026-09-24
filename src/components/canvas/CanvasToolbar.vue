@@ -31,7 +31,7 @@
 
         <button
           type="button"
-          @click="$emit('toggleLock')"
+          @click="trigger('toggleLock', undefined, 'toggleLock')"
           :class="[
             'w-7 h-7 rounded-lg text-xs flex items-center justify-center cursor-pointer transition-colors',
             selectedInfo.isLocked ? 'bg-amber-500 text-white' : 'bg-stone-100 hover:bg-amber-100 text-stone-700'
@@ -43,7 +43,7 @@
 
         <button
           type="button"
-          @click="$emit('delete')"
+          @click="trigger('delete', undefined, 'delete')"
           class="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs flex items-center justify-center cursor-pointer"
           title="Eliminar elemento (Supr)"
         >
@@ -83,35 +83,35 @@
         <span class="text-[10px] font-bold text-[#8a6e60] uppercase tracking-wider mr-1">Estilos 1-Clic:</span>
         <button
           type="button"
-          @click="$emit('applyTextPreset', 'meme')"
+          @click="trigger('textPreset', 'meme', 'applyTextPreset', 'meme')"
           class="px-2.5 py-1 rounded-lg bg-black text-white text-[11px] font-extrabold hover:bg-neutral-800 transition-all cursor-pointer shadow-2xs"
         >
           💥 Meme Clásico
         </button>
         <button
           type="button"
-          @click="$emit('applyTextPreset', 'sticker')"
+          @click="trigger('textPreset', 'sticker', 'applyTextPreset', 'sticker')"
           class="px-2.5 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 text-[11px] font-bold hover:bg-amber-200 transition-all cursor-pointer shadow-2xs"
         >
           ✨ Sticker
         </button>
         <button
           type="button"
-          @click="$emit('applyTextPreset', 'neon')"
+          @click="trigger('textPreset', 'neon', 'applyTextPreset', 'neon')"
           class="px-2.5 py-1 rounded-lg bg-cyan-50 border border-cyan-400 text-cyan-800 text-[11px] font-bold hover:bg-cyan-100 transition-all cursor-pointer shadow-2xs"
         >
           💡 Neón
         </button>
         <button
           type="button"
-          @click="$emit('applyTextPreset', 'soft-shadow')"
+          @click="trigger('textPreset', 'soft-shadow', 'applyTextPreset', 'soft-shadow')"
           class="px-2.5 py-1 rounded-lg bg-stone-100 border border-stone-300 text-stone-700 text-[11px] font-semibold hover:bg-stone-200 transition-all cursor-pointer shadow-2xs"
         >
           🌑 Sombra
         </button>
         <button
           type="button"
-          @click="$emit('applyTextPreset', 'clean')"
+          @click="trigger('textPreset', 'clean', 'applyTextPreset', 'clean')"
           class="px-2 py-1 rounded-lg bg-white border border-[#debfa8] text-stone-600 text-[11px] font-semibold hover:bg-amber-50 transition-all cursor-pointer"
         >
           🧼 Plano
@@ -120,19 +120,7 @@
 
       <!-- Sección Avanzada Modular: Relleno | Borde | Sombra en 1 fila desktop -->
       <div v-show="showAdvanced" class="pt-2 animate-fade-in">
-        <TextAdvancedControls
-          :fill="selectedInfo.fill"
-          :stroke="selectedInfo.stroke"
-          :stroke-width="selectedInfo.strokeWidth"
-          :shadow-color="selectedInfo.shadowColor"
-          :shadow-blur="selectedInfo.shadowBlur"
-          :shadow-offset-x="selectedInfo.shadowOffsetX"
-          :shadow-offset-y="selectedInfo.shadowOffsetY"
-          :shadow-opacity="selectedInfo.shadowOpacity"
-          @update-fill="$emit('updateText', { textColor: $event })"
-          @update-stroke="$emit('updateStroke', $event)"
-          @update-shadow="$emit('updateShadow', $event)"
-        />
+        <TextAdvancedControls />
       </div>
     </div>
 
@@ -143,35 +131,35 @@
         <span class="text-[10px] font-bold text-[#8a6e60] uppercase tracking-wider mr-1">Efectos 1-Clic:</span>
         <button
           type="button"
-          @click="$emit('applyImagePreset', 'sticker')"
+          @click="trigger('imagePreset', 'sticker', 'applyImagePreset', 'sticker')"
           class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[11px] font-bold hover:from-amber-600 hover:to-orange-600 transition-all cursor-pointer shadow-2xs"
         >
           ✨ Borde Sticker
         </button>
         <button
           type="button"
-          @click="$emit('applyImagePreset', 'neon', '#00f0ff')"
+          @click="trigger('imagePreset', { preset: 'neon', color: '#00f0ff' }, 'applyImagePreset', ['neon', '#00f0ff'])"
           class="px-2.5 py-1 rounded-lg bg-cyan-100 border border-cyan-400 text-cyan-900 text-[11px] font-bold hover:bg-cyan-200 transition-all cursor-pointer shadow-2xs"
         >
           💎 Neón Cyan
         </button>
         <button
           type="button"
-          @click="$emit('applyImagePreset', 'neon', '#ff007f')"
+          @click="trigger('imagePreset', { preset: 'neon', color: '#ff007f' }, 'applyImagePreset', ['neon', '#ff007f'])"
           class="px-2.5 py-1 rounded-lg bg-pink-100 border border-pink-400 text-pink-900 text-[11px] font-bold hover:bg-pink-200 transition-all cursor-pointer shadow-2xs"
         >
           💖 Neón Rosa
         </button>
         <button
           type="button"
-          @click="$emit('applyImagePreset', 'soft-shadow')"
+          @click="trigger('imagePreset', 'soft-shadow', 'applyImagePreset', 'soft-shadow')"
           class="px-2.5 py-1 rounded-lg bg-stone-100 border border-stone-300 text-stone-700 text-[11px] font-semibold hover:bg-stone-200 transition-all cursor-pointer shadow-2xs"
         >
           🌑 Sombra
         </button>
         <button
           type="button"
-          @click="$emit('applyImagePreset', 'clean')"
+          @click="trigger('imagePreset', 'clean', 'applyImagePreset', 'clean')"
           class="px-2 py-1 rounded-lg bg-white border border-[#debfa8] text-stone-600 text-[11px] font-semibold hover:bg-amber-50 transition-all cursor-pointer"
         >
           🧼 Normal
@@ -183,21 +171,21 @@
         <span class="text-[10px] font-bold text-[#8a6e60] uppercase tracking-wider mr-1">Orientación:</span>
         <button
           type="button"
-          @click="$emit('flipH')"
+          @click="trigger('flipH', undefined, 'flipH')"
           class="px-2.5 py-1 rounded-lg bg-white border border-[#debfa8] text-[#523e32] hover:bg-amber-50 text-[11px] font-semibold cursor-pointer"
         >
           ↔️ Reflejar
         </button>
         <button
           type="button"
-          @click="$emit('flipV')"
+          @click="trigger('flipV', undefined, 'flipV')"
           class="px-2.5 py-1 rounded-lg bg-white border border-[#debfa8] text-[#523e32] hover:bg-amber-50 text-[11px] font-semibold cursor-pointer"
         >
           ↕️ Invertir
         </button>
         <button
           type="button"
-          @click="$emit('center')"
+          @click="trigger('center', undefined, 'center')"
           class="px-2.5 py-1 rounded-lg bg-white border border-[#debfa8] text-[#523e32] hover:bg-amber-50 text-[11px] font-semibold cursor-pointer"
         >
           🎯 Centrar
@@ -206,14 +194,7 @@
 
       <!-- Sección Avanzada para Emoji / Imagen (Shadow Pad 2D) -->
       <div v-show="showAdvanced" class="pt-2 animate-fade-in">
-        <ShadowPad
-          :offset-x="selectedInfo.shadowOffsetX"
-          :offset-y="selectedInfo.shadowOffsetY"
-          :blur="selectedInfo.shadowBlur"
-          :color="selectedInfo.shadowColor"
-          :opacity="selectedInfo.shadowOpacity"
-          @update="$emit('updateShadow', $event)"
-        />
+        <ShadowPad />
       </div>
     </div>
   </div>
@@ -238,27 +219,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import TextAdvancedControls from '../studio/TextAdvancedControls.vue';
 import ShadowPad from '../studio/ShadowPad.vue';
+import { useCanvasStudio, type StudioAction, type ActiveElementSnapshot } from '../../composables/useCanvasStudioContext';
+
+const studio = useCanvasStudio();
 
 const props = defineProps<{
-  selectedInfo: {
-    label: string;
-    type: string;
-    isLocked?: boolean;
-    text?: string;
-    fontFamily?: string;
-    fontSize?: number;
-    fill?: string;
-    stroke?: string;
-    strokeWidth?: number;
-    shadowColor?: string;
-    shadowBlur?: number;
-    shadowOffsetX?: number;
-    shadowOffsetY?: number;
-    shadowOpacity?: number;
-  } | null;
+  selectedInfo?: ActiveElementSnapshot | null;
 }>();
 
 const emit = defineEmits<{
@@ -275,12 +244,16 @@ const emit = defineEmits<{
   (e: 'openBgTab'): void;
 }>();
 
+const selectedInfo = computed(() => {
+  return props.selectedInfo !== undefined ? props.selectedInfo : studio?.activeElement.value;
+});
+
 const showAdvanced = ref(false);
 const liveText = ref('');
 const liveFont = ref('Impact');
 
 watch(
-  () => props.selectedInfo,
+  () => selectedInfo.value,
   (info) => {
     if (info && info.type === 'Texto') {
       liveText.value = info.text || '';
@@ -290,11 +263,26 @@ watch(
   { immediate: true }
 );
 
+const trigger = (action: StudioAction, payload?: any, legacyEmit?: any, legacyArg?: any) => {
+  if (studio) {
+    studio.change(action, payload);
+  }
+  if (legacyEmit) {
+    if (Array.isArray(legacyArg)) {
+      (emit as any)(legacyEmit, ...legacyArg);
+    } else if (legacyArg !== undefined) {
+      (emit as any)(legacyEmit, legacyArg);
+    } else {
+      (emit as any)(legacyEmit, payload);
+    }
+  }
+};
+
 const onTextChange = () => {
-  emit('updateText', { text: liveText.value });
+  trigger('text', { text: liveText.value }, 'updateText', { text: liveText.value });
 };
 
 const onFontChange = () => {
-  emit('updateText', { fontFamily: liveFont.value });
+  trigger('font', liveFont.value, 'updateText', { fontFamily: liveFont.value });
 };
 </script>

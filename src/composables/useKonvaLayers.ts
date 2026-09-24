@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, shallowRef, computed, watch } from 'vue';
 import type { useKonvaStage } from './useKonvaStage';
 import { patchKonvaEmojiShadow } from './useKonvaEmojiFix';
 
@@ -20,6 +20,46 @@ export interface TextNodeOptions {
   strokeWidth?: number;
 }
 
+export interface StickerOptions {
+  strokeColor?: string;
+  strokeWidth?: number;
+  shadowColor?: string;
+  shadowBlur?: number;
+  shadowOffsetY?: number;
+}
+
+export interface CustomShadowOptions {
+  color: string;
+  blur: number;
+  offsetX: number;
+  offsetY: number;
+  opacity: number;
+}
+
+export interface ActiveElementState {
+  id: string;
+  type: 'Texto' | 'Emoji' | 'Imagen' | 'Objeto';
+  label: string;
+  isLocked: boolean;
+  text: string;
+  fontFamily: string;
+  fontSize: number;
+  fill: string;
+  stroke: string | undefined;
+  strokeWidth: number;
+  hasStroke: boolean;
+  shadowColor: string;
+  shadowBlur: number;
+  shadowOffsetX: number;
+  shadowOffsetY: number;
+  shadowOpacity: number;
+  hasShadow: boolean;
+  scaleX: number;
+  scaleY: number;
+  rotation: number;
+  raw: any;
+}
+
 export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
   const {
     layerInstance,
@@ -33,25 +73,23 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
   } = stageContext;
 
   const layersList = ref<LayerItem[]>([]);
-  const nodeRevision = ref(0);
-
-  const triggerNodeUpdate = () => {
-    nodeRevision.value++;
-  };
+  const activeElement = shallowRef<ActiveElementState | null>(null);
 
   const layersListReversed = computed(() => {
     return [...layersList.value].reverse();
   });
 
-  const selectedNodeInfo = computed(() => {
-    // Register dependency on nodeRevision so imperative Konva attribute changes trigger reactive updates
-    nodeRevision.value;
-    if (!selectedNode.value) return null;
-    const item = layersList.value.find((l) => l.raw === selectedNode.value);
+  const syncActiveElement = () => {
     const node = selectedNode.value;
+    if (!node) {
+      activeElement.value = null;
+      return;
+    }
 
     const explicitType = node.getAttr?.('nodeType');
-    let type = 'Objeto';
+    const item = layersList.value.find((l) => l.raw === node);
+
+    let type: 'Texto' | 'Emoji' | 'Imagen' | 'Objeto' = 'Objeto';
     if (explicitType === 'emoji') {
       type = 'Emoji';
     } else if (explicitType === 'text') {
@@ -59,7 +97,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     } else if (explicitType === 'image' || node.className === 'Image') {
       type = 'Imagen';
     } else if (item?.type) {
-      type = item.type;
+      type = item.type as any;
     } else if (typeof node.text === 'function') {
       const txt = node.text();
       if ([...txt].length <= 2 && /\p{Extended_Pictographic}/u.test(txt)) {
@@ -70,23 +108,58 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     }
 
     const isText = type === 'Texto';
-    return {
-      label: item?.label ?? (type === 'Emoji' ? `Emoji: ${node.text?.()}` : node.text?.() || 'Objeto'),
+    const nodeText = typeof node.text === 'function' ? node.text() : '';
+    const currentStroke = typeof node.stroke === 'function' ? node.stroke() : undefined;
+    const currentStrokeWidth = typeof node.strokeWidth === 'function' ? (node.strokeWidth() ?? 0) : 0;
+    const currentShadowColor = typeof node.shadowColor === 'function' ? (node.shadowColor() || '#000000') : '#000000';
+    const currentShadowBlur = typeof node.shadowBlur === 'function' ? (node.shadowBlur() ?? 0) : 0;
+    const currentShadowOffsetX = typeof node.shadowOffsetX === 'function' ? (node.shadowOffsetX() ?? 0) : 0;
+    const currentShadowOffsetY = typeof node.shadowOffsetY === 'function' ? (node.shadowOffsetY() ?? 0) : 0;
+    const currentShadowOpacity = typeof node.shadowOpacity === 'function' ? (node.shadowOpacity() ?? 1) : 1;
+    const hasShadowActive = typeof node.hasShadow === 'function'
+      ? node.hasShadow()
+      : (currentShadowBlur > 0 || currentShadowOffsetX !== 0 || currentShadowOffsetY !== 0);
+
+    activeElement.value = {
+      id: node._id ? String(node._id) : (item?.id || ''),
       type,
+      label: item?.label ?? (type === 'Emoji' ? `Emoji: ${nodeText}` : nodeText || 'Objeto'),
       isLocked: item?.isLocked ?? node.hasName('locked'),
-      text: isText ? node.text() : (typeof node.text === 'function' ? node.text() : ''),
+      text: isText ? nodeText : (typeof node.text === 'function' ? nodeText : ''),
       fontFamily: typeof node.fontFamily === 'function' ? node.fontFamily() : 'Impact',
       fontSize: typeof node.fontSize === 'function' ? node.fontSize() : 44,
       fill: typeof node.fill === 'function' ? node.fill() : '#ffffff',
-      stroke: typeof node.stroke === 'function' ? node.stroke() : undefined,
-      strokeWidth: typeof node.strokeWidth === 'function' ? (node.strokeWidth() ?? 0) : 0,
-      shadowColor: typeof node.shadowColor === 'function' ? (node.shadowColor() || '#000000') : '#000000',
-      shadowBlur: typeof node.shadowBlur === 'function' ? (node.shadowBlur() ?? 0) : 0,
-      shadowOffsetX: typeof node.shadowOffsetX === 'function' ? (node.shadowOffsetX() ?? 0) : 0,
-      shadowOffsetY: typeof node.shadowOffsetY === 'function' ? (node.shadowOffsetY() ?? 0) : 0,
-      shadowOpacity: typeof node.shadowOpacity === 'function' ? (node.shadowOpacity() ?? 1) : 1
+      stroke: currentStroke,
+      strokeWidth: currentStrokeWidth,
+      hasStroke: Boolean(currentStroke && currentStrokeWidth > 0),
+      shadowColor: currentShadowColor,
+      shadowBlur: currentShadowBlur,
+      shadowOffsetX: currentShadowOffsetX,
+      shadowOffsetY: currentShadowOffsetY,
+      shadowOpacity: currentShadowOpacity,
+      hasShadow: hasShadowActive,
+      scaleX: typeof node.scaleX === 'function' ? node.scaleX() : 1,
+      scaleY: typeof node.scaleY === 'function' ? node.scaleY() : 1,
+      rotation: typeof node.rotation === 'function' ? node.rotation() : 0,
+      raw: node
     };
-  });
+  };
+
+  watch(
+    () => selectedNode.value,
+    (node) => {
+      syncActiveElement();
+      if (node && typeof node.on === 'function') {
+        node.off('.activeSync');
+        node.on('dragend.activeSync transformend.activeSync', () => {
+          syncActiveElement();
+        });
+      }
+    },
+    { immediate: true }
+  );
+
+  const selectedNodeInfo = computed(() => activeElement.value);
 
   const refreshLayersList = () => {
     if (!layerInstance.value) return;
@@ -232,13 +305,13 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     img.src = url;
   };
 
-  // Visual Effects
+  // Visual Effects & Node Transformations
   const flipHorizontal = () => {
     if (!selectedNode.value || !layerInstance.value) return;
     const currentScale = selectedNode.value.scaleX() || 1;
     selectedNode.value.scaleX(currentScale * -1);
     layerInstance.value.draw();
-    triggerNodeUpdate();
+    syncActiveElement();
   };
 
   const flipVertical = () => {
@@ -246,38 +319,75 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     const currentScale = selectedNode.value.scaleY() || 1;
     selectedNode.value.scaleY(currentScale * -1);
     layerInstance.value.draw();
-    triggerNodeUpdate();
+    syncActiveElement();
   };
 
-  const applyStickerEffect = () => {
+  const rotateCW = (degrees = 90) => {
+    if (!selectedNode.value || !layerInstance.value) return;
+    const currentRotation = selectedNode.value.rotation() || 0;
+    selectedNode.value.rotation((currentRotation + degrees) % 360);
+    layerInstance.value.draw();
+    syncActiveElement();
+  };
+
+  const centerNode = () => {
+    if (!selectedNode.value || !layerInstance.value) return;
+    selectedNode.value.x(canvasWidth.value / 2);
+    selectedNode.value.y(canvasHeight.value / 2);
+    layerInstance.value.draw();
+    syncActiveElement();
+  };
+
+  const applyStickerEffect = (options?: StickerOptions) => {
     if (!selectedNode.value || !layerInstance.value) return;
     const node = selectedNode.value;
 
-    node.stroke('#ffffff');
-    node.strokeWidth(10);
-    node.shadowColor('rgba(0, 0, 0, 0.4)');
-    node.shadowBlur(14);
-    node.shadowOffsetY(6);
-    node.shadowOpacity(0.7);
+    const strokeColor = options?.strokeColor ?? '#ffffff';
+    const strokeWidth = options?.strokeWidth ?? 12;
+    const shadowColor = options?.shadowColor ?? 'rgba(0, 0, 0, 0.4)';
+    const shadowBlur = options?.shadowBlur ?? 14;
+    const shadowOffsetY = options?.shadowOffsetY ?? 6;
+
+    node.stroke(strokeColor);
+    node.strokeWidth(strokeWidth);
+    node.shadowColor(shadowColor);
+    node.shadowBlur(shadowBlur);
+    node.shadowOffsetX(0);
+    node.shadowOffsetY(shadowOffsetY);
+    node.shadowOpacity(0.75);
 
     layerInstance.value.draw();
     refreshLayersList();
-    triggerNodeUpdate();
+    syncActiveElement();
   };
 
-  const applyGlowEffect = (color = '#ff007f') => {
+  const applyGlowEffect = (color = '#ff007f', blur = 24, opacity = 0.9) => {
     if (!selectedNode.value || !layerInstance.value) return;
     const node = selectedNode.value;
 
     node.shadowColor(color);
-    node.shadowBlur(22);
+    node.shadowBlur(blur);
     node.shadowOffsetX(0);
     node.shadowOffsetY(0);
-    node.shadowOpacity(0.9);
+    node.shadowOpacity(opacity);
 
     layerInstance.value.draw();
     refreshLayersList();
-    triggerNodeUpdate();
+    syncActiveElement();
+  };
+
+  const setCustomShadow = (options: CustomShadowOptions) => {
+    if (!selectedNode.value || !layerInstance.value) return;
+    const node = selectedNode.value;
+
+    node.shadowColor(options.color);
+    node.shadowBlur(options.blur);
+    node.shadowOffsetX(options.offsetX);
+    node.shadowOffsetY(options.offsetY);
+    node.shadowOpacity(options.opacity);
+
+    layerInstance.value.draw();
+    syncActiveElement();
   };
 
   const removeEffects = () => {
@@ -294,7 +404,38 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
 
     layerInstance.value.draw();
     refreshLayersList();
-    triggerNodeUpdate();
+    syncActiveElement();
+  };
+
+  const applyImagePreset = (preset: 'sticker' | 'neon' | 'soft-shadow' | 'clean', customColor?: string) => {
+    if (!selectedNode.value || !layerInstance.value) return;
+
+    switch (preset) {
+      case 'sticker':
+        applyStickerEffect({
+          strokeColor: '#ffffff',
+          strokeWidth: 12,
+          shadowColor: 'rgba(0, 0, 0, 0.35)',
+          shadowBlur: 14,
+          shadowOffsetY: 6
+        });
+        break;
+      case 'neon':
+        applyGlowEffect(customColor || '#00f0ff', 24, 0.9);
+        break;
+      case 'soft-shadow':
+        setCustomShadow({
+          color: 'rgba(0, 0, 0, 0.45)',
+          blur: 18,
+          offsetX: 0,
+          offsetY: 8,
+          opacity: 0.7
+        });
+        break;
+      case 'clean':
+        removeEffects();
+        break;
+    }
   };
 
   const toggleLock = (node = selectedNode.value) => {
@@ -314,6 +455,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
 
     layerInstance.value.draw();
     refreshLayersList();
+    syncActiveElement();
   };
 
   // Pattern fill with emojis
@@ -435,6 +577,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     nodes.forEach((n: any) => n.destroy());
     selectNode(null);
     refreshLayersList();
+    syncActiveElement();
   };
 
   const updateSelectedText = (options: Partial<TextNodeOptions>) => {
@@ -457,7 +600,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
 
     layerInstance.value.draw();
     refreshLayersList();
-    triggerNodeUpdate();
+    syncActiveElement();
   };
 
   const applyTextPreset = (preset: 'meme' | 'sticker' | 'neon' | 'soft-shadow' | 'clean') => {
@@ -520,7 +663,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     node.offsetY(node.height() / 2);
     layerInstance.value.draw();
     refreshLayersList();
-    triggerNodeUpdate();
+    syncActiveElement();
   };
 
   const reorderLayerByIndex = (fromReversedIndex: number, toReversedIndex: number) => {
@@ -544,7 +687,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     transformerInstance.value?.moveToTop();
     layerInstance.value.draw();
     refreshLayersList();
-    triggerNodeUpdate();
+    syncActiveElement();
   };
 
   const updateSelectedShadow = (opts: { enabled?: boolean; offsetX?: number; offsetY?: number; blur?: number; color?: string; opacity?: number }) => {
@@ -568,7 +711,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     }
 
     layerInstance.value.draw();
-    triggerNodeUpdate();
+    syncActiveElement();
   };
 
   const updateSelectedStroke = (opts: { hasStroke?: boolean; color?: string; width?: number }) => {
@@ -586,26 +729,32 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     }
 
     layerInstance.value.draw();
-    triggerNodeUpdate();
+    syncActiveElement();
   };
 
   return {
     layersList,
     layersListReversed,
+    activeElement,
     selectedNodeInfo,
+    syncActiveElement,
+    triggerNodeUpdate: syncActiveElement,
     refreshLayersList,
-    triggerNodeUpdate,
     addEmoji,
     addText,
+    addImage,
     updateSelectedText,
     applyTextPreset,
+    applyImagePreset,
     updateSelectedShadow,
     updateSelectedStroke,
-    addImage,
     flipHorizontal,
     flipVertical,
+    rotateCW,
+    centerNode,
     applyStickerEffect,
     applyGlowEffect,
+    setCustomShadow,
     removeEffects,
     toggleLock,
     fillEmojiPattern,

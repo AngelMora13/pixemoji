@@ -91,20 +91,7 @@
       <!-- Center / Right Column: Expansive Canvas Protagonist (8 cols) -->
       <main class="lg:col-span-8 xl:col-span-8 glass-card rounded-3xl p-4 sm:p-6 border border-[#e8d2c0] shadow-xl shadow-[#523e32]/5 flex flex-col items-center space-y-4 min-w-0">
         <!-- Contextual Toolbar (Appears whenever an element is touched) -->
-        <CanvasToolbar
-          :selected-info="layers.selectedNodeInfo.value"
-          @update-text="handleUpdateText"
-          @apply-text-preset="handleApplyTextPreset"
-          @apply-image-preset="handleApplyImagePreset"
-          @update-shadow="handleUpdateShadow"
-          @update-stroke="handleUpdateStroke"
-          @flip-h="effects.flipHorizontal"
-          @flip-v="effects.flipVertical"
-          @center="effects.centerNode"
-          @toggle-lock="handleToggleLock"
-          @delete="handleDeleteSelected"
-          @open-bg-tab="activeTab = 'bg'"
-        />
+        <CanvasToolbar @open-bg-tab="activeTab = 'bg'" />
 
         <!-- Canvas Frame Container -->
         <div class="w-full flex justify-center items-center p-3 sm:p-6 bg-[#f4ece3]/60 border border-[#debfa8]/80 rounded-2xl overflow-auto max-w-full">
@@ -161,6 +148,7 @@ import { useKonvaEffects } from '../composables/useKonvaEffects';
 import { useKonvaTemplates } from '../composables/useKonvaTemplates';
 import { useCanvasExport } from '../composables/useCanvasExport';
 import { useHistoryUndo } from '../composables/useHistoryUndo';
+import { createStudioContext, provideCanvasStudio } from '../composables/useCanvasStudioContext';
 
 // Subcomponents per DEVELOPMENT_GUIDELINES
 import StudioHeader from './studio/StudioHeader.vue';
@@ -177,10 +165,7 @@ import ExportModal from './common/ExportModal.vue';
 const { currentPreset, formatPresets, selectPreset } = useSocialPresets();
 const stage = useKonvaStage();
 const layers = useKonvaLayers(stage);
-const effects = useKonvaEffects(stage, () => {
-  layers.refreshLayersList();
-  layers.triggerNodeUpdate();
-});
+const effects = useKonvaEffects(stage, layers);
 const exporter = useCanvasExport(stage);
 
 const history = useHistoryUndo(
@@ -188,9 +173,13 @@ const history = useHistoryUndo(
   () => stage.transformerInstance.value,
   () => {
     layers.refreshLayersList();
-    layers.triggerNodeUpdate();
+    layers.syncActiveElement();
   }
 );
+
+// Centralized Studio Context & Dependency Injection Provider
+const studio = createStudioContext(stage, layers, history);
+provideCanvasStudio(studio);
 
 const templates = useKonvaTemplates(
   stage,
@@ -249,53 +238,21 @@ const handleAddImage = (url: string) => {
   setTimeout(() => history.saveState(), 100);
 };
 
-const handleUpdateText = (options: any) => {
-  layers.updateSelectedText(options);
-  history.saveState();
-};
-
-const handleApplyTextPreset = (preset: any) => {
-  layers.applyTextPreset(preset);
-  history.saveState();
-};
-
-const handleApplyImagePreset = (preset: any, customColor?: string) => {
-  effects.applyImagePreset(preset, customColor);
-  layers.refreshLayersList();
-  layers.triggerNodeUpdate();
-  history.saveState();
-};
-
-const handleUpdateShadow = (opts: any) => {
-  layers.updateSelectedShadow(opts);
-  history.saveState();
-};
-
-const handleUpdateStroke = (opts: any) => {
-  layers.updateSelectedStroke(opts);
-  history.saveState();
-};
-
 const handleReorderLayer = (payload: { fromIndex: number; toIndex: number }) => {
-  layers.reorderLayerByIndex(payload.fromIndex, payload.toIndex);
-  history.saveState();
+  studio.change('reorder', payload);
 };
 
 const handleToggleLock = (node?: any) => {
-  effects.toggleLock(node || stage.selectedNode.value);
-  layers.refreshLayersList();
-  history.saveState();
+  studio.change('toggleLock', node || stage.selectedNode.value);
 };
 
 const handleDuplicateNode = (node: any) => {
   stage.selectNode(node);
-  layers.duplicateSelected();
-  setTimeout(() => history.saveState(), 50);
+  studio.change('duplicate');
 };
 
 const handleDeleteSelected = () => {
-  layers.deleteSelected();
-  history.saveState();
+  studio.change('delete');
 };
 
 const handleFillPattern = (emojiChar: string) => {
@@ -305,8 +262,7 @@ const handleFillPattern = (emojiChar: string) => {
 
 const handleClearAll = () => {
   if (confirm('¿Estás seguro de que deseas vaciar todas las capas del lienzo?')) {
-    layers.clearAll();
-    history.saveState();
+    studio.change('clearAll');
   }
 };
 
