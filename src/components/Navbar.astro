@@ -8,35 +8,35 @@ const isHome = currentPath === '/' || currentPath === '';
 const isMeme = currentPath.startsWith('/meme');
 ---
 
-<header class="relative z-20 w-full border-b border-[#ebd8ca]/80 glass-card sticky top-0 shadow-xs">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+<header class="relative z-30 w-full border-b border-app-border bg-app-header/90 backdrop-blur-md sticky top-0 shadow-xs">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-4">
     <!-- Brand -->
     <a href="/" class="flex items-center gap-3 group transition-transform hover:scale-[1.02]">
-      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#d97736] to-amber-400 flex items-center justify-center text-xl shadow-md shadow-[#d97736]/20">
+      <div class="w-10 h-10 rounded-2xl bg-primary-gradient-tr flex items-center justify-center text-xl text-white font-black shadow-md shadow-primary-600/20">
         ✨
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <span class="text-xl font-extrabold tracking-tight text-[#2b1e1a] group-hover:text-[#d97736] transition-colors">
+          <span class="text-xl font-extrabold tracking-tight text-text-main group-hover:text-primary-600 transition-colors">
             PixEmoji
           </span>
-          <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-800">
+          <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-primary-100 border border-primary-300 text-primary-800">
             Studio
           </span>
         </div>
-        <p class="text-[11px] text-[#735a4d] hidden sm:block">Editor gráfico de emojis y creador de stickers</p>
+        <p class="text-[11px] text-text-muted hidden sm:block">Editor gráfico de emojis y creador de stickers</p>
       </div>
     </a>
 
-    <!-- Navigation Tabs -->
-    <nav class="flex items-center p-1 bg-amber-100/60 rounded-2xl border border-amber-200/80">
+    <!-- Navigation Tabs / Mode Switcher -->
+    <nav class="flex items-center p-1 bg-primary-100/70 rounded-2xl border border-primary-200">
       <a
         href="/"
         class:list={[
-          'px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2',
+          'px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2',
           isHome
-            ? 'bg-white text-[#d97736] shadow-sm shadow-amber-900/5 ring-1 ring-[#debfa8]'
-            : 'text-[#735a4d] hover:text-[#2b1e1a] hover:bg-white/50'
+            ? 'bg-white text-primary-600 shadow-sm ring-1 ring-app-border-strong'
+            : 'text-text-muted hover:text-text-main hover:bg-white/50'
         ]}
       >
         <span class="text-base leading-none">🧁</span>
@@ -46,26 +46,26 @@ const isMeme = currentPath.startsWith('/meme');
       <a
         href="/meme"
         class:list={[
-          'px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2',
+          'px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2',
           isMeme
-            ? 'bg-white text-[#d97736] shadow-sm shadow-amber-900/5 ring-1 ring-[#debfa8]'
-            : 'text-[#735a4d] hover:text-[#2b1e1a] hover:bg-white/50'
+            ? 'bg-white text-primary-600 shadow-sm ring-1 ring-app-border-strong'
+            : 'text-text-muted hover:text-text-main hover:bg-white/50'
         ]}
       >
         <span class="text-base leading-none">🎨</span>
         <span>Meme & Sticker Studio</span>
-        <span class="text-[9px] uppercase px-1.5 py-0.2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-md font-extrabold tracking-wide">
+        <span class="text-[9px] uppercase px-1.5 py-0.5 bg-primary-gradient text-white rounded-md font-extrabold tracking-wide">
           Pro
         </span>
       </a>
     </nav>
 
     <!-- Quick shortcuts pill -->
-    <div class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/70 border border-[#ebd8ca] text-xs font-medium text-[#735a4d]">
-      <span class="text-[11px] text-[#8a6e60]">Teclado:</span>
-      <kbd class="px-1.5 py-0.5 rounded bg-stone-100 border border-stone-300 font-mono text-[10px]">Win + .</kbd>
+    <div class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/70 border border-app-border text-xs font-medium text-text-muted">
+      <span class="text-[11px] text-text-subtle">Teclado:</span>
+      <kbd class="px-1.5 py-0.5 rounded bg-stone-100 border border-stone-300 font-mono text-[10px] text-text-main">Win + .</kbd>
       <span>o</span>
-      <kbd class="px-1.5 py-0.5 rounded bg-stone-100 border border-stone-300 font-mono text-[10px]">Cmd + Ctrl + Space</kbd>
+      <kbd class="px-1.5 py-0.5 rounded bg-stone-100 border border-stone-300 font-mono text-[10px] text-text-main">Cmd + Ctrl + Space</kbd>
     </div>
   </div>
 </header>

@@ -8,9 +8,13 @@ export type ActiveElementSnapshot = ActiveElementState;
 export type StudioAction =
   | 'text'
   | 'font'
+  | 'fontStyle'
   | 'textPreset'
   | 'imagePreset'
+  | 'replaceImage'
   | 'shadow'
+  | 'filter'
+  | 'text3D'
   | 'stroke'
   | 'fill'
   | 'flipH'
@@ -64,11 +68,23 @@ export function createStudioContext(
 
     switch (action) {
       case 'text':
-        layers.updateSelectedText(payload);
+        if (typeof payload === 'string') {
+          layers.updateSelectedText({ text: payload });
+        } else {
+          layers.updateSelectedText(payload);
+        }
         isDiscrete = false;
         break;
       case 'font':
         layers.updateSelectedText({ fontFamily: payload });
+        isDiscrete = true;
+        break;
+      case 'fontStyle':
+        layers.updateSelectedText({ fontStyle: payload });
+        isDiscrete = true;
+        break;
+      case 'replaceImage':
+        layers.replaceSelectedImage(payload);
         isDiscrete = true;
         break;
       case 'textPreset':
@@ -85,6 +101,14 @@ export function createStudioContext(
         break;
       case 'shadow':
         layers.updateSelectedShadow(payload);
+        isDiscrete = false;
+        break;
+      case 'filter':
+        layers.updateSelectedFilters(payload);
+        isDiscrete = false;
+        break;
+      case 'text3D':
+        layers.updateSelectedText3D(payload);
         isDiscrete = false;
         break;
       case 'stroke':

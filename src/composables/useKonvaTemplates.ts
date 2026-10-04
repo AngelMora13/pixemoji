@@ -142,7 +142,7 @@ export function useKonvaTemplates(
       }
 
       case 'wallpaper-pattern': {
-        if (onPresetChangeReq) onPresetChangeReq(512, 910, 'stories-reels');
+        if (onPresetChangeReq) onPresetChangeReq(512, 910, 'story-reels');
         else changeDimensions(512, 910);
 
         const peachGrad = gradientPresets.find((g: GradientPreset) => g.id === 'peach') || gradientPresets[1];

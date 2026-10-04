@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-3">
     <div class="flex items-center justify-between mb-1">
-      <span class="text-xs font-bold uppercase tracking-wider text-[#523e32] flex items-center gap-1.5">
+      <span class="text-xs font-bold uppercase tracking-wider text-text-main flex items-center gap-1.5">
         <span>📚 Capas ({{ layers.length }})</span>
       </span>
       <button
@@ -13,8 +13,8 @@
         Vaciar lienzo
       </button>
     </div>
-    <p class="text-[11px] text-[#8a6e60] mb-2 flex items-center justify-between">
-      <span>Arrastra <strong class="text-[#d97736]">⋮⋮</strong> para reordenar (arriba = al frente):</span>
+    <p class="text-[11px] text-text-subtle mb-2 flex items-center justify-between">
+      <span>Arrastra <strong class="text-primary-600">⋮⋮</strong> para reordenar (arriba = al frente):</span>
     </p>
 
     <!-- Lista de Capas con Drag & Drop -->
@@ -32,20 +32,20 @@
         :class="[
           'p-2 rounded-xl border flex items-center justify-between gap-2 cursor-grab active:cursor-grabbing transition-all text-xs select-none',
           selectedNode === layer.raw
-            ? 'bg-amber-100 border-[#d97736] shadow-xs font-bold ring-1 ring-[#d97736]/30'
+            ? 'bg-primary-100 border-primary-500 shadow-xs font-bold ring-1 ring-primary-500/30'
             : layer.isLocked
               ? 'bg-stone-50/90 border-stone-200 opacity-80'
-              : 'bg-white/80 border-[#ebd8ca] hover:bg-amber-50/60',
+              : 'bg-white border-app-border hover:bg-primary-50/60',
           dropTargetIndex === index && draggedIndex !== index
-            ? 'ring-2 ring-[#d97736] bg-amber-100/90 border-[#d97736] scale-[1.02]'
+            ? 'ring-2 ring-primary-500 bg-primary-100/90 border-primary-500 scale-[1.02]'
             : '',
-          draggedIndex === index ? 'opacity-40 border-dashed border-[#d97736]' : ''
+          draggedIndex === index ? 'opacity-40 border-dashed border-primary-500' : ''
         ]"
       >
         <!-- Grip handle & Info de la capa -->
         <div class="flex items-center gap-2 min-w-0">
           <span
-            class="text-[#debfa8] hover:text-[#d97736] cursor-grab active:cursor-grabbing text-sm font-mono select-none px-0.5"
+            class="text-text-subtle hover:text-primary-600 cursor-grab active:cursor-grabbing text-sm font-mono select-none px-0.5"
             title="Arrastra para reordenar esta capa"
           >
             ⋮⋮
@@ -53,13 +53,13 @@
 
           <span class="text-sm shrink-0">{{ layer.icon }}</span>
 
-          <span class="truncate text-[11px] text-[#2b1e1a]">
+          <span class="truncate text-[11px] text-text-main">
             {{ layer.label }}
           </span>
 
           <span
             v-if="layer.isLocked"
-            class="text-[9px] px-1 py-0.2 rounded bg-amber-200 text-amber-900 font-bold shrink-0"
+            class="text-[9px] px-1 py-0.2 rounded bg-primary-200 text-primary-900 font-bold shrink-0"
           >
             Fijada
           </span>
@@ -71,7 +71,7 @@
           <button
             type="button"
             @click.stop="$emit('toggleLock', layer.raw)"
-            class="w-6 h-6 rounded flex items-center justify-center text-[11px] hover:bg-amber-200 cursor-pointer"
+            class="w-6 h-6 rounded flex items-center justify-center text-[11px] hover:bg-primary-200 cursor-pointer"
             :title="layer.isLocked ? 'Desbloquear capa' : 'Bloquear capa'"
           >
             {{ layer.isLocked ? '🔒' : '🔓' }}
@@ -81,7 +81,7 @@
           <button
             type="button"
             @click.stop="$emit('duplicate', layer.raw)"
-            class="w-6 h-6 rounded flex items-center justify-center text-[11px] hover:bg-amber-200 cursor-pointer"
+            class="w-6 h-6 rounded flex items-center justify-center text-[11px] hover:bg-primary-200 cursor-pointer"
             title="Duplicar capa"
           >
             📋
@@ -92,7 +92,7 @@
             type="button"
             @click.stop="$emit('moveUp', layer.raw)"
             :disabled="index === 0"
-            class="w-5 h-5 rounded flex items-center justify-center text-[9px] bg-stone-100 hover:bg-amber-200 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
+            class="w-5 h-5 rounded flex items-center justify-center text-[9px] bg-stone-100 hover:bg-primary-200 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
             title="Subir al frente"
           >
             ▲
@@ -101,7 +101,7 @@
             type="button"
             @click.stop="$emit('moveDown', layer.raw)"
             :disabled="index === layers.length - 1"
-            class="w-5 h-5 rounded flex items-center justify-center text-[9px] bg-stone-100 hover:bg-amber-200 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
+            class="w-5 h-5 rounded flex items-center justify-center text-[9px] bg-stone-100 hover:bg-primary-200 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
             title="Bajar al fondo"
           >
             ▼
@@ -119,7 +119,7 @@
         </div>
       </div>
 
-      <div v-if="layers.length === 0" class="text-center py-6 text-xs text-[#8a6e60] bg-white/50 rounded-xl border border-dashed border-[#ebd8ca]">
+      <div v-if="layers.length === 0" class="text-center py-6 text-xs text-text-subtle bg-white/50 rounded-xl border border-dashed border-app-border">
         No hay elementos en el lienzo todavía. Añade un emoji, texto o imagen para comenzar.
       </div>
     </div>

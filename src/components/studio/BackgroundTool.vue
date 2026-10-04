@@ -1,20 +1,20 @@
 <template>
   <div class="space-y-4">
     <div>
-      <label class="block text-xs font-bold uppercase tracking-wider text-[#523e32] mb-2">
+      <label class="block text-xs font-bold uppercase tracking-wider text-text-main mb-2">
         Fondo del Lienzo
       </label>
 
       <!-- Mode Selector: Transparente / Color / Degradado -->
-      <div class="grid grid-cols-3 gap-1.5 p-1 bg-amber-100/70 rounded-2xl border border-amber-200 mb-3">
+      <div class="grid grid-cols-3 gap-1.5 p-1 bg-primary-100/70 rounded-2xl border border-primary-200 mb-3">
         <button
           type="button"
           @click="$emit('setTransparent')"
           :class="[
             'py-1.5 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1',
             isTransparent
-              ? 'bg-white text-[#d97736] shadow-xs'
-              : 'text-[#735a4d] hover:text-[#2b1e1a]'
+              ? 'bg-white text-primary-600 shadow-xs ring-1 ring-app-border-strong'
+              : 'text-text-muted hover:text-text-main'
           ]"
         >
           <span>🏁</span>
@@ -27,8 +27,8 @@
           :class="[
             'py-1.5 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1',
             bgMode === 'solid'
-              ? 'bg-white text-[#d97736] shadow-xs'
-              : 'text-[#735a4d] hover:text-[#2b1e1a]'
+              ? 'bg-white text-primary-600 shadow-xs ring-1 ring-app-border-strong'
+              : 'text-text-muted hover:text-text-main'
           ]"
         >
           <span>🎨</span>
@@ -41,8 +41,8 @@
           :class="[
             'py-1.5 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1',
             bgMode === 'gradient'
-              ? 'bg-white text-[#d97736] shadow-xs'
-              : 'text-[#735a4d] hover:text-[#2b1e1a]'
+              ? 'bg-white text-primary-600 shadow-xs ring-1 ring-app-border-strong'
+              : 'text-text-muted hover:text-text-main'
           ]"
         >
           <span>🌅</span>
@@ -51,19 +51,19 @@
       </div>
 
       <!-- MODO 1: COLOR SÓLIDO -->
-      <div v-if="bgMode === 'solid'" class="space-y-3 p-3 bg-white/80 border border-[#ebd8ca] rounded-2xl">
+      <div v-if="bgMode === 'solid'" class="space-y-3 p-3 bg-white border border-app-border rounded-2xl shadow-2xs">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-[#523e32]">Color del lienzo:</span>
+          <span class="text-xs font-bold text-text-main">Color del lienzo:</span>
           <input
             :value="bgColor"
             @input="$emit('setColor', ($event.target as HTMLInputElement).value)"
             type="color"
-            class="w-8 h-8 rounded-lg border border-[#debfa8] cursor-pointer"
+            class="w-8 h-8 rounded-lg border border-app-border-strong cursor-pointer"
           />
         </div>
 
         <div>
-          <span class="text-[10px] text-[#8a6e60] block mb-1.5 font-medium">Paleta rápida:</span>
+          <span class="text-[10px] text-text-subtle block mb-1.5 font-medium">Paleta rápida:</span>
           <div class="flex flex-wrap gap-1.5">
             <button
               v-for="c in ['#ffffff', '#000000', '#fffbf7', '#fed7aa', '#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8']"
@@ -78,83 +78,83 @@
       </div>
 
       <!-- MODO 2: DEGRADADOS DE MODA -->
-      <div v-if="bgMode === 'gradient'" class="space-y-2.5 p-3 bg-white/80 border border-[#ebd8ca] rounded-2xl">
+      <div v-if="bgMode === 'gradient'" class="space-y-2.5 p-3 bg-white border border-app-border rounded-2xl shadow-2xs">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-[#523e32]">Degradados de Tendencia:</span>
-          <span class="text-[10px] text-[#8a6e60]">{{ gradientPresets.length }} estilos</span>
+          <span class="text-xs font-bold text-text-main">Degradados de Tendencia:</span>
+          <span class="text-[10px] text-text-subtle">{{ gradientPresets.length }} estilos</span>
         </div>
 
-          <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-3 gap-2">
+          <button
+            v-for="preset in gradientPresets"
+            :key="preset.id"
+            type="button"
+            @click="$emit('setGradient', preset)"
+            :class="[
+              'h-12 rounded-xl p-1.5 flex flex-col justify-end text-left border transition-all cursor-pointer hover:scale-105 shadow-2xs',
+              activeGradient?.id === preset.id
+                ? 'ring-2 ring-primary-500 border-white'
+                : 'border-white/50'
+            ]"
+            :style="{ background: preset.cssPreview }"
+          >
+            <span class="text-[9px] font-extrabold text-white drop-shadow-md truncate leading-tight">
+              {{ preset.name }}
+            </span>
+          </button>
+        </div>
+
+        <!-- SECCIÓN AVANZADA: CREAR DEGRADADO PERSONALIZADO -->
+        <div class="pt-2.5 mt-2 border-t border-app-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-text-main">✨ Crear Degradado Propio:</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <!-- Color 1 -->
+            <div class="flex-1 space-y-0.5">
+              <span class="text-[9px] text-text-subtle font-bold block">Color Inicio</span>
+              <div class="flex items-center gap-1.5">
+                <input
+                  v-model="customColor1"
+                  type="color"
+                  class="w-7 h-7 p-0 rounded-md border border-app-border-strong cursor-pointer bg-white"
+                />
+                <span class="font-mono text-[10px] text-text-main">{{ customColor1 }}</span>
+              </div>
+            </div>
+
+            <!-- Color 2 -->
+            <div class="flex-1 space-y-0.5">
+              <span class="text-[9px] text-text-subtle font-bold block">Color Fin</span>
+              <div class="flex items-center gap-1.5">
+                <input
+                  v-model="customColor2"
+                  type="color"
+                  class="w-7 h-7 p-0 rounded-md border border-app-border-strong cursor-pointer bg-white"
+                />
+                <span class="font-mono text-[10px] text-text-main">{{ customColor2 }}</span>
+              </div>
+            </div>
+
+            <!-- Botón Aplicar -->
             <button
-              v-for="preset in gradientPresets"
-              :key="preset.id"
               type="button"
-              @click="$emit('setGradient', preset)"
-              :class="[
-                'h-12 rounded-xl p-1.5 flex flex-col justify-end text-left border transition-all cursor-pointer hover:scale-105 shadow-2xs',
-                activeGradient?.id === preset.id
-                  ? 'ring-2 ring-[#d97736] border-white'
-                  : 'border-white/50'
-              ]"
-              :style="{ background: preset.cssPreview }"
+              @click="onApplyCustomGradient"
+              class="px-3 py-2 rounded-xl text-white font-extrabold text-xs shadow-xs hover:scale-105 transition-all cursor-pointer shrink-0 self-end"
+              :style="{ background: `linear-gradient(135deg, ${customColor1}, ${customColor2})` }"
+              title="Aplicar degradado personalizado al lienzo"
             >
-              <span class="text-[9px] font-extrabold text-white drop-shadow-md truncate leading-tight">
-                {{ preset.name }}
-              </span>
+              Aplicar
             </button>
           </div>
-
-          <!-- SECCIÓN AVANZADA: CREAR DEGRADADO PERSONALIZADO -->
-          <div class="pt-2.5 mt-2 border-t border-[#ebd8ca]/80 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold text-[#523e32]">✨ Crear Degradado Propio:</span>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <!-- Color 1 -->
-              <div class="flex-1 space-y-0.5">
-                <span class="text-[9px] text-[#8a6e60] font-bold block">Color Inicio</span>
-                <div class="flex items-center gap-1.5">
-                  <input
-                    v-model="customColor1"
-                    type="color"
-                    class="w-7 h-7 p-0 rounded-md border border-[#debfa8] cursor-pointer bg-white"
-                  />
-                  <span class="font-mono text-[10px] text-[#523e32]">{{ customColor1 }}</span>
-                </div>
-              </div>
-
-              <!-- Color 2 -->
-              <div class="flex-1 space-y-0.5">
-                <span class="text-[9px] text-[#8a6e60] font-bold block">Color Fin</span>
-                <div class="flex items-center gap-1.5">
-                  <input
-                    v-model="customColor2"
-                    type="color"
-                    class="w-7 h-7 p-0 rounded-md border border-[#debfa8] cursor-pointer bg-white"
-                  />
-                  <span class="font-mono text-[10px] text-[#523e32]">{{ customColor2 }}</span>
-                </div>
-              </div>
-
-              <!-- Botón Aplicar -->
-              <button
-                type="button"
-                @click="onApplyCustomGradient"
-                class="px-3 py-2 rounded-xl text-white font-extrabold text-xs shadow-xs hover:scale-105 transition-all cursor-pointer shrink-0 self-end"
-                :style="{ background: `linear-gradient(135deg, ${customColor1}, ${customColor2})` }"
-                title="Aplicar degradado personalizado al lienzo"
-              >
-                Aplicar
-              </button>
-            </div>
-          </div>
         </div>
+      </div>
 
       <!-- HERRAMIENTA: PATRÓN DE EMOJIS (WALLPAPER) -->
-      <div class="mt-4 p-3 bg-white/80 border border-[#ebd8ca] rounded-2xl space-y-2.5">
+      <div class="mt-4 p-3 bg-white border border-app-border rounded-2xl space-y-2.5 shadow-2xs">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-[#523e32] flex items-center gap-1">
+          <span class="text-xs font-bold text-text-main flex items-center gap-1">
             <span>✨</span>
             <span>Patrón de Emojis de Fondo</span>
           </span>
@@ -167,7 +167,7 @@
           </button>
         </div>
 
-        <p class="text-[10px] text-[#8a6e60]">
+        <p class="text-[10px] text-text-subtle">
           Rellena todo el fondo en cuadrícula con tu emoji favorito en marca de agua suave:
         </p>
 
@@ -178,7 +178,7 @@
             :key="e"
             type="button"
             @click="onApplyPattern(e)"
-            class="w-7 h-7 rounded-lg bg-amber-50 hover:bg-amber-100 border border-[#debfa8] flex items-center justify-center text-sm cursor-pointer transition-transform hover:scale-110"
+            class="w-7 h-7 rounded-lg bg-primary-50 hover:bg-primary-100 border border-app-border-strong flex items-center justify-center text-sm cursor-pointer transition-transform hover:scale-110"
           >
             {{ e }}
           </button>
@@ -191,12 +191,12 @@
             type="text"
             maxlength="2"
             placeholder="Emoji..."
-            class="w-16 px-2 py-1 bg-white border border-[#debfa8] rounded-xl text-center text-sm focus:outline-none focus:ring-1 focus:ring-[#d97736]"
+            class="w-16 px-2 py-1 bg-white border border-app-border-strong rounded-xl text-center text-sm text-text-main focus:outline-none focus:ring-1 focus:ring-primary-500 shadow-2xs"
           />
           <button
             type="button"
             @click="onApplyCustomPattern"
-            class="flex-1 py-1 px-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer"
+            class="flex-1 py-1 px-2.5 rounded-xl bg-primary-gradient text-white font-bold text-xs shadow-2xs hover:opacity-95 transition-all cursor-pointer"
           >
             Llenar con este Emoji
           </button>

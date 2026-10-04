@@ -1,7 +1,7 @@
 <template>
   <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
     <div
-      class="w-full max-w-sm bg-white border border-[#ebd8ca] rounded-3xl p-6 shadow-2xl space-y-4 relative"
+      class="w-full max-w-sm bg-white border border-app-border rounded-3xl p-6 shadow-2xl space-y-4 relative"
       @click.stop
     >
       <!-- Close button -->
@@ -17,16 +17,16 @@
       <div class="text-left space-y-1">
         <div class="flex items-center gap-2">
           <span class="text-xl">💾</span>
-          <h3 class="text-base font-extrabold text-[#2b1e1a]">Exportar Creación</h3>
+          <h3 class="text-base font-extrabold text-text-main">Exportar Creación</h3>
         </div>
-        <p class="text-xs text-[#735a4d]">
+        <p class="text-xs text-text-muted">
           Descarga en formato PNG con máxima nitidez o cópialo directamente.
         </p>
       </div>
 
       <!-- Resoluciones -->
       <div class="space-y-1.5">
-        <label class="block text-[11px] font-bold uppercase tracking-wider text-[#523e32]">
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-text-main">
           Resolución de salida
         </label>
         <div class="grid grid-cols-2 gap-2">
@@ -36,8 +36,8 @@
             :class="[
               'py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center',
               exportScale === 1
-                ? 'bg-[#d97736] text-white border-[#d97736] shadow-xs'
-                : 'bg-white text-[#523e32] border-[#debfa8] hover:bg-amber-50'
+                ? 'bg-primary-600 text-white border-primary-600 shadow-xs'
+                : 'bg-white text-text-main border-app-border-strong hover:bg-primary-50'
             ]"
           >
             <span class="block">1x (Estándar)</span>
@@ -50,8 +50,8 @@
             :class="[
               'py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center',
               exportScale === 2
-                ? 'bg-[#d97736] text-white border-[#d97736] shadow-xs'
-                : 'bg-white text-[#523e32] border-[#debfa8] hover:bg-amber-50'
+                ? 'bg-primary-600 text-white border-primary-600 shadow-xs'
+                : 'bg-white text-text-main border-app-border-strong hover:bg-primary-50'
             ]"
           >
             <span class="block">2x (Ultra HD)</span>
@@ -65,7 +65,7 @@
         <button
           type="button"
           @click="$emit('download')"
-          class="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#d97736] to-amber-600 hover:from-[#c46527] hover:to-amber-700 text-white font-bold text-xs shadow-md shadow-[#d97736]/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+          class="w-full py-3 px-4 rounded-2xl bg-primary-gradient hover:opacity-95 text-white font-bold text-xs shadow-md shadow-primary-600/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -80,7 +80,7 @@
             'w-full py-2.5 px-4 rounded-2xl border font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer',
             copied
               ? 'bg-emerald-500 border-emerald-600 text-white shadow-xs'
-              : 'bg-white border-[#debfa8] text-[#523e32] hover:bg-amber-50'
+              : 'bg-white border-app-border-strong text-text-main hover:bg-primary-50'
           ]"
         >
           <svg v-if="copied" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,7 +90,7 @@
         </button>
       </div>
 
-      <p class="text-[10px] text-center text-[#8a6e60] pt-1">
+      <p class="text-[10px] text-center text-text-subtle pt-1">
         🔒 Procesado 100% en tu navegador con Konva.js.
       </p>
     </div>
@@ -108,7 +108,7 @@ defineProps<{
 
 defineEmits<{
   (e: 'close'): void;
-  (e: 'update:exportScale', val: number): void;
+  (e: 'update:exportScale', scale: number): void;
   (e: 'download'): void;
   (e: 'copy'): void;
 }>();

@@ -91,3 +91,5 @@ Antes de dar por completado un cambio o nueva funcionalidad, verifica:
 - [ ] ¿La lógica de canvas está dentro de un composable en `src/composables/`?
 - [ ] ¿Los controles o paneles tienen su propio archivo en `src/components/studio/` o `src/components/common/`?
 - [ ] ¿El código es legible para otro desarrollador sin requerir explicaciones complejas?
+- [ ] ¿Se evitó ejecutar builds innecesarios (`npm run build`) o intentar usar subagentes de navegador?
+

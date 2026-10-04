@@ -42,6 +42,26 @@ export function useKonvaStage() {
   const activeGradient = ref<GradientPreset | null>(null);
   const selectedNode = shallowRef<any>(null);
 
+  const selectNode = (node: any) => {
+    if (!layerInstance.value || !transformerInstance.value) return;
+    if (selectedNode.value === node && (!node || transformerInstance.value.nodes().includes(node))) {
+      return;
+    }
+    selectedNode.value = node;
+    if (node) {
+      if (node.hasName && node.hasName('locked')) {
+        // El elemento bloqueado se selecciona para el inspector pero no se transforma ni arrastra
+        transformerInstance.value.nodes([]);
+      } else {
+        transformerInstance.value.nodes([node]);
+        transformerInstance.value.moveToTop();
+      }
+    } else {
+      transformerInstance.value.nodes([]);
+    }
+    layerInstance.value.draw();
+  };
+
   const initStage = async (options: KonvaStageOptions) => {
     if (typeof window === 'undefined') return;
 
@@ -98,20 +118,53 @@ export function useKonvaStage() {
     transformerInstance.value = tr;
     bgRectNode.value = bgRect;
 
+    const findSelectableNode = (target: any) => {
+      let curr = target;
+      while (curr && curr !== stage) {
+        if (curr.hasName && (curr.hasName('selectable') || curr.hasName('locked'))) {
+          return curr;
+        }
+        curr = curr.parent;
+      }
+      return null;
+    };
+
+    // Auto-seleccionar de inmediato al presionar o tocar para que el Transformer
+    // y el panel de propiedades se sincronicen antes o durante un arrastre
+    stage.on('mousedown touchstart', (e: any) => {
+      const selectable = findSelectableNode(e.target);
+      if (selectable && selectedNode.value !== selectable) {
+        selectNode(selectable);
+      }
+    });
+
+    // En caso de que se inicie un arrastre directamente sobre un nodo no seleccionado
+    stage.on('dragstart', (e: any) => {
+      const selectable = findSelectableNode(e.target);
+      if (selectable && selectedNode.value !== selectable) {
+        selectNode(selectable);
+      }
+    });
+
+    // Respaldo al terminar el arrastre para garantizar selección sincronizada
+    stage.on('dragend', (e: any) => {
+      const selectable = findSelectableNode(e.target);
+      if (selectable && selectedNode.value !== selectable) {
+        selectNode(selectable);
+      }
+    });
+
+    // Clic/Tap para alternar elemento o deseleccionar al presionar el fondo vacío
     stage.on('click tap', (e: any) => {
       if (e.target === stage || e.target === bgRect) {
-        tr.nodes([]);
-        selectedNode.value = null;
-        layer.draw();
+        selectNode(null);
         return;
       }
 
-      if (!e.target.hasName('selectable')) return;
-
-      selectedNode.value = e.target;
-      tr.nodes([e.target]);
-      tr.moveToTop();
-      layer.draw();
+      const selectable = findSelectableNode(e.target);
+      if (selectable) {
+        selectNode(selectable);
+      }
     });
 
     layer.draw();
@@ -169,18 +222,6 @@ export function useKonvaStage() {
       bgRectNode.value.moveToBottom();
       layerInstance.value.draw();
     }
-  };
-
-  const selectNode = (node: any) => {
-    if (!layerInstance.value || !transformerInstance.value) return;
-    selectedNode.value = node;
-    if (node) {
-      transformerInstance.value.nodes([node]);
-      transformerInstance.value.moveToTop();
-    } else {
-      transformerInstance.value.nodes([]);
-    }
-    layerInstance.value.draw();
   };
 
   const clearSelection = () => {

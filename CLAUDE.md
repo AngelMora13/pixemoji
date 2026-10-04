@@ -22,6 +22,11 @@ astro dev --background
 
 Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
 
+## Restricciones Obligatorias del Agente
+
+- **NO ejecutar builds (`npm run build` / `astro build`):** No compilar el proyecto para producción de manera automática. Confiar en el servidor de desarrollo (`astro dev`).
+- **NO usar herramientas de navegador / browser subagent:** No intentar abrir el navegador con `open_browser_url` ni lanzar subagentes de navegador (`browser_subagent`). Las pruebas y validaciones visuales las realiza el usuario directamente en su navegador.
+
 ## Documentation
 
 Full documentation: https://docs.astro.build

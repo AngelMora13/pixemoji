@@ -1,14 +1,14 @@
 <template>
-  <div class="space-y-3 p-3 bg-amber-50/70 border border-[#debfa8] rounded-2xl">
+  <div class="space-y-3 p-3 bg-primary-50/70 border border-app-border-strong rounded-2xl">
     <div class="flex items-center justify-between text-xs">
-      <span class="font-bold text-[#523e32] flex items-center gap-1.5">
+      <span class="font-bold text-text-main flex items-center gap-1.5">
         <span>🌑</span>
         <span>Dirección & Posición de Sombra (2D)</span>
       </span>
       <button
         type="button"
         @click="resetOffset"
-        class="text-[10px] font-bold text-[#d97736] hover:underline cursor-pointer"
+        class="text-[10px] font-bold text-primary-600 hover:underline cursor-pointer"
         title="Centrar sombra a (0, 0)"
       >
         Centrar (0, 0)
@@ -22,7 +22,7 @@
         <div
           ref="padRef"
           @pointerdown="startDrag"
-          class="relative w-24 h-24 rounded-2xl bg-white border-2 border-[#debfa8] shadow-inner cursor-crosshair select-none touch-none overflow-hidden flex items-center justify-center group"
+          class="relative w-24 h-24 rounded-2xl bg-white border-2 border-app-border-strong shadow-inner cursor-crosshair select-none touch-none overflow-hidden flex items-center justify-center group"
           title="Arrastra el punto para orientar la sombra en cualquier dirección"
         >
           <!-- Eje central X / Y -->
@@ -34,15 +34,15 @@
 
           <!-- Bola interactiva -->
           <div
-            class="absolute w-5 h-5 rounded-full bg-gradient-to-tr from-[#d97736] to-amber-400 border-2 border-white shadow-md transition-transform pointer-events-none"
+            class="absolute w-5 h-5 rounded-full bg-primary-gradient-tr border-2 border-white shadow-md transition-transform pointer-events-none"
             :style="{
               transform: `translate(${ballX}px, ${ballY}px)`
             }"
           ></div>
         </div>
 
-        <span class="text-[10px] font-mono text-[#735a4d]">
-          X: <strong class="text-[#d97736]">{{ Math.round(localOffsetX) }}</strong> · Y: <strong class="text-[#d97736]">{{ Math.round(localOffsetY) }}</strong>
+        <span class="text-[10px] font-mono text-text-muted">
+          X: <strong class="text-primary-600">{{ Math.round(localOffsetX) }}</strong> · Y: <strong class="text-primary-600">{{ Math.round(localOffsetY) }}</strong>
         </span>
       </div>
 
@@ -50,9 +50,9 @@
       <div class="flex-1 space-y-2 text-xs">
         <!-- Difuminado (Blur) -->
         <div>
-          <div class="flex justify-between items-center text-[10px] font-bold uppercase text-[#523e32] mb-0.5">
+          <div class="flex justify-between items-center text-[10px] font-bold uppercase text-text-main mb-0.5">
             <span>Difuminado (Blur)</span>
-            <span class="text-[#d97736] font-mono">{{ effectiveBlur }}px</span>
+            <span class="text-primary-600 font-mono">{{ effectiveBlur }}px</span>
           </div>
           <input
             :value="effectiveBlur"
@@ -60,22 +60,24 @@
             type="range"
             min="0"
             max="40"
-            class="w-full accent-[#d97736] cursor-pointer h-1.5 bg-stone-200 rounded-lg appearance-none"
+            class="w-full accent-primary-600 cursor-pointer h-1.5 bg-stone-200 rounded-lg appearance-none"
           />
         </div>
 
         <!-- Color & Opacidad de sombra -->
         <div>
-          <div class="flex justify-between items-center text-[10px] font-bold uppercase text-[#523e32] mb-1">
+          <div class="flex justify-between items-center text-[10px] font-bold uppercase text-text-main mb-1">
             <span>Color & Opacidad</span>
-            <span class="text-[#d97736] font-mono">{{ Math.round(effectiveOpacity * 100) }}%</span>
+            <span class="text-primary-600 font-mono">{{ Math.round(effectiveOpacity * 100) }}%</span>
           </div>
           <div class="flex items-center gap-2">
-            <input
-              :value="hexColor"
-              @input="onColorInput"
-              type="color"
-              class="w-7 h-7 p-0 rounded-md border border-[#debfa8] cursor-pointer bg-white shrink-0"
+            <ColorPalettePicker
+              :current-color="hexColor"
+              compact
+              popover-align="left"
+              title="Color de sombra"
+              @live-change="onColorChange"
+              @commit-change="onColorChange"
             />
             <input
               :value="effectiveOpacity"
@@ -84,7 +86,7 @@
               min="0"
               max="1"
               step="0.05"
-              class="w-full accent-[#d97736] cursor-pointer h-1.5 bg-stone-200 rounded-lg appearance-none"
+              class="w-full accent-primary-600 cursor-pointer h-1.5 bg-stone-200 rounded-lg appearance-none"
               title="Opacidad de la sombra"
             />
           </div>
@@ -97,6 +99,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useCanvasStudio } from '../../composables/useCanvasStudioContext';
+import ColorPalettePicker from './ColorPalettePicker.vue';
 
 const studio = useCanvasStudio();
 
@@ -258,8 +261,7 @@ const onBlurInput = (e: Event) => {
   });
 };
 
-const onColorInput = (e: Event) => {
-  const val = (e.target as HTMLInputElement).value;
+const onColorChange = (val: string) => {
   emitChange({
     offsetX: localOffsetX.value,
     offsetY: localOffsetY.value,

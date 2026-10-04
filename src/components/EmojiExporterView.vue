@@ -2,14 +2,14 @@
   <div class="w-full max-w-5xl mx-auto space-y-8">
     <!-- Header -->
     <div class="text-center space-y-2">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100/90 border border-amber-200 text-amber-800 text-xs font-semibold uppercase tracking-wider mb-1">
-        <span class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-100 border border-primary-200 text-primary-800 text-xs font-semibold uppercase tracking-wider mb-1">
+        <span class="inline-block w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
         Lienzo Interactivo con Konva.js & Emojis Unicode
       </div>
-      <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-[#2b1e1a]">
+      <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-text-main">
         Exportador de Emojis a PNG Transparente
       </h2>
-      <p class="text-sm md:text-base text-[#735a4d] max-w-2xl mx-auto">
+      <p class="text-sm md:text-base text-text-muted max-w-2xl mx-auto">
         Posiciona, escala o rota tu emoji libremente en el lienzo interactivo de 250x250 px. Usa el selector completo con miles de emojis o elige uno de la galería rápida.
       </p>
     </div>
@@ -17,11 +17,11 @@
     <!-- Main Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       <!-- Left Controls: Emoji Selector & Alignment -->
-      <div class="lg:col-span-7 glass-card rounded-3xl p-6 md:p-7 border border-[#e8d2c0] shadow-xl shadow-[#523e32]/5 space-y-6">
+      <div class="lg:col-span-7 glass-card rounded-3xl p-6 md:p-7 border border-app-border shadow-xl space-y-6">
         <!-- Emoji Selection Modes -->
         <div>
           <div class="flex items-center justify-between mb-3">
-            <label class="text-xs font-bold uppercase tracking-wider text-[#523e32]">
+            <label class="text-xs font-bold uppercase tracking-wider text-text-main">
               1. Selecciona tu Emoji
             </label>
             <button
@@ -30,8 +30,8 @@
               :class="[
                 'text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer',
                 showPicker
-                  ? 'bg-[#d97736] text-white border-[#d97736] shadow-xs'
-                  : 'bg-white text-[#d97736] border-[#debfa8] hover:bg-amber-50'
+                  ? 'bg-primary-600 text-white border-primary-600 shadow-xs'
+                  : 'bg-white text-primary-600 border-app-border-strong hover:bg-primary-50'
               ]"
             >
               <span>🔍</span>
@@ -54,16 +54,16 @@
               type="button"
               @click="selectPreset(item)"
               :class="[
-                'p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-150 cursor-pointer border select-none',
+                'p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-150 cursor-pointer border select-none shadow-2xs',
                 selected.char === item.char && !isCustom
-                  ? 'bg-amber-100/90 border-[#d97736] shadow-sm scale-105 ring-2 ring-[#d97736]/30'
-                  : 'bg-white/80 border-[#ebd8ca] hover:bg-amber-50/70 hover:border-amber-300'
+                  ? 'bg-primary-100 border-primary-500 shadow-sm scale-105 ring-2 ring-primary-500/30'
+                  : 'bg-white border-app-border hover:bg-primary-50/70 hover:border-primary-300'
               ]"
             >
               <span class="text-3xl p-1 inline-flex items-center justify-center leading-none select-none">
                 {{ item.char }}
               </span>
-              <span class="text-[10px] font-semibold text-[#735a4d] truncate max-w-full capitalize">
+              <span class="text-[10px] font-semibold text-text-muted truncate max-w-full capitalize">
                 {{ item.name }}
               </span>
             </button>
@@ -71,8 +71,8 @@
         </div>
 
         <!-- Custom Emoji Direct Input -->
-        <div class="pt-2 border-t border-[#ebd8ca]/80">
-          <label class="block text-xs font-bold uppercase tracking-wider text-[#523e32] mb-2">
+        <div class="pt-2 border-t border-app-border">
+          <label class="block text-xs font-bold uppercase tracking-wider text-text-main mb-2">
             O escribe directamente cualquier emoji:
           </label>
           <div class="flex gap-2.5">
@@ -82,25 +82,25 @@
               type="text"
               maxlength="4"
               placeholder="🍕"
-              class="w-20 h-11 px-3 bg-white/90 border border-[#debfa8] rounded-xl text-center text-xl focus:outline-none focus:ring-2 focus:ring-[#d97736] shadow-xs"
+              class="w-20 h-11 px-3 bg-white border border-app-border-strong rounded-xl text-center text-xl text-text-main focus:outline-none focus:ring-1 focus:ring-primary-500 shadow-xs"
             />
             <input
               v-model="customName"
               type="text"
               placeholder="Nombre del archivo (ej: pizza)"
-              class="flex-1 h-11 px-4 bg-white/90 border border-[#debfa8] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d97736] shadow-xs placeholder-[#aa9384]"
+              class="flex-1 h-11 px-4 bg-white border border-app-border-strong rounded-xl text-sm text-text-main focus:outline-none focus:ring-1 focus:ring-primary-500 shadow-xs placeholder-text-hint"
             />
           </div>
         </div>
 
         <!-- Resolution & Alignment -->
-        <div class="pt-2 border-t border-[#ebd8ca]/80 space-y-4">
+        <div class="pt-2 border-t border-app-border space-y-4">
           <div>
             <div class="flex items-center justify-between mb-2">
-              <label class="text-xs font-bold uppercase tracking-wider text-[#523e32]">
+              <label class="text-xs font-bold uppercase tracking-wider text-text-main">
                 2. Resolución de Descarga PNG
               </label>
-              <span class="text-[11px] text-[#8a6e60] font-mono font-semibold">
+              <span class="text-[11px] text-text-subtle font-mono font-semibold">
                 {{ targetResolution }} &times; {{ targetResolution }} px
               </span>
             </div>
@@ -113,12 +113,12 @@
                 :class="[
                   'py-2 px-1.5 rounded-xl border transition-all cursor-pointer text-center select-none flex flex-col items-center justify-center gap-0.5',
                   targetResolution === item.val
-                    ? 'bg-[#d97736] text-white border-[#d97736] shadow-md shadow-[#d97736]/20'
-                    : 'bg-white/80 text-[#523e32] border-[#debfa8] hover:bg-amber-50/70'
+                    ? 'bg-primary-600 text-white border-primary-600 shadow-md shadow-primary-600/20'
+                    : 'bg-white text-text-main border-app-border-strong hover:bg-primary-50/70'
                 ]"
               >
                 <span class="text-xs font-bold font-mono">{{ item.label }}</span>
-                <span :class="['text-[9px] font-semibold', targetResolution === item.val ? 'text-amber-100' : 'text-[#8a6e60]']">
+                <span :class="['text-[9px] font-semibold', targetResolution === item.val ? 'text-primary-100' : 'text-text-subtle']">
                   {{ item.tag }}
                 </span>
               </button>
@@ -127,16 +127,16 @@
 
           <!-- Alignment Tools -->
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-[#523e32] mb-2">
+            <label class="block text-xs font-bold uppercase tracking-wider text-text-main mb-2">
               Herramientas de Posicionamiento
             </label>
             <div class="flex flex-wrap gap-2">
               <button
                 type="button"
                 @click="centerEmoji"
-                class="px-3 py-2 rounded-xl bg-white border border-[#debfa8] text-[#523e32] hover:bg-amber-50 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                class="px-3 py-2 rounded-xl bg-white border border-app-border-strong text-text-main hover:bg-primary-50 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
               >
-                <svg class="w-4 h-4 text-[#d97736]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 <span>Centrar Emoji</span>
@@ -145,9 +145,9 @@
               <button
                 type="button"
                 @click="fitEmoji"
-                class="px-3 py-2 rounded-xl bg-white border border-[#debfa8] text-[#523e32] hover:bg-amber-50 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                class="px-3 py-2 rounded-xl bg-white border border-app-border-strong text-text-main hover:bg-primary-50 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
               >
-                <svg class="w-4 h-4 text-[#d97736]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </svg>
                 <span>Ajustar al Lienzo</span>
@@ -156,9 +156,9 @@
               <button
                 type="button"
                 @click="resetTransform"
-                class="px-3 py-2 rounded-xl bg-white border border-[#debfa8] text-[#523e32] hover:bg-amber-50 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                class="px-3 py-2 rounded-xl bg-white border border-app-border-strong text-text-main hover:bg-primary-50 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
               >
-                <svg class="w-4 h-4 text-[#d97736]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 <span>Resetear Rotación</span>
@@ -169,12 +169,12 @@
       </div>
 
       <!-- Right: Interactive Canvas & Export Actions -->
-      <div class="lg:col-span-5 glass-card rounded-3xl p-6 md:p-7 border border-[#e8d2c0] shadow-xl shadow-[#523e32]/5 space-y-6 flex flex-col items-center text-center">
+      <div class="lg:col-span-5 glass-card rounded-3xl p-6 md:p-7 border border-app-border shadow-xl space-y-6 flex flex-col items-center text-center">
         <div>
-          <span class="text-xs font-bold uppercase tracking-wider text-[#523e32]">
+          <span class="text-xs font-bold uppercase tracking-wider text-text-main">
             Lienzo Konva (250 &times; 250 px)
           </span>
-          <p class="text-[11px] text-[#8a6e60] mt-0.5">
+          <p class="text-[11px] text-text-subtle mt-0.5">
             ¡Usa los controles para arrastrar, rotar y escalar libremente!
           </p>
         </div>
@@ -189,10 +189,10 @@
         />
 
         <!-- Live Status Pill -->
-        <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50/90 border border-amber-200/80 text-[11px] text-[#735a4d]">
-          <span class="font-mono font-bold text-base leading-none text-[#d97736]">{{ selected.char }}</span>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary-50 border border-primary-200 text-[11px] text-text-muted">
+          <span class="font-mono font-bold text-base leading-none text-primary-600">{{ selected.char }}</span>
           <span>&bull;</span>
-          <span class="font-semibold">{{ fileName }}.png</span>
+          <span class="font-semibold text-text-main">{{ fileName }}.png</span>
           <span>&bull;</span>
           <span class="font-mono">{{ targetResolution }}&times;{{ targetResolution }}px</span>
         </div>
@@ -202,7 +202,7 @@
           <button
             type="button"
             @click="handleDownload"
-            class="w-full py-3.5 px-4 rounded-2xl bg-[#d97736] hover:bg-[#c46527] text-white font-bold text-sm shadow-md shadow-[#d97736]/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer"
+            class="w-full py-3.5 px-4 rounded-2xl bg-primary-gradient hover:opacity-95 text-white font-bold text-sm shadow-md shadow-primary-600/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -214,16 +214,16 @@
             type="button"
             @click="handleCopy"
             :class="[
-              'w-full py-3 px-4 rounded-2xl border font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer',
+              'w-full py-3 px-4 rounded-2xl border font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs',
               copied
                 ? 'bg-emerald-500 border-emerald-600 text-white shadow-sm'
-                : 'bg-white/90 border-[#debfa8] text-[#523e32] hover:bg-amber-50/80'
+                : 'bg-white border-app-border-strong text-text-main hover:bg-primary-50/80'
             ]"
           >
             <svg v-if="copied" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
-            <svg v-else class="w-4 h-4 text-[#735a4d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg v-else class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
             </svg>
             <span>{{ copied ? '¡Copiado al portapapeles con éxito!' : 'Copiar imagen al portapapeles' }}</span>
@@ -252,13 +252,6 @@ const emojiList: EmojiItem[] = Object.entries(emojiFallback).map(([name, char]) 
   name,
   char
 }));
-
-const resolutionOptions = [
-  { val: 256, label: '256px', tag: 'Sticker' },
-  { val: 512, label: '512px', tag: 'HD Slack' },
-  { val: 1024, label: '1024px', tag: 'Feed/Avatar' },
-  { val: 2048, label: '2048px', tag: 'Ultra HD' }
-];
 
 const selected = ref<EmojiItem>(emojiList[0]);
 const customInput = ref('');

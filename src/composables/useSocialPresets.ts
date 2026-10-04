@@ -40,15 +40,15 @@ export const formatPresets: FormatPreset[] = [
   },
   {
     id: 'story-reels',
-    name: 'Stories / Reels / TikTok',
+    name: 'Wallpaper / Stories / Reels',
     category: 'story',
     ratioLabel: '9:16',
-    platform: 'Instagram / TikTok / Shorts',
+    platform: 'Wallpaper / Stories / TikTok',
     icon: '📱',
-    baseWidth: 288,
-    baseHeight: 512,
-    export2xLabel: '576 × 1024 px',
-    description: 'Pantalla completa vertical para historias y videos cortos'
+    baseWidth: 512,
+    baseHeight: 910,
+    export2xLabel: '1024 × 1820 px',
+    description: 'Pantalla completa vertical 9:16 para fondos de pantalla (Wallpaper) e historias'
   },
   {
     id: 'landscape-banner',

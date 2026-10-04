@@ -1,15 +1,15 @@
 <template>
-  <div class="p-3.5 bg-amber-50/70 border border-[#debfa8] rounded-2xl space-y-3">
+  <div class="p-3.5 bg-primary-50/70 border border-app-border-strong rounded-2xl space-y-3">
     <!-- Grid de 3 columnas en desktop: Relleno | Borde | Sombra -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
       <!-- COLUMNA 1: COLOR DE RELLENO -->
-      <div class="p-3 bg-white border border-[#ebd8ca] rounded-xl flex flex-col justify-between space-y-2 shadow-2xs">
+      <div class="p-3 bg-white border border-app-border rounded-xl flex flex-col justify-between space-y-2 shadow-2xs">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-[#523e32] flex items-center gap-1">
+          <span class="text-xs font-bold text-text-main flex items-center gap-1">
             <span>🎨</span>
             <span>Relleno (Texto)</span>
           </span>
-          <span class="font-mono text-[11px] font-bold text-[#d97736]">{{ liveFill }}</span>
+          <span class="font-mono text-[11px] font-bold text-primary-600">{{ liveFill }}</span>
         </div>
 
         <div class="flex items-center gap-2">
@@ -17,7 +17,7 @@
             :value="liveFill"
             @input="onFillInput"
             type="color"
-            class="w-8 h-8 p-0 rounded-lg border border-[#debfa8] cursor-pointer bg-white shrink-0"
+            class="w-8 h-8 p-0 rounded-lg border border-app-border-strong cursor-pointer bg-white shrink-0"
           />
           <div class="flex flex-wrap gap-1">
             <button
@@ -33,18 +33,18 @@
       </div>
 
       <!-- COLUMNA 2: BORDE / STROKE (CON TOGGLE) -->
-      <div class="p-3 bg-white border border-[#ebd8ca] rounded-xl flex flex-col justify-between space-y-2 shadow-2xs">
+      <div class="p-3 bg-white border border-app-border rounded-xl flex flex-col justify-between space-y-2 shadow-2xs">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-[#523e32] flex items-center gap-1">
+          <span class="text-xs font-bold text-text-main flex items-center gap-1">
             <span>🔲</span>
             <span>Borde (Trazo)</span>
           </span>
-          <label class="flex items-center gap-1 text-[11px] font-bold text-[#d97736] cursor-pointer select-none">
+          <label class="flex items-center gap-1 text-[11px] font-bold text-primary-600 cursor-pointer select-none">
             <input
               type="checkbox"
               v-model="hasStroke"
               @change="onToggleStroke"
-              class="rounded accent-[#d97736] cursor-pointer"
+              class="rounded accent-primary-600 cursor-pointer"
             />
             <span>{{ hasStroke ? 'Activo' : 'Desactivado' }}</span>
           </label>
@@ -56,12 +56,12 @@
               v-model="liveStrokeColor"
               @input="onStrokeChange"
               type="color"
-              class="w-7 h-7 p-0 rounded-md border border-[#debfa8] cursor-pointer bg-white shrink-0"
+              class="w-7 h-7 p-0 rounded-md border border-app-border-strong cursor-pointer bg-white shrink-0"
             />
             <div class="flex-1">
-              <div class="flex justify-between text-[10px] text-[#8a6e60] font-semibold mb-0.5">
+              <div class="flex justify-between text-[10px] text-text-subtle font-semibold mb-0.5">
                 <span>Grosor</span>
-                <span class="font-mono text-[#d97736] font-bold">{{ strokeWidth }}px</span>
+                <span class="font-mono text-primary-600 font-bold">{{ strokeWidth }}px</span>
               </div>
               <input
                 v-model.number="strokeWidth"
@@ -70,29 +70,29 @@
                 min="1"
                 max="6"
                 step="0.5"
-                class="w-full accent-[#d97736] cursor-pointer h-1.5 bg-stone-200 rounded-lg appearance-none"
+                class="w-full accent-primary-600 cursor-pointer h-1.5 bg-stone-200 rounded-lg appearance-none"
               />
             </div>
           </div>
         </div>
-        <div v-else class="text-[10px] text-[#8a6e60] italic py-1">
+        <div v-else class="text-[10px] text-text-subtle italic py-1">
           Sin borde exterior.
         </div>
       </div>
 
       <!-- COLUMNA 3: SOMBRA (CON TOGGLE) -->
-      <div class="p-3 bg-white border border-[#ebd8ca] rounded-xl flex flex-col justify-between space-y-2 shadow-2xs">
+      <div class="p-3 bg-white border border-app-border rounded-xl flex flex-col justify-between space-y-2 shadow-2xs">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-[#523e32] flex items-center gap-1">
+          <span class="text-xs font-bold text-text-main flex items-center gap-1">
             <span>🌑</span>
             <span>Sombra (Shadow)</span>
           </span>
-          <label class="flex items-center gap-1 text-[11px] font-bold text-[#d97736] cursor-pointer select-none">
+          <label class="flex items-center gap-1 text-[11px] font-bold text-primary-600 cursor-pointer select-none">
             <input
               type="checkbox"
               v-model="hasShadow"
               @change="onToggleShadow"
-              class="rounded accent-[#d97736] cursor-pointer"
+              class="rounded accent-primary-600 cursor-pointer"
             />
             <span>{{ hasShadow ? 'Activa' : 'Desactivada' }}</span>
           </label>
@@ -102,13 +102,13 @@
           <button
             type="button"
             @click="showShadowPad = !showShadowPad"
-            class="w-full py-1.5 px-2.5 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-[11px] flex items-center justify-between cursor-pointer"
+            class="w-full py-1.5 px-2.5 rounded-lg bg-primary-50 hover:bg-primary-100 border border-primary-200 text-primary-900 font-bold text-[11px] flex items-center justify-between cursor-pointer"
           >
             <span>🎯 Dirección 2D (Pad)</span>
             <span>{{ showShadowPad ? '▲ Ocultar Pad' : '▼ Ajustar Dirección' }}</span>
           </button>
         </div>
-        <div v-else class="text-[10px] text-[#8a6e60] italic py-1">
+        <div v-else class="text-[10px] text-text-subtle italic py-1">
           Sin sombra proyectada.
         </div>
       </div>

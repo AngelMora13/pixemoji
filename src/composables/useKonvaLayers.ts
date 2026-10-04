@@ -1,6 +1,7 @@
 import { ref, shallowRef, computed, watch } from 'vue';
 import type { useKonvaStage } from './useKonvaStage';
 import { patchKonvaEmojiShadow } from './useKonvaEmojiFix';
+import { createRichTextShape } from '../utils/konvaRichText';
 
 export interface LayerItem {
   id: string;
@@ -13,11 +14,13 @@ export interface LayerItem {
 
 export interface TextNodeOptions {
   text: string;
+  html?: string;
   fontFamily?: string;
   fontSize?: number;
   textColor?: string;
   strokeColor?: string;
   strokeWidth?: number;
+  fontStyle?: string;
 }
 
 export interface StickerOptions {
@@ -42,6 +45,7 @@ export interface ActiveElementState {
   label: string;
   isLocked: boolean;
   text: string;
+  html?: string;
   fontFamily: string;
   fontSize: number;
   fill: string;
@@ -57,6 +61,16 @@ export interface ActiveElementState {
   scaleX: number;
   scaleY: number;
   rotation: number;
+  fontStyle: string;
+  filterBlur: number;
+  filterContrast: number;
+  is3D?: boolean;
+  depth3D?: number;
+  color3DMode?: 'auto' | 'custom';
+  shading3D?: number;
+  color3D?: string;
+  dirX3D?: number;
+  dirY3D?: number;
   raw: any;
 }
 
@@ -120,12 +134,33 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
       ? node.hasShadow()
       : (currentShadowBlur > 0 || currentShadowOffsetX !== 0 || currentShadowOffsetY !== 0);
 
+    const nodeHtml = typeof (node as any).html === 'function'
+      ? (node as any).html()
+      : (node.getAttr?.('html') || '');
+
+    const rawBlur = node.getAttr?.('filterBlur');
+    const filterBlur = (rawBlur !== undefined && !isNaN(Number(rawBlur))) ? Number(rawBlur) : 0;
+    const rawContrast = node.getAttr?.('filterContrast');
+    const filterContrast = (rawContrast !== undefined && !isNaN(Number(rawContrast))) ? Number(rawContrast) : 100;
+    const is3D = Boolean(node.getAttr?.('is3D'));
+    const rawDepth = node.getAttr?.('depth3D');
+    const depth3D = (rawDepth !== undefined && !isNaN(Number(rawDepth))) ? Number(rawDepth) : 8;
+    const color3DMode = (node.getAttr?.('color3DMode') as 'auto' | 'custom') || 'auto';
+    const rawShading = node.getAttr?.('shading3D');
+    const shading3D = (rawShading !== undefined && !isNaN(Number(rawShading))) ? Number(rawShading) : 35;
+    const color3D = node.getAttr?.('color3D') || '#333333';
+    const rawDirX = node.getAttr?.('dirX3D');
+    const dirX3D = (rawDirX !== undefined && !isNaN(Number(rawDirX))) ? Number(rawDirX) : 1;
+    const rawDirY = node.getAttr?.('dirY3D');
+    const dirY3D = (rawDirY !== undefined && !isNaN(Number(rawDirY))) ? Number(rawDirY) : 1;
+
     activeElement.value = {
       id: node._id ? String(node._id) : (item?.id || ''),
       type,
       label: item?.label ?? (type === 'Emoji' ? `Emoji: ${nodeText}` : nodeText || 'Objeto'),
       isLocked: item?.isLocked ?? node.hasName('locked'),
       text: isText ? nodeText : (typeof node.text === 'function' ? nodeText : ''),
+      html: isText ? (nodeHtml || `<p>${nodeText}</p>`) : undefined,
       fontFamily: typeof node.fontFamily === 'function' ? node.fontFamily() : 'Impact',
       fontSize: typeof node.fontSize === 'function' ? node.fontSize() : 44,
       fill: typeof node.fill === 'function' ? node.fill() : '#ffffff',
@@ -141,6 +176,16 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
       scaleX: typeof node.scaleX === 'function' ? node.scaleX() : 1,
       scaleY: typeof node.scaleY === 'function' ? node.scaleY() : 1,
       rotation: typeof node.rotation === 'function' ? node.rotation() : 0,
+      fontStyle: typeof node.fontStyle === 'function' ? (node.fontStyle() || 'normal') : 'normal',
+      filterBlur,
+      filterContrast,
+      is3D,
+      depth3D,
+      color3DMode,
+      shading3D,
+      color3D,
+      dirX3D,
+      dirY3D,
       raw: node
     };
   };
@@ -229,6 +274,9 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
       ...customOptions
     });
     emoji.setAttr('nodeType', 'emoji');
+    emoji.setAttr('filterBlur', 0);
+    emoji.setAttr('filterContrast', 100);
+    attachNodeFilters(emoji);
 
     emoji.offsetX(emoji.width() / 2);
     emoji.offsetY(emoji.height() / 2);
@@ -240,28 +288,23 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
   };
 
   const addText = (options: TextNodeOptions, customAttrs?: any) => {
-    if (!layerInstance.value || !KonvaModule.value || !options.text.trim()) return;
+    if (!layerInstance.value || !KonvaModule.value || !options.text?.trim()) return;
 
     const offset = (Math.random() - 0.5) * 30;
-    const memeText = new KonvaModule.value.Text({
+    const memeText = createRichTextShape(KonvaModule.value, {
       x: customAttrs?.x ?? canvasWidth.value / 2 + offset,
       y: customAttrs?.y ?? canvasHeight.value / 2 + offset,
       text: options.text,
+      html: options.html,
       fontSize: options.fontSize ?? 44,
-      fontFamily: options.fontFamily ?? 'Impact',
-      fill: options.textColor ?? '#ffffff',
-      stroke: (options.strokeWidth ?? 0) > 0 ? options.strokeColor : undefined,
-      strokeWidth: options.strokeWidth ?? 3,
-      align: 'center',
-      draggable: true,
-      name: 'selectable',
-      nodeType: 'text',
+      fontFamily: options.fontFamily ?? 'Plus Jakarta Sans',
+      fill: options.textColor ?? '#1e293b',
+      textColor: options.textColor ?? '#1e293b',
+      strokeColor: options.strokeColor,
+      strokeWidth: options.strokeWidth ?? 0,
+      fontStyle: options.fontStyle ?? 'normal',
       ...customAttrs
     });
-    memeText.setAttr('nodeType', 'text');
-
-    memeText.offsetX(memeText.width() / 2);
-    memeText.offsetY(memeText.height() / 2);
 
     layerInstance.value.add(memeText);
     selectNode(memeText);
@@ -284,6 +327,9 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
         nodeType: 'image'
       });
       kImg.setAttr('nodeType', 'image');
+      kImg.setAttr('filterBlur', 0);
+      kImg.setAttr('filterContrast', 100);
+      attachNodeFilters(kImg);
 
       const maxW = canvasWidth.value * 0.75;
       const maxH = canvasHeight.value * 0.75;
@@ -301,6 +347,40 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     };
     img.onerror = () => {
       alert('No se pudo cargar la imagen. Verifica que el enlace sea válido y público.');
+    };
+    img.src = url;
+  };
+
+  const replaceSelectedImage = (url: string) => {
+    if (!selectedNode.value || !layerInstance.value) return;
+    const node = selectedNode.value;
+    const explicitType = node.getAttr?.('nodeType');
+    if (node.className !== 'Image' && explicitType !== 'image') return;
+
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      node.image(img);
+      const maxW = canvasWidth.value * 0.75;
+      const maxH = canvasHeight.value * 0.75;
+      let width = img.naturalWidth || img.width;
+      let height = img.naturalHeight || img.height;
+      if (width > maxW || height > maxH) {
+        const scale = Math.min(maxW / width, maxH / height);
+        width = width * scale;
+        height = height * scale;
+      }
+      node.width(width);
+      node.height(height);
+      node.scale({ x: 1, y: 1 });
+      node.offsetX(width / 2);
+      node.offsetY(height / 2);
+      layerInstance.value?.draw();
+      refreshLayersList();
+      syncActiveElement();
+    };
+    img.onerror = () => {
+      alert('No se pudo cargar la imagen. Verifica que el enlace o archivo sea válido.');
     };
     img.src = url;
   };
@@ -446,6 +526,10 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
       node.removeName('locked');
       node.addName('selectable');
       node.draggable(true);
+      if (selectedNode.value === node) {
+        transformerInstance.value?.nodes([node]);
+        transformerInstance.value?.moveToTop();
+      }
     } else {
       node.removeName('selectable');
       node.addName('locked');
@@ -558,15 +642,150 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     removeLayer(selectedNode.value);
   };
 
-  const duplicateSelected = () => {
-    if (!selectedNode.value || !layerInstance.value) return;
-    const cloned = selectedNode.value.clone({
-      x: selectedNode.value.x() + 20,
-      y: selectedNode.value.y() + 20
+  const attachNodeFilters = (node: any) => {
+    if (!node || node._filtersAttached || typeof node.getSceneFunc !== 'function') return;
+    node._filtersAttached = true;
+
+    const originalSceneFunc = node.getSceneFunc();
+    node.sceneFunc(function(context: any, shapeNode: any) {
+      const ctx = context._context;
+      const rawBlur = shapeNode.getAttr('filterBlur');
+      const blur = (rawBlur !== undefined && !isNaN(Number(rawBlur))) ? Number(rawBlur) : 0;
+      const rawContrast = shapeNode.getAttr('filterContrast');
+      const contrast = (rawContrast !== undefined && !isNaN(Number(rawContrast))) ? Number(rawContrast) : 100;
+
+      if (blur > 0 || contrast !== 100) {
+        ctx.save();
+        let f = '';
+        if (blur > 0) f += `blur(${blur}px) `;
+        if (contrast !== 100) f += `contrast(${contrast}%) `;
+        ctx.filter = f.trim();
+        originalSceneFunc.call(this, context, shapeNode);
+        ctx.restore();
+      } else {
+        originalSceneFunc.call(this, context, shapeNode);
+      }
     });
+  };
+
+  const updateSelectedFilters = (options: { blur?: number; contrast?: number }) => {
+    if (!selectedNode.value || !layerInstance.value) return;
+    const node = selectedNode.value;
+
+    if (options.blur !== undefined && !isNaN(Number(options.blur))) {
+      node.setAttr('filterBlur', Number(options.blur));
+    }
+    if (options.contrast !== undefined && !isNaN(Number(options.contrast))) {
+      node.setAttr('filterContrast', Number(options.contrast));
+    }
+
+    if (node.getAttr('nodeType') !== 'text') {
+      attachNodeFilters(node);
+    }
+    node.getLayer()?.batchDraw();
+    layerInstance.value.batchDraw();
+    syncActiveElement();
+  };
+
+  const updateSelectedText3D = (options: {
+    is3D?: boolean;
+    depth?: number;
+    color?: string;
+    colorMode?: 'auto' | 'custom';
+    shading?: number;
+    dirX?: number;
+    dirY?: number;
+  }) => {
+    if (!selectedNode.value || !layerInstance.value) return;
+    const node = selectedNode.value;
+    const isText = node.getAttr?.('nodeType') === 'text' || typeof (node as any).html === 'function' || typeof node.text === 'function';
+    if (!isText) return;
+
+    if (options.is3D !== undefined) node.setAttr('is3D', Boolean(options.is3D));
+    if (options.depth !== undefined && !isNaN(Number(options.depth))) node.setAttr('depth3D', Number(options.depth));
+    if (options.colorMode !== undefined) node.setAttr('color3DMode', options.colorMode);
+    if (options.shading !== undefined && !isNaN(Number(options.shading))) node.setAttr('shading3D', Number(options.shading));
+    if (options.color !== undefined && options.color) node.setAttr('color3D', options.color);
+    if (options.dirX !== undefined && !isNaN(Number(options.dirX))) node.setAttr('dirX3D', Number(options.dirX));
+    if (options.dirY !== undefined && !isNaN(Number(options.dirY))) node.setAttr('dirY3D', Number(options.dirY));
+
+    if (typeof (node as any).clearCache === 'function' && (node as any).isCached?.()) {
+      (node as any).clearCache();
+    }
+    node.getLayer()?.batchDraw();
+    layerInstance.value.batchDraw();
+    syncActiveElement();
+  };
+
+  const duplicateSelected = () => {
+    if (!selectedNode.value || !layerInstance.value || !KonvaModule.value) return;
+    const node = selectedNode.value;
+    const explicitType = node.getAttr?.('nodeType');
+
+    let cloned: any = null;
+    if (explicitType === 'text') {
+      const currentHtml = (typeof (node as any).html === 'function' ? (node as any).html() : node.getAttr('html')) || `<p>${node.getAttr('text') || ''}</p>`;
+      const currentText = (typeof node.text === 'function' ? node.text() : node.getAttr('text')) || 'Texto';
+
+      cloned = createRichTextShape(KonvaModule.value, {
+        x: node.x() + 20,
+        y: node.y() + 20,
+        width: node.width(),
+        text: currentText,
+        html: currentHtml,
+        fontSize: typeof node.fontSize === 'function' ? node.fontSize() : (node.getAttr('fontSize') || 44),
+        fontFamily: typeof node.fontFamily === 'function' ? node.fontFamily() : (node.getAttr('fontFamily') || 'Plus Jakarta Sans'),
+        fill: typeof node.fill === 'function' ? node.fill() : (node.getAttr('fill') || '#1e293b'),
+        textColor: typeof node.fill === 'function' ? node.fill() : (node.getAttr('fill') || '#1e293b'),
+        strokeColor: typeof node.stroke === 'function' ? node.stroke() : undefined,
+        strokeWidth: typeof node.strokeWidth === 'function' ? node.strokeWidth() : 0,
+        fontStyle: typeof node.fontStyle === 'function' ? node.fontStyle() : 'normal'
+      }, {
+        rotation: typeof node.rotation === 'function' ? node.rotation() : 0,
+        scaleX: typeof node.scaleX === 'function' ? node.scaleX() : 1,
+        scaleY: typeof node.scaleY === 'function' ? node.scaleY() : 1,
+        shadowColor: typeof node.shadowColor === 'function' ? node.shadowColor() : undefined,
+        shadowBlur: typeof node.shadowBlur === 'function' ? node.shadowBlur() : 0,
+        shadowOffsetX: typeof node.shadowOffsetX === 'function' ? node.shadowOffsetX() : 0,
+        shadowOffsetY: typeof node.shadowOffsetY === 'function' ? node.shadowOffsetY() : 0,
+        shadowOpacity: typeof node.shadowOpacity === 'function' ? node.shadowOpacity() : 1
+      });
+
+      if (node.getAttr('is3D')) {
+        cloned.setAttr('is3D', true);
+        const d = node.getAttr('depth3D');
+        cloned.setAttr('depth3D', (d !== undefined && !isNaN(Number(d))) ? Number(d) : 8);
+        cloned.setAttr('color3DMode', node.getAttr('color3DMode') || 'auto');
+        const s = node.getAttr('shading3D');
+        cloned.setAttr('shading3D', (s !== undefined && !isNaN(Number(s))) ? Number(s) : 35);
+        cloned.setAttr('color3D', node.getAttr('color3D') || '#333333');
+        const x = node.getAttr('dirX3D');
+        cloned.setAttr('dirX3D', (x !== undefined && !isNaN(Number(x))) ? Number(x) : 1);
+        const y = node.getAttr('dirY3D');
+        cloned.setAttr('dirY3D', (y !== undefined && !isNaN(Number(y))) ? Number(y) : 1);
+      }
+      const b = node.getAttr('filterBlur');
+      cloned.setAttr('filterBlur', (b !== undefined && !isNaN(Number(b))) ? Number(b) : 0);
+      const c = node.getAttr('filterContrast');
+      cloned.setAttr('filterContrast', (c !== undefined && !isNaN(Number(c))) ? Number(c) : 100);
+    } else {
+      cloned = node.clone({
+        x: node.x() + 20,
+        y: node.y() + 20
+      });
+      attachNodeFilters(cloned);
+    }
+
+    cloned.removeName('locked');
+    cloned.addName('selectable');
+    cloned.draggable(true);
+    cloned.listening(true);
+
     layerInstance.value.add(cloned);
+    layerInstance.value.batchDraw();
     selectNode(cloned);
     refreshLayersList();
+    syncActiveElement();
   };
 
   const clearAll = () => {
@@ -586,8 +805,16 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     if (typeof node.text !== 'function') return;
 
     if (options.text !== undefined) node.text(options.text);
+    if (options.html !== undefined) {
+      if (typeof (node as any).html === 'function') {
+        (node as any).html(options.html);
+      } else {
+        node.setAttr('html', options.html);
+      }
+    }
     if (options.fontFamily !== undefined) node.fontFamily(options.fontFamily);
     if (options.textColor !== undefined) node.fill(options.textColor);
+    if (options.fontStyle !== undefined) node.fontStyle(options.fontStyle);
     if (options.strokeColor !== undefined) node.stroke(options.strokeColor);
     if (options.strokeWidth !== undefined) {
       node.strokeWidth(options.strokeWidth);
@@ -598,7 +825,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     node.offsetX(node.width() / 2);
     node.offsetY(node.height() / 2);
 
-    layerInstance.value.draw();
+    layerInstance.value.batchDraw();
     refreshLayersList();
     syncActiveElement();
   };
@@ -743,9 +970,12 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     addEmoji,
     addText,
     addImage,
+    replaceSelectedImage,
     updateSelectedText,
     applyTextPreset,
     applyImagePreset,
+    updateSelectedFilters,
+    updateSelectedText3D,
     updateSelectedShadow,
     updateSelectedStroke,
     flipHorizontal,

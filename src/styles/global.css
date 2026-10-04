@@ -1,38 +1,189 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@400;700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 @import "tailwindcss";
 
 :root {
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* ==========================================================================
+     PixEmoji Theme Configuration & Design Tokens
+     Edit these variables to rebrand the entire application in one place.
+     ========================================================================== */
+
+  /* Typography */
+  --font-family-base: 'Outfit', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-impact: 'Anton', 'Impact', sans-serif;
+
+  /* Primary Brand Colors (Main brand identity) */
+  --primary-50: #fff9ed;
+  --primary-100: #ffefd2;
+  --primary-200: #fde2b6;
+  --primary-300: #fdba74;
+  --primary-400: #fb923c;
+  --primary-500: #ea580c;
+  --primary-600: #d97736;
+  /* Brand signature orange */
+  --primary-700: #c2410c;
+  --primary-800: #9a3412;
+  --primary-900: #7c2d12;
+
+  /* Gradients */
+  --primary-gradient: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-400) 100%);
+  --primary-gradient-tr: linear-gradient(to top right, var(--primary-600) 0%, #f59e0b 100%);
+  --primary-gradient-subtle: linear-gradient(to bottom, #fffbf7 0%, #f8ede3 50%, #eedac9 100%);
+
+  /* Neutral & Canvas Surfaces */
+  --color-app-bg: #fffbf7;
+  --color-app-bg-start: #fffbf7;
+  --color-app-bg-mid: #f8ede3;
+  --color-app-bg-end: #eedac9;
+  --color-app-canvas: #efe7da;
+  --color-app-canvas-frame: #f5ecde;
+  --color-app-card: rgba(255, 255, 255, 0.85);
+  --color-app-card-solid: #ffffff;
+  --color-app-header: #faf4ec;
+
+  /* Borders */
+  --color-app-border: #ebd8ca;
+  --color-app-border-strong: #debfa8;
+  --color-app-border-subtle: #f5ece2;
+
+  /* Text Colors */
+  --color-text-main: #2b1e1a;
+  --color-text-muted: #735a4d;
+  --color-text-subtle: #8a6e60;
+  --color-text-hint: #a08272;
+
+  /* Shadows */
+  --shadow-brand: 0 4px 14px 0 rgba(217, 119, 54, 0.25);
+  --shadow-soft: 0 4px 20px -2px rgba(82, 62, 50, 0.06);
+}
+
+@theme {
+  --font-sans: var(--font-family-base);
+  --font-impact: var(--font-family-impact);
+
+  /* Primary color utilities (bg-primary-50, text-primary-600, border-primary-300, etc.) */
+  --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
+  --color-primary-400: var(--primary-400);
+  --color-primary-500: var(--primary-500);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
+  --color-primary-900: var(--primary-900);
+
+  /* App surfaces and layout tokens */
+  --color-app-bg: var(--color-app-bg);
+  --color-app-canvas: var(--color-app-canvas);
+  --color-app-canvas-frame: var(--color-app-canvas-frame);
+  --color-app-card: var(--color-app-card);
+  --color-app-card-solid: var(--color-app-card-solid);
+  --color-app-header: var(--color-app-header);
+  --color-app-border: var(--color-app-border);
+  --color-app-border-strong: var(--color-app-border-strong);
+  --color-app-border-subtle: var(--color-app-border-subtle);
+
+  /* Typography tokens (text-text-main, text-text-muted, etc.) */
+  --color-text-main: var(--color-text-main);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-subtle: var(--color-text-subtle);
+  --color-text-hint: var(--color-text-hint);
 }
 
 body {
-  font-family: 'Outfit', sans-serif;
-  color: #2b1e1a;
-  background-color: #fffbf7;
+  font-family: var(--font-family-base);
+  color: var(--color-text-main);
+  background-color: var(--color-app-bg);
   min-height: 100vh;
 }
 
+/* Glassmorphism styling */
 .glass-card {
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--color-app-card);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
 
+/* Utility Classes using the CSS variables */
+.bg-primary-gradient {
+  background-image: var(--primary-gradient);
+}
+
+.bg-primary-gradient-tr {
+  background-image: var(--primary-gradient-tr);
+}
+
+.bg-app-gradient {
+  background-image: var(--primary-gradient-subtle);
+}
+
+.text-primary-gradient {
+  background-image: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Subtle checkerboard transparency pattern */
+.bg-grid-pattern {
+  background-size: 20px 20px;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+}
+
+.meme-text-stroke {
+  -webkit-text-stroke: 4px black;
+  paint-order: stroke fill;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f7ebe0;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #debfa8;
-  border-radius: 4px;
+  background: var(--color-app-border-strong);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d97736;
+  background: var(--primary-600);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

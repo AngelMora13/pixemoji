@@ -1,19 +1,19 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <label class="block text-xs font-bold uppercase tracking-wider text-[#523e32]">
+      <label class="block text-xs font-bold uppercase tracking-wider text-text-main">
         Efectos Visuales
       </label>
-      <span v-if="selectedInfo" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 truncate max-w-[140px]">
+      <span v-if="selectedInfo" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary-100 text-primary-800 border border-primary-200 truncate max-w-[140px]">
         {{ selectedInfo.label }}
       </span>
     </div>
 
     <!-- Si no hay nada seleccionado -->
-    <div v-if="!selectedInfo" class="p-6 text-center bg-white/60 border border-dashed border-[#debfa8] rounded-2xl space-y-2">
+    <div v-if="!selectedInfo" class="p-6 text-center bg-white/60 border border-dashed border-app-border-strong rounded-2xl space-y-2">
       <span class="text-3xl block">✨</span>
-      <p class="text-xs font-semibold text-[#523e32]">Ningún elemento seleccionado</p>
-      <p class="text-[11px] text-[#8a6e60]">
+      <p class="text-xs font-semibold text-text-main">Ningún elemento seleccionado</p>
+      <p class="text-[11px] text-text-subtle">
         Haz clic en cualquier emoji, texto o imagen en el lienzo para aplicarle efectos de pegatina, resplandor neón o reflejarlo.
       </p>
     </div>
@@ -21,15 +21,15 @@
     <!-- Controles de Efectos cuando hay selección -->
     <div v-else class="space-y-4">
       <!-- 1. EFECTO STICKER / TROQUELADO -->
-      <div class="p-3 bg-white/80 border border-[#ebd8ca] rounded-2xl space-y-2.5 shadow-2xs">
+      <div class="p-3 bg-white border border-app-border rounded-2xl space-y-2.5 shadow-2xs">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-[#523e32] flex items-center gap-1">
+          <span class="text-xs font-bold text-text-main flex items-center gap-1">
             <span>🏷️</span>
             <span>Efecto Pegatina / Sticker</span>
           </span>
-          <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">Troquelado</span>
+          <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary-100 text-primary-800 border border-primary-200">Troquelado</span>
         </div>
-        <p class="text-[10px] text-[#8a6e60]">
+        <p class="text-[10px] text-text-subtle">
           Borde grueso y sombra suave para darle aspecto de pegatina física de vinilo.
         </p>
 
@@ -37,7 +37,7 @@
           <button
             type="button"
             @click="onApplySticker"
-            class="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            class="flex-1 py-2 px-3 rounded-xl bg-primary-gradient hover:opacity-95 text-white font-bold text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
           >
             <span>✨</span>
             <span>Aplicar Borde Sticker</span>
@@ -47,24 +47,24 @@
         <!-- Opciones de Sticker: Grosor y Color de Trazo -->
         <div class="grid grid-cols-2 gap-2 pt-1">
           <div>
-            <span class="text-[10px] text-[#8a6e60] block mb-1">Grosor borde ({{ stickerWidth }}px):</span>
+            <span class="text-[10px] text-text-subtle block mb-1">Grosor borde ({{ stickerWidth }}px):</span>
             <input
               v-model.number="stickerWidth"
               @input="onApplySticker"
               type="range"
               min="4"
               max="24"
-              class="w-full accent-[#d97736] cursor-pointer"
+              class="w-full accent-primary-600 cursor-pointer"
             />
           </div>
           <div>
-            <span class="text-[10px] text-[#8a6e60] block mb-1">Color borde:</span>
+            <span class="text-[10px] text-text-subtle block mb-1">Color borde:</span>
             <div class="flex items-center gap-1.5">
               <input
                 v-model="stickerColor"
                 @input="onApplySticker"
                 type="color"
-                class="w-7 h-7 rounded-lg border border-[#debfa8] cursor-pointer"
+                class="w-7 h-7 rounded-lg border border-app-border-strong cursor-pointer"
               />
               <button
                 v-for="c in ['#ffffff', '#fef08a', '#67e8f9', '#f472b6']"
@@ -80,8 +80,8 @@
       </div>
 
       <!-- 2. RESPLANDOR NEÓN / GLOW -->
-      <div class="p-3 bg-white/80 border border-[#ebd8ca] rounded-2xl space-y-2.5 shadow-2xs">
-        <span class="text-xs font-bold text-[#523e32] flex items-center gap-1">
+      <div class="p-3 bg-white border border-app-border rounded-2xl space-y-2.5 shadow-2xs">
+        <span class="text-xs font-bold text-text-main flex items-center gap-1">
           <span>💡</span>
           <span>Resplandor Neón / Glow</span>
         </span>
@@ -101,28 +101,28 @@
         </div>
 
         <div class="flex items-center justify-between pt-1">
-          <span class="text-[10px] text-[#8a6e60]">Intensidad / Blur ({{ glowBlur }}px):</span>
+          <span class="text-[10px] text-text-subtle">Intensidad / Blur ({{ glowBlur }}px):</span>
           <input
             v-model.number="glowBlur"
             @input="onGlowBlurChange"
             type="range"
             min="6"
             max="45"
-            class="w-32 accent-[#d97736] cursor-pointer"
+            class="w-32 accent-primary-600 cursor-pointer"
           />
         </div>
       </div>
 
       <!-- 3. GIRO, REFLEJO & POSICIÓN -->
-      <div class="p-3 bg-white/80 border border-[#ebd8ca] rounded-2xl space-y-2 shadow-2xs">
-        <span class="text-xs font-bold text-[#523e32] block">
+      <div class="p-3 bg-white border border-app-border rounded-2xl space-y-2 shadow-2xs">
+        <span class="text-xs font-bold text-text-main block">
           Orientación & Alineación
         </span>
         <div class="grid grid-cols-2 gap-1.5">
           <button
             type="button"
             @click="$emit('flipH')"
-            class="py-1.5 px-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-[#debfa8] text-[#523e32] text-xs font-semibold cursor-pointer flex items-center justify-center gap-1"
+            class="py-1.5 px-2 rounded-xl bg-primary-50 hover:bg-primary-100 border border-app-border-strong text-text-main text-xs font-semibold cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
             title="Reflejar horizontalmente"
           >
             <span>↔️</span>
@@ -131,7 +131,7 @@
           <button
             type="button"
             @click="$emit('flipV')"
-            class="py-1.5 px-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-[#debfa8] text-[#523e32] text-xs font-semibold cursor-pointer flex items-center justify-center gap-1"
+            class="py-1.5 px-2 rounded-xl bg-primary-50 hover:bg-primary-100 border border-app-border-strong text-text-main text-xs font-semibold cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
             title="Reflejar verticalmente"
           >
             <span>↕️</span>
@@ -140,7 +140,7 @@
           <button
             type="button"
             @click="$emit('rotate')"
-            class="py-1.5 px-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-[#debfa8] text-[#523e32] text-xs font-semibold cursor-pointer flex items-center justify-center gap-1"
+            class="py-1.5 px-2 rounded-xl bg-primary-50 hover:bg-primary-100 border border-app-border-strong text-text-main text-xs font-semibold cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
             title="Girar 90 grados"
           >
             <span>🔄</span>
@@ -149,7 +149,7 @@
           <button
             type="button"
             @click="$emit('center')"
-            class="py-1.5 px-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-[#debfa8] text-[#523e32] text-xs font-semibold cursor-pointer flex items-center justify-center gap-1"
+            class="py-1.5 px-2 rounded-xl bg-primary-50 hover:bg-primary-100 border border-app-border-strong text-text-main text-xs font-semibold cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
             title="Centrar en el lienzo"
           >
             <span>🎯</span>
@@ -166,8 +166,8 @@
           :class="[
             'flex-1 py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5',
             selectedInfo?.isLocked
-              ? 'bg-amber-600 text-white border-amber-700 shadow-xs'
-              : 'bg-white text-[#523e32] border-[#debfa8] hover:bg-amber-50'
+              ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+              : 'bg-white text-text-main border-app-border-strong hover:bg-primary-50'
           ]"
         >
           <span>{{ selectedInfo?.isLocked ? '🔒' : '🔓' }}</span>
