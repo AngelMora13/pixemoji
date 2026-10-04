@@ -74,6 +74,32 @@ export interface ActiveElementState {
   raw: any;
 }
 
+export const attachNodeFilters = (node: any) => {
+  if (!node || node._filtersAttached || typeof node.getSceneFunc !== 'function') return;
+  node._filtersAttached = true;
+
+  const originalSceneFunc = node.getSceneFunc();
+  node.sceneFunc(function(this: any, context: any, shapeNode: any) {
+    const ctx = context._context;
+    const rawBlur = shapeNode.getAttr('filterBlur');
+    const blur = (rawBlur !== undefined && !isNaN(Number(rawBlur))) ? Number(rawBlur) : 0;
+    const rawContrast = shapeNode.getAttr('filterContrast');
+    const contrast = (rawContrast !== undefined && !isNaN(Number(rawContrast))) ? Number(rawContrast) : 100;
+
+    if (blur > 0 || contrast !== 100) {
+      ctx.save();
+      let f = '';
+      if (blur > 0) f += `blur(${blur}px) `;
+      if (contrast !== 100) f += `contrast(${contrast}%) `;
+      ctx.filter = f.trim();
+      originalSceneFunc.call(this, context, shapeNode);
+      ctx.restore();
+    } else {
+      originalSceneFunc.call(this, context, shapeNode);
+    }
+  });
+};
+
 export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
   const {
     layerInstance,
@@ -642,32 +668,6 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     removeLayer(selectedNode.value);
   };
 
-  const attachNodeFilters = (node: any) => {
-    if (!node || node._filtersAttached || typeof node.getSceneFunc !== 'function') return;
-    node._filtersAttached = true;
-
-    const originalSceneFunc = node.getSceneFunc();
-    node.sceneFunc(function(context: any, shapeNode: any) {
-      const ctx = context._context;
-      const rawBlur = shapeNode.getAttr('filterBlur');
-      const blur = (rawBlur !== undefined && !isNaN(Number(rawBlur))) ? Number(rawBlur) : 0;
-      const rawContrast = shapeNode.getAttr('filterContrast');
-      const contrast = (rawContrast !== undefined && !isNaN(Number(rawContrast))) ? Number(rawContrast) : 100;
-
-      if (blur > 0 || contrast !== 100) {
-        ctx.save();
-        let f = '';
-        if (blur > 0) f += `blur(${blur}px) `;
-        if (contrast !== 100) f += `contrast(${contrast}%) `;
-        ctx.filter = f.trim();
-        originalSceneFunc.call(this, context, shapeNode);
-        ctx.restore();
-      } else {
-        originalSceneFunc.call(this, context, shapeNode);
-      }
-    });
-  };
-
   const updateSelectedFilters = (options: { blur?: number; contrast?: number }) => {
     if (!selectedNode.value || !layerInstance.value) return;
     const node = selectedNode.value;
@@ -963,6 +963,8 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     layersList,
     layersListReversed,
     activeElement,
+    selectedNode,
+    selectNode,
     selectedNodeInfo,
     syncActiveElement,
     triggerNodeUpdate: syncActiveElement,

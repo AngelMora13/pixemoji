@@ -54,14 +54,7 @@ export function createStudioContext(
   layers: ReturnType<typeof useKonvaLayers>,
   history: ReturnType<typeof useHistoryUndo>
 ): CanvasStudioContext {
-  let saveHistoryTimer: any = null;
 
-  const debouncedSaveState = () => {
-    if (saveHistoryTimer) clearTimeout(saveHistoryTimer);
-    saveHistoryTimer = setTimeout(() => {
-      history.saveState();
-    }, 250);
-  };
 
   const change = (action: StudioAction, payload?: any) => {
     let isDiscrete = true;
@@ -180,12 +173,7 @@ export function createStudioContext(
         break;
     }
 
-    if (isDiscrete) {
-      if (saveHistoryTimer) clearTimeout(saveHistoryTimer);
-      history.saveState();
-    } else {
-      debouncedSaveState();
-    }
+    history.saveState(isDiscrete);
   };
 
   return {

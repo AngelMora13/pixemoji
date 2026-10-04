@@ -593,14 +593,7 @@ const layers = useKonvaLayers(stage);
 const effects = useKonvaEffects(stage, layers);
 const exporter = useCanvasExport(stage);
 
-const history = useHistoryUndo(
-  () => stage.layerInstance.value,
-  () => stage.transformerInstance.value,
-  () => {
-    layers.refreshLayersList();
-    layers.syncActiveElement();
-  }
-);
+const history = useHistoryUndo(stage, layers);
 
 // Centralized Studio Context & Dependency Injection Provider
 const studio = createStudioContext(stage, layers, history);
@@ -713,12 +706,12 @@ const handlePresetSelect = (preset: FormatPreset) => {
 // Al seleccionar plantilla, se aplica y se guarda en historial pero NO se cierra el popover
 const handleTemplateSelect = (templateId: string) => {
   templates.applyTemplate(templateId);
-  setTimeout(() => history.saveState(), 80);
+  history.saveState(true);
 };
 
 const handleAddEmoji = (char: string) => {
   layers.addEmoji(char);
-  setTimeout(() => history.saveState(), 50);
+  history.saveState(true);
 };
 
 const handleAddEmojiAndCloseMobile = (char: string) => {
@@ -733,7 +726,7 @@ const onPickerSelect = (char: string) => {
 
 const handleAddText = (opts: TextNodeOptions) => {
   layers.addText(opts);
-  setTimeout(() => history.saveState(), 50);
+  history.saveState(true);
 };
 
 const handleAddTextAndCloseMobile = (opts: TextNodeOptions) => {
@@ -744,7 +737,7 @@ const handleAddTextAndCloseMobile = (opts: TextNodeOptions) => {
 
 const handleAddImage = (url: string) => {
   layers.addImage(url);
-  setTimeout(() => history.saveState(), 100);
+  setTimeout(() => history.saveState(true), 120);
 };
 
 const handleAddImageAndCloseMobile = (url: string) => {
@@ -817,10 +810,11 @@ const handleDownload = () => {
 
 const handleKeyDown = (e: KeyboardEvent) => {
   const activeEl = document.activeElement as HTMLElement | null;
-  const isTyping = activeEl && (
+  const inputType = activeEl && activeEl.tagName === 'INPUT' ? (activeEl as HTMLInputElement).type?.toLowerCase() : '';
+  const isNonTextInput = ['checkbox', 'radio', 'range', 'color', 'button', 'submit'].includes(inputType);
+  const isTyping = activeEl && !isNonTextInput && (
     activeEl.tagName === 'INPUT' ||
     activeEl.tagName === 'TEXTAREA' ||
-    activeEl.tagName === 'SELECT' ||
     activeEl.isContentEditable ||
     Boolean(activeEl.closest?.('[contenteditable="true"]')) ||
     Boolean(activeEl.closest?.('.tiptap')) ||
@@ -861,7 +855,7 @@ onMounted(async () => {
 
   // Initial demo template or emoji
   layers.addEmoji('🧁');
-  setTimeout(() => history.saveState(), 100);
+  history.saveState(true);
 
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('click', handleDocumentClick);

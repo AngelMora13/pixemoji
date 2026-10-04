@@ -201,8 +201,8 @@ export function createRichTextShape(KonvaModule: any, options: {
   shape.setAttr('fontSize', options.fontSize || 44);
   shape.setAttr('fill', options.textColor || options.fill || '#1e293b');
   shape.setAttr('fontStyle', options.fontStyle || 'normal');
-  shape.setAttr('filterBlur', 0);
-  shape.setAttr('filterContrast', 100);
+  shape.setAttr('filterBlur', customAttrs?.filterBlur ?? 0);
+  shape.setAttr('filterContrast', customAttrs?.filterContrast ?? 100);
   shape.setAttr('is3D', Boolean(customAttrs?.is3D));
   shape.setAttr('depth3D', customAttrs?.depth3D ?? 8);
   shape.setAttr('color3DMode', customAttrs?.color3DMode || 'auto');

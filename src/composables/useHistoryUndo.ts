@@ -1,38 +1,53 @@
 import { ref, computed } from 'vue';
+import { serializeCanvasState, restoreCanvasState } from '../utils/canvasHistorySerializer';
 
 export function useHistoryUndo(
-  layerInstanceGetter: () => any,
-  transformerInstanceGetter: () => any,
-  onRestoreCallback: () => void
+  stageContext: any,
+  layersContext: any
 ) {
   const historyStack = ref<string[]>([]);
   const historyStep = ref(-1);
-  const maxHistorySteps = 20;
+  const maxHistorySteps = 30;
   let isPerformingUndoRedo = false;
+  let debounceTimer: any = null;
 
   const canUndo = computed(() => historyStep.value > 0);
   const canRedo = computed(() => historyStep.value < historyStack.value.length - 1);
 
-  const saveState = () => {
+  const captureCurrentPayload = (): string => {
+    const layer = stageContext?.layerInstance?.value || stageContext?.layerInstance;
+    const selected = stageContext?.selectedNode?.value || stageContext?.selectedNode || layersContext?.selectedNode?.value || layersContext?.selectedNode;
+    return serializeCanvasState(layer, selected);
+  };
+
+  const saveStateImmediate = () => {
     if (isPerformingUndoRedo) return;
-    const layer = layerInstanceGetter();
-    if (!layer) return;
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+    }
 
-    // Snapshot of user elements (excluding transformer and background rect)
-    const nodes = layer.getChildren((n: any) => {
-      return n.hasName('selectable') || n.hasName('locked') || n.hasName('patternItem');
-    });
+    const payload = captureCurrentPayload();
 
-    const payload = JSON.stringify(nodes.map((n: any) => n.toObject()));
-
-    // Discard any forward steps if we're branching from the past
+    // Si estamos en un paso anterior, descartar historial posterior
     if (historyStep.value < historyStack.value.length - 1) {
       historyStack.value = historyStack.value.slice(0, historyStep.value + 1);
     }
 
-    // Avoid duplicate adjacent states
-    if (historyStack.value.length > 0 && historyStack.value[historyStack.value.length - 1] === payload) {
-      return;
+    // Evitar estados duplicados si los nodos no cambiaron
+    if (historyStack.value.length > 0) {
+      const lastPayloadStr = historyStack.value[historyStack.value.length - 1];
+      try {
+        const lastSnapshot = JSON.parse(lastPayloadStr);
+        const currSnapshot = JSON.parse(payload);
+        if (JSON.stringify(lastSnapshot.nodes) === JSON.stringify(currSnapshot.nodes)) {
+          lastSnapshot.selectedNodeIndex = currSnapshot.selectedNodeIndex;
+          historyStack.value[historyStack.value.length - 1] = JSON.stringify(lastSnapshot);
+          return;
+        }
+      } catch {
+        if (lastPayloadStr === payload) return;
+      }
     }
 
     historyStack.value.push(payload);
@@ -43,76 +58,59 @@ export function useHistoryUndo(
     }
   };
 
+  const saveState = (immediate = false) => {
+    if (isPerformingUndoRedo) return;
+    if (immediate) {
+      saveStateImmediate();
+    } else {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        saveStateImmediate();
+      }, 200);
+    }
+  };
+
+  const flushPendingSave = () => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+      debounceTimer = null;
+      saveStateImmediate();
+    }
+  };
+
   const undo = () => {
+    flushPendingSave();
     if (!canUndo.value) return;
-    const layer = layerInstanceGetter();
-    if (!layer) return;
 
     isPerformingUndoRedo = true;
     historyStep.value--;
     const state = historyStack.value[historyStep.value];
     if (state) {
-      restoreState(state);
+      restoreCanvasState(state, stageContext, layersContext);
     }
     isPerformingUndoRedo = false;
   };
 
   const redo = () => {
+    flushPendingSave();
     if (!canRedo.value) return;
-    const layer = layerInstanceGetter();
-    if (!layer) return;
 
     isPerformingUndoRedo = true;
     historyStep.value++;
     const state = historyStack.value[historyStep.value];
     if (state) {
-      restoreState(state);
+      restoreCanvasState(state, stageContext, layersContext);
     }
     isPerformingUndoRedo = false;
-  };
-
-  const restoreState = (jsonString: string) => {
-    const layer = layerInstanceGetter();
-    const transformer = transformerInstanceGetter();
-    if (!layer) return;
-
-    // Clear active transformer selection
-    if (transformer) {
-      transformer.nodes([]);
-    }
-
-    // Destroy existing user nodes
-    const existing = layer.getChildren((n: any) => {
-      return n.hasName('selectable') || n.hasName('locked') || n.hasName('patternItem');
-    });
-    existing.forEach((n: any) => n.destroy());
-
-    // Recreate nodes from payload
-    try {
-      const nodesData = JSON.parse(jsonString);
-      const Konva = (window as any).Konva;
-      if (Konva && Array.isArray(nodesData)) {
-        nodesData.forEach((nodeObj: any) => {
-          const node = Konva.Node.create(nodeObj);
-          layer.add(node);
-        });
-      }
-
-      if (transformer) {
-        transformer.moveToTop();
-      }
-
-      layer.draw();
-      onRestoreCallback();
-    } catch (e) {
-      console.error('Error restoring state in undo/redo:', e);
-    }
   };
 
   return {
     canUndo,
     canRedo,
+    historyStep,
+    historyStack,
     saveState,
+    flushPendingSave,
     undo,
     redo
   };

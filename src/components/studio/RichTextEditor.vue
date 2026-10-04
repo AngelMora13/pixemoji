@@ -62,9 +62,10 @@ const currentFont = ref('Plus Jakarta Sans');
 const currentWeight = ref('400');
 const isItalic = ref(false);
 const currentColor = ref('#1e293b');
+let isSyncingFromExternal = false;
 
 const syncToCanvas = () => {
-  if (!editor.value) return;
+  if (!editor.value || isSyncingFromExternal) return;
   const formatted = getFormattedTextFromDoc(editor.value.getJSON());
   const html = editor.value.getHTML();
   studio?.change('text', { text: formatted, html });
@@ -84,6 +85,30 @@ const editor = useEditor({
     syncToCanvas();
   }
 });
+
+watch(
+  () => studio?.activeElement.value,
+  (el) => {
+    if (!el || el.type !== 'Texto') return;
+    if (el.fontFamily) currentFont.value = el.fontFamily;
+    if (el.fill) currentColor.value = el.fill;
+    if (el.fontStyle) {
+      isItalic.value = el.fontStyle.includes('italic');
+      const wMatch = el.fontStyle.match(/\b\d{3}\b/);
+      if (wMatch) currentWeight.value = wMatch[0];
+    }
+    const targetHtml = el.html || `<p>${el.text || ''}</p>`;
+    if (editor.value && targetHtml) {
+      const currentHtml = editor.value.getHTML();
+      if (currentHtml !== targetHtml) {
+        isSyncingFromExternal = true;
+        editor.value.commands.setContent(targetHtml);
+        isSyncingFromExternal = false;
+      }
+    }
+  },
+  { immediate: true, deep: true }
+);
 
 const isBulletActive = computed(() => Boolean(editor.value?.isActive('bulletList')));
 const isOrderedActive = computed(() => Boolean(editor.value?.isActive('orderedList')));
