@@ -29,7 +29,8 @@ src/components/
 │   ├── ColorPalettePicker.vue    # Selector y paleta flotante de color con guardados
 │   ├── ExportModal.vue           # Modal global de exportación PNG con resolución
 │   ├── EmojiPickerModal.vue      # Envoltorio del web component emoji-picker
-│   └── EmojiControlsPanel.vue    # Panel de presets de emoji, resolución y alineación
+│   ├── EmojiControlsPanel.vue    # Panel de presets de emoji, resolución y alineación
+│   └── CropModal.vue             # Modal interactivo reutilizable de recorte con controles tipo lienzo
 │
 ├── canvas/                  # Componentes específicos del lienzo gráfico
 │   ├── KonvaStage.vue       # Montaje del contenedor del lienzo y fondo ajedrez
@@ -47,6 +48,7 @@ src/components/
 │   ├── TextInspector.vue         # Inspector de texto con TipTap, sombras y efectos 3D
 │   ├── EmojiInspector.vue        # Inspector de emojis y atajos frecuentes
 │   ├── ImageInspector.vue        # Inspector de imágenes, reemplazo y filtros
+│   ├── CropControls.vue          # Control de recorte no destructivo de dimensiones (Crop)
 │   ├── BackgroundTool.vue        # Controles de transparencia, color y degradado de fondo
 │   └── TemplatesTool.vue         # Catálogo de plantillas rápidas prediseñadas
 │
@@ -68,6 +70,9 @@ La lógica imperativa de Konva.js, el estado reactivo y las operaciones no deben
 src/composables/
 ├── useKonvaStage.ts          # Inicialización del Stage, Layer, Transformer y redimensionamiento
 ├── useKonvaLayers.ts         # Lista de capas reactiva, inserción (emoji, texto, imagen) y orden (arriba/abajo)
+├── useKonvaEmojiFix.ts       # Corrección de cajas delimitadoras, centrado y sombras Skia en fuentes de emojis
+├── useKonvaCrop.ts           # Lógica de recorte direccional por clipping en canvas para imágenes y emojis
+├── useCropInteraction.ts     # Cálculo de métricas de glifos de emojis e interacción matemática de recorte
 ├── useCanvasExport.ts        # Descarga PNG (1x/2x), copiado al portapapeles y ocultado del transformer
 ├── useSocialPresets.ts       # Catálogo de ratios de redes sociales (base 512px / HD 1024px)
 ├── useCanvasStudioContext.ts # Contexto reactivo unificado (provide/inject) para toda la app

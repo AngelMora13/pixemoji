@@ -1,5 +1,6 @@
 import { ref, shallowRef } from 'vue';
-import { patchKonvaEmojiShadow } from './useKonvaEmojiFix';
+import { patchKonvaEmojiShadow, patchKonvaEmojiBounds } from './useKonvaEmojiFix';
+import { patchKonvaCrop } from './useKonvaCrop';
 
 export interface KonvaStageOptions {
   containerId: string;
@@ -69,6 +70,8 @@ export function useKonvaStage() {
     KonvaModule.value = konvaImport.default || konvaImport;
     (window as any).Konva = KonvaModule.value;
     patchKonvaEmojiShadow(KonvaModule.value);
+    patchKonvaEmojiBounds(KonvaModule.value);
+    patchKonvaCrop(KonvaModule.value);
 
     const container = document.getElementById(options.containerId);
     if (!container) return;

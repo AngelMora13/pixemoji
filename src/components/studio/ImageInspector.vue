@@ -110,6 +110,9 @@
 
     <!-- 5. Filtros: Desenfoque & Contraste -->
     <FilterControls />
+
+    <!-- 6. Recorte de Dimensiones (Crop) -->
+    <CropControls />
   </div>
 </template>
 
@@ -118,6 +121,7 @@ import { ref } from 'vue';
 import { useCanvasStudio } from '../../composables/useCanvasStudioContext';
 import ShadowPad from './ShadowPad.vue';
 import FilterControls from './FilterControls.vue';
+import CropControls from './CropControls.vue';
 import EffectPresetsGrid from '../common/EffectPresetsGrid.vue';
 import TransformActionsGrid from '../common/TransformActionsGrid.vue';
 

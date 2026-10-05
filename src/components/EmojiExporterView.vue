@@ -79,6 +79,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { emojiFallback } from './icons';
 import { useKonvaStage } from '../composables/useKonvaStage';
+import { patchKonvaEmojiShadow, patchKonvaEmojiBounds, syncEmojiMetrics } from '../composables/useKonvaEmojiFix';
 
 // Modular Subcomponents
 import KonvaStage from './canvas/KonvaStage.vue';
@@ -143,8 +144,8 @@ const applyFromPicker = (unicode: string, name: string) => {
 const updateEmoji = (char: string) => {
   if (!emojiNode || !stage.layerInstance.value) return;
   emojiNode.text(char);
-  emojiNode.offsetX(emojiNode.width() / 2);
-  emojiNode.offsetY(emojiNode.height() / 2);
+  syncEmojiMetrics(emojiNode, char);
+  stage.transformerInstance.value?.forceUpdate();
   stage.layerInstance.value.draw();
 };
 
@@ -160,8 +161,8 @@ const fitEmoji = () => {
   emojiNode.scale({ x: 1, y: 1 });
   emojiNode.fontSize(160);
   emojiNode.rotation(0);
-  emojiNode.offsetX(emojiNode.width() / 2);
-  emojiNode.offsetY(emojiNode.height() / 2);
+  syncEmojiMetrics(emojiNode, emojiNode.text(), 160);
+  stage.transformerInstance.value?.forceUpdate();
   stage.layerInstance.value.draw();
 };
 
@@ -228,6 +229,9 @@ onMounted(async () => {
 
   if (!stage.KonvaModule.value || !stage.layerInstance.value) return;
 
+  patchKonvaEmojiShadow(stage.KonvaModule.value);
+  patchKonvaEmojiBounds(stage.KonvaModule.value);
+
   emojiNode = new stage.KonvaModule.value.Text({
     x: CANVAS_SIZE / 2,
     y: CANVAS_SIZE / 2,
@@ -235,10 +239,11 @@ onMounted(async () => {
     fontSize: 130,
     fontFamily: '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif',
     draggable: true,
-    name: 'selectable'
+    name: 'selectable',
+    nodeType: 'emoji'
   });
-  emojiNode.offsetX(emojiNode.width() / 2);
-  emojiNode.offsetY(emojiNode.height() / 2);
+  emojiNode.setAttr('nodeType', 'emoji');
+  syncEmojiMetrics(emojiNode, selected.value.char, 130);
 
   stage.layerInstance.value.add(emojiNode);
   stage.selectNode(emojiNode);

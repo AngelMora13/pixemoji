@@ -1,7 +1,11 @@
 import { ref, shallowRef, computed, watch } from 'vue';
 import type { useKonvaStage } from './useKonvaStage';
-import { patchKonvaEmojiShadow } from './useKonvaEmojiFix';
+import { patchKonvaEmojiShadow, patchKonvaEmojiBounds, syncEmojiMetrics } from './useKonvaEmojiFix';
+import { patchKonvaCrop, type CropInset, DEFAULT_CROP } from './useKonvaCrop';
 import { createRichTextShape } from '../utils/konvaRichText';
+
+export type { CropInset };
+export { DEFAULT_CROP };
 
 export interface LayerItem {
   id: string;
@@ -64,6 +68,7 @@ export interface ActiveElementState {
   fontStyle: string;
   filterBlur: number;
   filterContrast: number;
+  cropInset?: CropInset;
   is3D?: boolean;
   depth3D?: number;
   color3DMode?: 'auto' | 'custom';
@@ -80,13 +85,14 @@ export const attachNodeFilters = (node: any) => {
 
   const originalSceneFunc = node.getSceneFunc();
   node.sceneFunc(function(this: any, context: any, shapeNode: any) {
-    const ctx = context._context;
     const rawBlur = shapeNode.getAttr('filterBlur');
     const blur = (rawBlur !== undefined && !isNaN(Number(rawBlur))) ? Number(rawBlur) : 0;
     const rawContrast = shapeNode.getAttr('filterContrast');
     const contrast = (rawContrast !== undefined && !isNaN(Number(rawContrast))) ? Number(rawContrast) : 100;
+    const hasFilter = blur > 0 || contrast !== 100;
 
-    if (blur > 0 || contrast !== 100) {
+    if (hasFilter) {
+      const ctx = context._context;
       ctx.save();
       let f = '';
       if (blur > 0) f += `blur(${blur}px) `;
@@ -205,6 +211,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
       fontStyle: typeof node.fontStyle === 'function' ? (node.fontStyle() || 'normal') : 'normal',
       filterBlur,
       filterContrast,
+      cropInset: (node.getAttr?.('cropInset') as CropInset) ? { ...node.getAttr('cropInset') } : { ...DEFAULT_CROP },
       is3D,
       depth3D,
       color3DMode,
@@ -285,13 +292,15 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     if (!layerInstance.value || !KonvaModule.value) return;
 
     patchKonvaEmojiShadow(KonvaModule.value);
+    patchKonvaEmojiBounds(KonvaModule.value);
 
     const offset = (Math.random() - 0.5) * 40;
+    const initialFontSize = customOptions?.fontSize ?? 110;
     const emoji = new KonvaModule.value.Text({
       x: customOptions?.x ?? canvasWidth.value / 2 + offset,
       y: customOptions?.y ?? canvasHeight.value / 2 + offset,
       text: char,
-      fontSize: customOptions?.fontSize ?? 110,
+      fontSize: initialFontSize,
       fontFamily: '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif',
       draggable: true,
       name: 'selectable',
@@ -302,10 +311,8 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     emoji.setAttr('nodeType', 'emoji');
     emoji.setAttr('filterBlur', 0);
     emoji.setAttr('filterContrast', 100);
+    syncEmojiMetrics(emoji, char, initialFontSize);
     attachNodeFilters(emoji);
-
-    emoji.offsetX(emoji.width() / 2);
-    emoji.offsetY(emoji.height() / 2);
 
     layerInstance.value.add(emoji);
     selectNode(emoji);
@@ -687,6 +694,31 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     syncActiveElement();
   };
 
+  const updateSelectedCrop = (crop: Partial<CropInset>) => {
+    if (!selectedNode.value || !layerInstance.value) return;
+    const node = selectedNode.value;
+    const existing = (node.getAttr?.('cropInset') as CropInset) || { ...DEFAULT_CROP };
+    const next: CropInset = {
+      top: Math.max(0, Math.min(90, crop.top ?? existing.top ?? 0)),
+      right: Math.max(0, Math.min(90, crop.right ?? existing.right ?? 0)),
+      bottom: Math.max(0, Math.min(90, crop.bottom ?? existing.bottom ?? 0)),
+      left: Math.max(0, Math.min(90, crop.left ?? existing.left ?? 0))
+    };
+
+    if (next.top + next.bottom >= 95) {
+      next.bottom = Math.max(0, 95 - next.top);
+    }
+    if (next.left + next.right >= 95) {
+      next.right = Math.max(0, 95 - next.left);
+    }
+
+    node.setAttr('cropInset', next);
+
+    node.getLayer()?.batchDraw();
+    layerInstance.value.batchDraw();
+    syncActiveElement();
+  };
+
   const updateSelectedText3D = (options: {
     is3D?: boolean;
     depth?: number;
@@ -822,9 +854,14 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     }
     if (options.fontSize !== undefined) node.fontSize(options.fontSize);
 
-    node.offsetX(node.width() / 2);
-    node.offsetY(node.height() / 2);
+    if (node.getAttr('nodeType') === 'emoji') {
+      syncEmojiMetrics(node);
+    } else {
+      node.offsetX(node.width() / 2);
+      node.offsetY(node.height() / 2);
+    }
 
+    transformerInstance.value?.forceUpdate();
     layerInstance.value.batchDraw();
     refreshLayersList();
     syncActiveElement();
@@ -977,6 +1014,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     applyTextPreset,
     applyImagePreset,
     updateSelectedFilters,
+    updateSelectedCrop,
     updateSelectedText3D,
     updateSelectedShadow,
     updateSelectedStroke,

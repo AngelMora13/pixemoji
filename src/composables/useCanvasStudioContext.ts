@@ -12,6 +12,7 @@ export type StudioAction =
   | 'textPreset'
   | 'imagePreset'
   | 'replaceImage'
+  | 'crop'
   | 'shadow'
   | 'filter'
   | 'text3D'
@@ -98,6 +99,10 @@ export function createStudioContext(
         break;
       case 'filter':
         layers.updateSelectedFilters(payload);
+        isDiscrete = false;
+        break;
+      case 'crop':
+        layers.updateSelectedCrop(payload);
         isDiscrete = false;
         break;
       case 'text3D':

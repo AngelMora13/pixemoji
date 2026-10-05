@@ -1,5 +1,5 @@
 import { createRichTextShape } from './konvaRichText';
-import { patchKonvaEmojiShadow } from '../composables/useKonvaEmojiFix';
+import { patchKonvaEmojiShadow, patchKonvaEmojiBounds, syncEmojiMetrics } from '../composables/useKonvaEmojiFix';
 import { attachNodeFilters } from '../composables/useKonvaLayers';
 
 export interface SerializedNode {
@@ -39,6 +39,7 @@ export interface SerializedNode {
   shadowOpacity?: number;
   filterBlur?: number;
   filterContrast?: number;
+  cropInset?: { top: number; right: number; bottom: number; left: number };
 }
 
 export interface CanvasHistorySnapshot {
@@ -92,7 +93,8 @@ export function serializeCanvasState(layer: any, selectedNode: any): string {
       shadowOffsetY: getProp(node, 'shadowOffsetY', 0),
       shadowOpacity: getProp(node, 'shadowOpacity', 1),
       filterBlur: node.getAttr?.('filterBlur') ?? 0,
-      filterContrast: node.getAttr?.('filterContrast') ?? 100
+      filterContrast: node.getAttr?.('filterContrast') ?? 100,
+      cropInset: node.getAttr?.('cropInset') ?? undefined
     };
 
     if (nodeType === 'text') {
@@ -182,6 +184,7 @@ export function restoreCanvasState(jsonString: string, stage: any, layers: any) 
       restoredNodes.push(shape);
     } else if (item.nodeType === 'emoji') {
       patchKonvaEmojiShadow(Konva);
+      patchKonvaEmojiBounds(Konva);
       const emoji = new Konva.Text({
         x: item.x, y: item.y, text: item.text || '✨', fontSize: item.fontSize || 110,
         fontFamily: item.fontFamily || '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif',
@@ -193,8 +196,13 @@ export function restoreCanvasState(jsonString: string, stage: any, layers: any) 
       emoji.setAttr('nodeType', 'emoji');
       emoji.setAttr('filterBlur', item.filterBlur ?? 0);
       emoji.setAttr('filterContrast', item.filterContrast ?? 100);
-      emoji.offsetX(item.offsetX || emoji.width() / 2);
-      emoji.offsetY(item.offsetY || emoji.height() / 2);
+      if (item.cropInset) emoji.setAttr('cropInset', item.cropInset);
+      if (item.offsetX !== undefined && item.offsetY !== undefined) {
+        emoji.offsetX(item.offsetX);
+        emoji.offsetY(item.offsetY);
+      } else {
+        syncEmojiMetrics(emoji, item.text, item.fontSize);
+      }
       attachNodeFilters(emoji);
       layer.add(emoji);
       restoredNodes.push(emoji);
@@ -211,6 +219,7 @@ export function restoreCanvasState(jsonString: string, stage: any, layers: any) 
       kImg.setAttr('src', item.src || '');
       kImg.setAttr('filterBlur', item.filterBlur ?? 0);
       kImg.setAttr('filterContrast', item.filterContrast ?? 100);
+      if (item.cropInset) kImg.setAttr('cropInset', item.cropInset);
       kImg.offsetX(item.offsetX || 0);
       kImg.offsetY(item.offsetY || 0);
       attachNodeFilters(kImg);
