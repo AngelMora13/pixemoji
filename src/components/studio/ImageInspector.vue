@@ -91,100 +91,12 @@
     </div>
 
     <!-- 2. Efectos 1-Clic para Imagen -->
-    <div class="space-y-2.5">
-      <span class="block text-xs font-bold text-text-main uppercase tracking-wider text-[11px]">
-        Efectos 1-Clic:
-      </span>
-      <div class="grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          @click="applyImagePreset('sticker')"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary-gradient text-white font-bold text-xs shadow-sm hover:opacity-95 transition-all cursor-pointer active:scale-98"
-        >
-          <span>✨</span>
-          <span>Borde Sticker</span>
-        </button>
-        <button
-          type="button"
-          @click="applyImagePreset({ preset: 'neon', color: '#00f0ff' })"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl bg-cyan-100 hover:bg-cyan-200 border border-cyan-400 text-cyan-900 font-bold text-xs transition-colors cursor-pointer active:scale-98"
-        >
-          <span>💎</span>
-          <span>Neón Cyan</span>
-        </button>
-        <button
-          type="button"
-          @click="applyImagePreset({ preset: 'neon', color: '#ff007f' })"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl bg-pink-100 hover:bg-pink-200 border border-pink-400 text-pink-900 font-bold text-xs transition-colors cursor-pointer active:scale-98"
-        >
-          <span>💖</span>
-          <span>Neón Rosa</span>
-        </button>
-        <button
-          type="button"
-          @click="applyImagePreset('soft-shadow')"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 font-bold text-xs transition-colors cursor-pointer active:scale-98"
-        >
-          <span>🌑</span>
-          <span>Sombra</span>
-        </button>
-        <button
-          type="button"
-          @click="applyImagePreset('clean')"
-          class="col-span-2 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white hover:bg-primary-50 border border-app-border-strong text-stone-700 font-bold text-xs transition-colors cursor-pointer active:scale-98"
-        >
-          <span>🧼</span>
-          <span>Normal / Limpio</span>
-        </button>
-      </div>
-    </div>
+    <EffectPresetsGrid mode="object" />
 
     <hr class="border-app-border" />
 
     <!-- 3. Orientación & Posición -->
-    <div class="space-y-2.5">
-      <span class="block text-xs font-bold text-text-main uppercase tracking-wider text-[11px]">
-        Orientación & Posición:
-      </span>
-      <div class="grid grid-cols-4 gap-1.5">
-        <button
-          type="button"
-          @click="studio?.change('flipH')"
-          class="flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-white border border-app-border hover:bg-primary-50 hover:border-primary-400 text-text-main text-[11px] font-semibold cursor-pointer shadow-2xs transition-colors"
-          title="Reflejar Horizontalmente"
-        >
-          <span class="text-sm">↔️</span>
-          <span>Reflejar</span>
-        </button>
-        <button
-          type="button"
-          @click="studio?.change('flipV')"
-          class="flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-white border border-app-border hover:bg-primary-50 hover:border-primary-400 text-text-main text-[11px] font-semibold cursor-pointer shadow-2xs transition-colors"
-          title="Invertir Verticalmente"
-        >
-          <span class="text-sm">↕️</span>
-          <span>Invertir</span>
-        </button>
-        <button
-          type="button"
-          @click="studio?.change('center')"
-          class="flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-white border border-app-border hover:bg-primary-50 hover:border-primary-400 text-text-main text-[11px] font-semibold cursor-pointer shadow-2xs transition-colors"
-          title="Centrar en el lienzo"
-        >
-          <span class="text-sm">🎯</span>
-          <span>Centrar</span>
-        </button>
-        <button
-          type="button"
-          @click="studio?.change('rotate', 90)"
-          class="flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-white border border-app-border hover:bg-primary-50 hover:border-primary-400 text-text-main text-[11px] font-semibold cursor-pointer shadow-2xs transition-colors"
-          title="Girar 90 grados"
-        >
-          <span class="text-sm">🔄</span>
-          <span>Rotar 90°</span>
-        </button>
-      </div>
-    </div>
+    <TransformActionsGrid />
 
     <hr class="border-app-border" />
 
@@ -206,6 +118,8 @@ import { ref } from 'vue';
 import { useCanvasStudio } from '../../composables/useCanvasStudioContext';
 import ShadowPad from './ShadowPad.vue';
 import FilterControls from './FilterControls.vue';
+import EffectPresetsGrid from '../common/EffectPresetsGrid.vue';
+import TransformActionsGrid from '../common/TransformActionsGrid.vue';
 
 const studio = useCanvasStudio();
 
@@ -242,9 +156,5 @@ const loadImageFromUrl = () => {
   if (!url) return;
   studio?.change('replaceImage', url);
   imageUrlInput.value = '';
-};
-
-const applyImagePreset = (preset: any) => {
-  studio?.change('imagePreset', preset);
 };
 </script>

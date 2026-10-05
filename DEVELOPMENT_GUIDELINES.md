@@ -20,21 +20,35 @@ La carpeta `src/components/` debe estructurarse por dominios y niveles de abstra
 ```text
 src/components/
 ├── common/                  # Componentes reutilizables transversales
-│   ├── ExportCard.vue       # Tarjeta de exportación (resolución, descarga y portapapeles)
-│   ├── ColorPicker.vue      # Selector de color y paleta rápida
-│   └── EmojiPickerModal.vue # Envoltorio del web component emoji-picker
+│   ├── SliderControl.vue         # Control deslizador de rango numérico con etiqueta y unidades
+│   ├── TransformActionsGrid.vue  # Botonera 4x1 de orientación (reflejar, centrar, rotar)
+│   ├── EffectPresetsGrid.vue     # Cuadrícula de presets de efectos rápidos de 1-clic
+│   ├── CollapsibleSection.vue    # Tarjeta de propiedad con interruptor On/Off
+│   ├── ExportActions.vue         # Botones unificados de descarga PNG y portapapeles
+│   ├── BottomSheetModal.vue      # Drawer y hoja inferior táctil para dispositivos móviles
+│   ├── ColorPalettePicker.vue    # Selector y paleta flotante de color con guardados
+│   ├── ExportModal.vue           # Modal global de exportación PNG con resolución
+│   ├── EmojiPickerModal.vue      # Envoltorio del web component emoji-picker
+│   └── EmojiControlsPanel.vue    # Panel de presets de emoji, resolución y alineación
 │
 ├── canvas/                  # Componentes específicos del lienzo gráfico
 │   ├── KonvaStage.vue       # Montaje del contenedor del lienzo y fondo ajedrez
-│   └── CanvasToolbar.vue    # Barra de acción rápida contextual del objeto seleccionado
+│   ├── CanvasToolbar.vue    # Barra de acción rápida contextual del objeto seleccionado
+│   └── CanvasViewport.vue   # Viewport central (resolución, undo/redo, canvas y zoom)
 │
-├── studio/                  # Herramientas modulares del editor de memes / stickers
-│   ├── FormatSelector.vue   # Presets de redes sociales (1:1, 9:16, 4:5, 16:9, etc.)
-│   ├── LayersPanel.vue      # Lista visual de capas con reordenamiento arriba/abajo
-│   ├── TextTool.vue         # Formulario de texto, fuentes meme, color y contorno
-│   ├── EmojiTool.vue        # Presets rápidos y disparador del buscador de emojis
-│   ├── ImageTool.vue        # Carga de imágenes locales y por URL
-│   └── BackgroundTool.vue   # Controles de transparencia y color de fondo
+├── studio/                  # Herramientas modulares e inspectores del editor
+│   ├── StudioHeader.vue          # Barra superior con selector de ratio y botón de exportar
+│   ├── ToolsSidebarContent.vue   # Vista unificada del panel de herramientas y capas (Desktop y Mobile)
+│   ├── StudioMobileDrawers.vue   # Drawers móviles inferiores y botones flotantes (FABs)
+│   ├── CanvasBottomBar.vue       # Barra inferior de zoom y catálogo flotante de plantillas
+│   ├── AddTool.vue               # Inserción rápida de texto, emoji o imagen
+│   ├── LayersPanel.vue           # Lista visual de capas con reordenamiento arriba/abajo
+│   ├── InspectorPanel.vue        # Panel lateral derecho unificado de propiedades
+│   ├── TextInspector.vue         # Inspector de texto con TipTap, sombras y efectos 3D
+│   ├── EmojiInspector.vue        # Inspector de emojis y atajos frecuentes
+│   ├── ImageInspector.vue        # Inspector de imágenes, reemplazo y filtros
+│   ├── BackgroundTool.vue        # Controles de transparencia, color y degradado de fondo
+│   └── TemplatesTool.vue         # Catálogo de plantillas rápidas prediseñadas
 │
 ├── Navbar.astro             # Barra de navegación global
 ├── EmojiExporterView.vue    # Vista ensambladora de la ruta Home (Exportador)
@@ -52,10 +66,12 @@ La lógica imperativa de Konva.js, el estado reactivo y las operaciones no deben
 
 ```text
 src/composables/
-├── useKonvaStage.ts      # Inicialización del Stage, Layer, Transformer y redimensionamiento
-├── useKonvaLayers.ts     # Lista de capas reactiva, inserción (emoji, texto, imagen) y orden (arriba/abajo)
-├── useCanvasExport.ts    # Descarga PNG (1x/2x), copiado al portapapeles y ocultado del transformer
-└── useSocialPresets.ts   # Catálogo de ratios de redes sociales (base 512px / HD 1024px)
+├── useKonvaStage.ts          # Inicialización del Stage, Layer, Transformer y redimensionamiento
+├── useKonvaLayers.ts         # Lista de capas reactiva, inserción (emoji, texto, imagen) y orden (arriba/abajo)
+├── useCanvasExport.ts        # Descarga PNG (1x/2x), copiado al portapapeles y ocultado del transformer
+├── useSocialPresets.ts       # Catálogo de ratios de redes sociales (base 512px / HD 1024px)
+├── useCanvasStudioContext.ts # Contexto reactivo unificado (provide/inject) para toda la app
+└── useStudioShortcuts.ts     # Atajos globales de teclado (Ctrl+Z, Ctrl+Y, Supr)
 ```
 
 #### Responsabilidades de cada Composable:

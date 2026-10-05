@@ -1,41 +1,20 @@
 <template>
-  <div class="p-3.5 rounded-2xl bg-app-header/60 border border-app-border space-y-3" data-purpose="text-3d-controls">
-    <!-- Header con Switch Activo/Desactivado -->
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="text-base select-none">🧊</span>
-        <span class="text-xs font-bold text-text-main">Extrusión 3D (Bloque)</span>
-      </div>
-      <label class="inline-flex items-center gap-1.5 cursor-pointer select-none">
-        <input
-          type="checkbox"
-          :checked="is3DActive"
-          @change="toggle3D"
-          class="rounded border-stone-300 text-primary-600 focus:ring-primary-500 w-3.5 h-3.5 accent-primary-600 cursor-pointer"
-        />
-        <span :class="['text-xs font-bold', is3DActive ? 'text-primary-600' : 'text-text-muted']">
-          {{ is3DActive ? 'Activo' : 'Desactivado' }}
-        </span>
-      </label>
-    </div>
-
-    <div v-if="is3DActive" class="pt-1 space-y-3">
-      <!-- 1. Profundidad Slider -->
-      <div>
-        <div class="flex items-center justify-between text-xs mb-1">
-          <span class="text-text-muted font-medium">Profundidad</span>
-          <span class="font-mono font-bold text-primary-600">{{ depth3D }}px</span>
-        </div>
-        <input
-          type="range"
-          min="1"
-          max="25"
-          step="1"
-          :value="depth3D"
-          @input="onDepthInput"
-          class="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
-        />
-      </div>
+  <CollapsibleSection
+    title="Extrusión 3D (Bloque)"
+    icon="🧊"
+    :model-value="is3DActive"
+    @change="toggle3D"
+  >
+    <!-- 1. Profundidad Slider -->
+    <SliderControl
+      label="Profundidad"
+      :model-value="depth3D"
+      :min="1"
+      :max="25"
+      :step="1"
+      unit="px"
+      @update:model-value="onDepthChange"
+    />
 
       <!-- 2. Selector de Modo de Color 3D (Mismo color vs Color Fijo) -->
       <div>
@@ -74,18 +53,14 @@
 
       <!-- 3. Sombreado de Profundidad (Modo Mismo Color) -->
       <div v-if="color3DMode === 'auto'" class="p-2.5 rounded-xl bg-white/70 border border-stone-200/70 space-y-1.5">
-        <div class="flex items-center justify-between text-xs">
-          <span class="text-text-muted font-medium">Sombreado lateral (Relieve 3D)</span>
-          <span class="font-mono font-bold text-primary-600">{{ shading3D }}%</span>
-        </div>
-        <input
-          type="range"
-          min="0"
-          max="80"
-          step="5"
-          :value="shading3D"
-          @input="onShadingInput"
-          class="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
+        <SliderControl
+          label="Sombreado lateral (Relieve 3D)"
+          :model-value="shading3D"
+          :min="0"
+          :max="80"
+          :step="5"
+          unit="%"
+          @update:model-value="onShadingChange"
         />
         <p class="text-[10px] text-text-subtle leading-tight">
           Oscurece los laterales para dar perspectiva e iluminación tridimensional manteniendo los colores del texto.
@@ -139,15 +114,15 @@
           </div>
         </div>
       </div>
-    </div>
-    <p v-else class="text-xs text-text-subtle italic">Texto plano normal sin volumen 3D.</p>
-  </div>
+  </CollapsibleSection>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useCanvasStudio } from '../../composables/useCanvasStudioContext';
-import ColorPalettePicker from './ColorPalettePicker.vue';
+import ColorPalettePicker from '../common/ColorPalettePicker.vue';
+import CollapsibleSection from '../common/CollapsibleSection.vue';
+import SliderControl from '../common/SliderControl.vue';
 
 const studio = useCanvasStudio();
 
@@ -178,8 +153,8 @@ const currentDirY = computed(() => {
   return (y !== undefined && !isNaN(Number(y))) ? Number(y) : 1;
 });
 
-const toggle3D = (e: Event) => {
-  const checked = (e.target as HTMLInputElement).checked;
+const toggle3D = (active: boolean | Event) => {
+  const checked = typeof active === 'boolean' ? active : (active.target as HTMLInputElement).checked;
   studio?.change('text3D', {
     is3D: checked,
     depth: depth3D.value,
@@ -203,8 +178,7 @@ const setColorMode = (mode: 'auto' | 'custom') => {
   });
 };
 
-const onShadingInput = (e: Event) => {
-  const val = Number((e.target as HTMLInputElement).value);
+const onShadingChange = (val: number) => {
   studio?.change('text3D', {
     is3D: true,
     depth: depth3D.value,
@@ -216,11 +190,10 @@ const onShadingInput = (e: Event) => {
   });
 };
 
-const onDepthInput = (e: Event) => {
-  const val = Number((e.target as HTMLInputElement).value);
+const onDepthChange = (val: number) => {
   studio?.change('text3D', {
     is3D: true,
-    depth: val,
+    depth: !isNaN(val) ? val : 8,
     colorMode: color3DMode.value,
     shading: shading3D.value,
     color: color3D.value,

@@ -49,20 +49,15 @@
       <!-- Controles de Blur y Color -->
       <div class="flex-1 space-y-2 text-xs">
         <!-- Difuminado (Blur) -->
-        <div>
-          <div class="flex justify-between items-center text-[10px] font-bold uppercase text-text-main mb-0.5">
-            <span>Difuminado (Blur)</span>
-            <span class="text-primary-600 font-mono">{{ effectiveBlur }}px</span>
-          </div>
-          <input
-            :value="effectiveBlur"
-            @input="onBlurInput"
-            type="range"
-            min="0"
-            max="40"
-            class="w-full accent-primary-600 cursor-pointer h-1.5 bg-stone-200 rounded-lg appearance-none"
-          />
-        </div>
+        <SliderControl
+          label="Difuminado (Blur)"
+          :model-value="effectiveBlur"
+          :min="0"
+          :max="40"
+          :step="1"
+          unit="px"
+          @update:model-value="onBlurChange"
+        />
 
         <!-- Color & Opacidad de sombra -->
         <div>
@@ -99,7 +94,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useCanvasStudio } from '../../composables/useCanvasStudioContext';
-import ColorPalettePicker from './ColorPalettePicker.vue';
+import ColorPalettePicker from '../common/ColorPalettePicker.vue';
+import SliderControl from '../common/SliderControl.vue';
 
 const studio = useCanvasStudio();
 
@@ -250,8 +246,7 @@ const resetOffset = () => {
   });
 };
 
-const onBlurInput = (e: Event) => {
-  const val = Number((e.target as HTMLInputElement).value);
+const onBlurChange = (val: number) => {
   emitChange({
     offsetX: localOffsetX.value,
     offsetY: localOffsetY.value,

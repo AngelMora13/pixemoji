@@ -54,26 +54,14 @@
       <div v-if="bgMode === 'solid'" class="space-y-3 p-3 bg-white border border-app-border rounded-2xl shadow-2xs">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-text-main">Color del lienzo:</span>
-          <input
-            :value="bgColor"
-            @input="$emit('setColor', ($event.target as HTMLInputElement).value)"
-            type="color"
-            class="w-8 h-8 rounded-lg border border-app-border-strong cursor-pointer"
+          <ColorPalettePicker
+            :current-color="bgColor || '#ffffff'"
+            compact
+            popover-align="left"
+            title="Seleccionar color de fondo"
+            @live-change="$emit('setColor', $event)"
+            @commit-change="$emit('setColor', $event)"
           />
-        </div>
-
-        <div>
-          <span class="text-[10px] text-text-subtle block mb-1.5 font-medium">Paleta rápida:</span>
-          <div class="flex flex-wrap gap-1.5">
-            <button
-              v-for="c in ['#ffffff', '#000000', '#fffbf7', '#fed7aa', '#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8']"
-              :key="c"
-              type="button"
-              @click="$emit('setColor', c)"
-              class="w-6 h-6 rounded-md border border-stone-300 shadow-2xs cursor-pointer hover:scale-110 transition-transform"
-              :style="{ backgroundColor: c }"
-            ></button>
-          </div>
         </div>
       </div>
 
@@ -115,10 +103,13 @@
             <div class="flex-1 space-y-0.5">
               <span class="text-[9px] text-text-subtle font-bold block">Color Inicio</span>
               <div class="flex items-center gap-1.5">
-                <input
-                  v-model="customColor1"
-                  type="color"
-                  class="w-7 h-7 p-0 rounded-md border border-app-border-strong cursor-pointer bg-white"
+                <ColorPalettePicker
+                  :current-color="customColor1"
+                  compact
+                  popover-align="left"
+                  title="Color de inicio"
+                  @live-change="customColor1 = $event"
+                  @commit-change="customColor1 = $event"
                 />
                 <span class="font-mono text-[10px] text-text-main">{{ customColor1 }}</span>
               </div>
@@ -128,10 +119,13 @@
             <div class="flex-1 space-y-0.5">
               <span class="text-[9px] text-text-subtle font-bold block">Color Fin</span>
               <div class="flex items-center gap-1.5">
-                <input
-                  v-model="customColor2"
-                  type="color"
-                  class="w-7 h-7 p-0 rounded-md border border-app-border-strong cursor-pointer bg-white"
+                <ColorPalettePicker
+                  :current-color="customColor2"
+                  compact
+                  popover-align="left"
+                  title="Color de fin"
+                  @live-change="customColor2 = $event"
+                  @commit-change="customColor2 = $event"
                 />
                 <span class="font-mono text-[10px] text-text-main">{{ customColor2 }}</span>
               </div>
@@ -209,6 +203,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { GradientPreset } from '../../composables/useKonvaStage';
+import ColorPalettePicker from '../common/ColorPalettePicker.vue';
 
 const props = defineProps<{
   isTransparent: boolean;

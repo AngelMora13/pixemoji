@@ -18,41 +18,27 @@
 
     <div class="space-y-2.5 text-xs">
       <!-- 1. Desenfoque (Blur) -->
-      <div>
-        <div class="flex justify-between items-center text-[10px] font-bold uppercase text-text-main mb-1">
-          <span>Desenfoque (Blur)</span>
-          <span class="font-mono font-bold text-primary-600">{{ effectiveBlur }}px</span>
-        </div>
-        <input
-          type="range"
-          min="0"
-          max="30"
-          step="0.5"
-          :value="effectiveBlur"
-          @input="onBlurInput"
-          class="w-full accent-primary-600 cursor-pointer h-1.5 bg-stone-200 rounded-lg appearance-none"
-        />
-      </div>
+      <SliderControl
+        label="Desenfoque (Blur)"
+        :model-value="effectiveBlur"
+        :min="0"
+        :max="30"
+        :step="0.5"
+        unit="px"
+        @update:model-value="onBlurChange"
+      />
 
-      <!-- 2. Contraste / Luminosidad (mínimo 0%) -->
-      <div>
-        <div class="flex justify-between items-center text-[10px] font-bold uppercase text-text-main mb-1">
-          <span>Contraste & Luminosidad</span>
-          <span class="font-mono font-bold text-primary-600">
-            {{ effectiveContrast }}%
-            <span v-if="effectiveContrast === 100" class="text-[9px] text-text-subtle font-normal">(Normal)</span>
-          </span>
-        </div>
-        <input
-          type="range"
-          min="0"
-          max="250"
-          step="5"
-          :value="effectiveContrast"
-          @input="onContrastInput"
-          class="w-full accent-primary-600 cursor-pointer h-1.5 bg-stone-200 rounded-lg appearance-none"
-        />
-      </div>
+      <!-- 2. Contraste / Luminosidad -->
+      <SliderControl
+        label="Contraste & Luminosidad"
+        :model-value="effectiveContrast"
+        :min="0"
+        :max="250"
+        :step="5"
+        unit="%"
+        :hint="effectiveContrast === 100 ? '(Normal)' : ''"
+        @update:model-value="onContrastChange"
+      />
     </div>
   </div>
 </template>
@@ -60,6 +46,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useCanvasStudio } from '../../composables/useCanvasStudioContext';
+import SliderControl from '../common/SliderControl.vue';
 
 const studio = useCanvasStudio();
 
@@ -73,16 +60,14 @@ const effectiveContrast = computed(() => {
   return (c !== undefined && !isNaN(Number(c))) ? Number(c) : 100;
 });
 
-const onBlurInput = (e: Event) => {
-  const val = Number((e.target as HTMLInputElement).value);
+const onBlurChange = (val: number) => {
   studio?.change('filter', {
     blur: !isNaN(val) ? val : 0,
     contrast: effectiveContrast.value
   });
 };
 
-const onContrastInput = (e: Event) => {
-  const val = Number((e.target as HTMLInputElement).value);
+const onContrastChange = (val: number) => {
   studio?.change('filter', {
     blur: effectiveBlur.value,
     contrast: !isNaN(val) ? val : 100

@@ -61,33 +61,13 @@
       </div>
 
       <!-- Action buttons -->
-      <div class="space-y-2 pt-2">
-        <button
-          type="button"
-          @click="$emit('download')"
-          class="w-full py-3 px-4 rounded-2xl bg-primary-gradient hover:opacity-95 text-white font-bold text-xs shadow-md shadow-primary-600/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          <span>Descargar Imagen PNG</span>
-        </button>
-
-        <button
-          type="button"
-          @click="$emit('copy')"
-          :class="[
-            'w-full py-2.5 px-4 rounded-2xl border font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer',
-            copied
-              ? 'bg-emerald-500 border-emerald-600 text-white shadow-xs'
-              : 'bg-white border-app-border-strong text-text-main hover:bg-primary-50'
-          ]"
-        >
-          <svg v-if="copied" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          <span>{{ copied ? '¡Copiado con éxito!' : 'Copiar al portapapeles' }}</span>
-        </button>
+      <div class="pt-2">
+        <ExportActions
+          :copied="copied"
+          download-text="Descargar Imagen PNG"
+          @download="$emit('download')"
+          @copy="$emit('copy')"
+        />
       </div>
 
       <p class="text-[10px] text-center text-text-subtle pt-1">
@@ -98,6 +78,8 @@
 </template>
 
 <script setup lang="ts">
+import ExportActions from './ExportActions.vue';
+
 defineProps<{
   isOpen: boolean;
   exportScale: number;
