@@ -86,22 +86,6 @@
       />
     </div>
 
-    <!-- Font Size Slider -->
-    <div>
-      <div class="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-text-main mb-1">
-        <span>Tamaño de Fuente</span>
-        <span class="text-primary-600 font-mono">{{ fontSize }}px</span>
-      </div>
-      <input
-        v-model.number="fontSize"
-        type="range"
-        min="16"
-        max="96"
-        step="2"
-        class="w-full accent-primary-600 cursor-pointer h-2 bg-stone-200 rounded-lg appearance-none"
-      />
-    </div>
-
     <button
       type="button"
       @click="handleAdd"
@@ -126,14 +110,13 @@ const fontFamily = ref('Impact');
 const textColor = ref('#ffffff');
 const strokeColor = ref('#000000');
 const strokeWidth = ref(4);
-const fontSize = ref(48);
 
 const handleAdd = () => {
   if (!textContent.value.trim()) return;
   emit('addText', {
     text: textContent.value,
     fontFamily: fontFamily.value,
-    fontSize: fontSize.value,
+    fontSize: 48,
     textColor: textColor.value,
     strokeColor: strokeColor.value,
     strokeWidth: strokeWidth.value

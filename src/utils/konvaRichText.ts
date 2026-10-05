@@ -1,27 +1,13 @@
 import { layout, drawLayout } from 'render-tag';
 
 export function wrapWithBaseStyles(rawHtml: string, options: {
-  fontFamily?: string;
-  fontSize?: number;
-  color?: string;
-  fontStyle?: string;
-  strokeColor?: string;
-  strokeWidth?: number;
+  fontFamily?: string; fontSize?: number; color?: string;
+  fontStyle?: string; strokeColor?: string; strokeWidth?: number;
 }) {
-  const baseFont = options.fontFamily || 'Plus Jakarta Sans';
-  const baseSize = options.fontSize || 44;
-  const baseColor = options.color || '#1e293b';
-  const baseStyle = options.fontStyle || 'normal';
-  const sColor = options.strokeColor;
-  const sWidth = options.strokeWidth || 0;
-
-  const strokeCss = (sWidth > 0 && sColor)
-    ? `-webkit-text-stroke: ${sWidth}px ${sColor}; paint-order: stroke fill;`
-    : '';
-
+  const { fontFamily = 'Plus Jakarta Sans', fontSize = 44, color = '#1e293b', fontStyle = 'normal', strokeColor, strokeWidth = 0 } = options;
+  const strokeCss = (strokeWidth > 0 && strokeColor) ? `-webkit-text-stroke: ${strokeWidth}px ${strokeColor}; paint-order: stroke fill;` : '';
   const content = rawHtml && rawHtml.trim() ? rawHtml : '&nbsp;';
-
-  return `<div style="font-family: '${baseFont}', sans-serif; font-size: ${baseSize}px; color: ${baseColor}; font-style: ${baseStyle}; line-height: 1.25; word-wrap: break-word; overflow-wrap: break-word; ${strokeCss}">${content}</div>`;
+  return `<div style="font-family: '${fontFamily}', sans-serif; font-size: ${fontSize}px; color: ${color}; font-style: ${fontStyle}; line-height: 1.25; word-wrap: break-word; overflow-wrap: break-word; ${strokeCss}">${content}</div>`;
 }
 
 export function updateRichTextLayout(shapeNode: any) {
@@ -47,25 +33,35 @@ export function updateRichTextLayout(shapeNode: any) {
       shapeNode.height(layoutObj.height);
       shapeNode.offsetX(width / 2);
       shapeNode.offsetY(layoutObj.height / 2);
+      const tr = shapeNode.getStage()?.findOne('Transformer');
+      if (tr && tr.nodes().includes(shapeNode) && !tr.getActiveAnchor()) {
+        tr.forceUpdate();
+      }
     }
   } catch (err) {
     console.warn('RichText updateLayout error:', err);
   }
 }
 
+const OPPOSITE_ANCHORS: Record<string, (w: number, h: number) => { x: number; y: number }> = {
+  'top-left': (w, h) => ({ x: w, y: h }),
+  'top-center': (w, h) => ({ x: w / 2, y: h }),
+  'top-right': (_w, h) => ({ x: 0, y: h }),
+  'middle-right': (_w, h) => ({ x: 0, y: h / 2 }),
+  'bottom-right': () => ({ x: 0, y: 0 }),
+  'bottom-center': (w) => ({ x: w / 2, y: 0 }),
+  'bottom-left': (w) => ({ x: w, y: 0 }),
+  'middle-left': (w, h) => ({ x: w, y: h / 2 }),
+};
+function getOppositeAnchorPoint(node: any, anchor: string) {
+  const fn = OPPOSITE_ANCHORS[anchor];
+  return fn ? fn(node.width(), node.height()) : { x: node.width() / 2, y: node.height() / 2 };
+}
+
 export function createRichTextShape(KonvaModule: any, options: {
-  x: number;
-  y: number;
-  width?: number;
-  text: string;
-  html?: string;
-  fontSize?: number;
-  fontFamily?: string;
-  fill?: string;
-  textColor?: string;
-  fontStyle?: string;
-  strokeColor?: string;
-  strokeWidth?: number;
+  x: number; y: number; width?: number; text: string; html?: string;
+  fontSize?: number; fontFamily?: string; fill?: string; textColor?: string;
+  fontStyle?: string; strokeColor?: string; strokeWidth?: number;
 }, customAttrs?: any) {
   const initialWidth = options.width || 340;
   const initialHtml = options.html || `<p>${options.text || 'Escribe tu texto...'}</p>`;
@@ -194,27 +190,32 @@ export function createRichTextShape(KonvaModule: any, options: {
     ...customAttrs
   });
 
-  shape.setAttr('nodeType', 'text');
-  shape.setAttr('text', options.text);
-  shape.setAttr('html', initialHtml);
-  shape.setAttr('fontFamily', options.fontFamily || 'Plus Jakarta Sans');
-  shape.setAttr('fontSize', options.fontSize || 44);
-  shape.setAttr('fill', options.textColor || options.fill || '#1e293b');
-  shape.setAttr('fontStyle', options.fontStyle || 'normal');
-  shape.setAttr('filterBlur', customAttrs?.filterBlur ?? 0);
-  shape.setAttr('filterContrast', customAttrs?.filterContrast ?? 100);
-  shape.setAttr('is3D', Boolean(customAttrs?.is3D));
-  shape.setAttr('depth3D', customAttrs?.depth3D ?? 8);
-  shape.setAttr('color3DMode', customAttrs?.color3DMode || 'auto');
-  shape.setAttr('shading3D', customAttrs?.shading3D ?? 35);
-  shape.setAttr('color3D', customAttrs?.color3D || '#333333');
-  shape.setAttr('dirX3D', customAttrs?.dirX3D ?? 1);
-  shape.setAttr('dirY3D', customAttrs?.dirY3D ?? 1);
+  shape.setAttrs({
+    nodeType: 'text',
+    text: options.text,
+    html: initialHtml,
+    fontFamily: options.fontFamily || 'Plus Jakarta Sans',
+    fontSize: options.fontSize || 44,
+    fill: options.textColor || options.fill || '#1e293b',
+    fontStyle: options.fontStyle || 'normal',
+    filterBlur: customAttrs?.filterBlur ?? 0,
+    filterContrast: customAttrs?.filterContrast ?? 100,
+    is3D: Boolean(customAttrs?.is3D),
+    depth3D: customAttrs?.depth3D ?? 8,
+    color3DMode: customAttrs?.color3DMode || 'auto',
+    shading3D: customAttrs?.shading3D ?? 35,
+    color3D: customAttrs?.color3D || '#333333',
+    dirX3D: customAttrs?.dirX3D ?? 1,
+    dirY3D: customAttrs?.dirY3D ?? 1,
+  });
+
+  let rawFontSize = options.fontSize || 44;
 
   const bindProp = (name: string, fallback: any) => {
     (shape as any)[name] = function (val?: any) {
       if (val !== undefined) {
         this.setAttr(name, val);
+        if (name === 'fontSize') rawFontSize = Number(val) || 44;
         updateRichTextLayout(this);
         this.getLayer()?.batchDraw();
         return this;
@@ -229,35 +230,60 @@ export function createRichTextShape(KonvaModule: any, options: {
   bindProp('fill', '#1e293b');
   bindProp('fontStyle', 'normal');
 
-  const origStroke = shape.stroke.bind(shape);
-  shape.stroke = function (val?: any) {
-    if (val !== undefined) {
-      const res = origStroke(val);
-      updateRichTextLayout(this);
-      this.getLayer()?.batchDraw();
-      return res;
-    }
-    return origStroke();
-  };
+  (['stroke', 'strokeWidth'] as const).forEach((name) => {
+    const orig = (shape as any)[name].bind(shape);
+    (shape as any)[name] = function (val?: any) {
+      if (val !== undefined) {
+        const res = orig(val);
+        updateRichTextLayout(this);
+        this.getLayer()?.batchDraw();
+        return res;
+      }
+      return orig();
+    };
+  });
 
-  const origStrokeWidth = shape.strokeWidth.bind(shape);
-  shape.strokeWidth = function (val?: any) {
-    if (val !== undefined) {
-      const res = origStrokeWidth(val);
-      updateRichTextLayout(this);
-      this.getLayer()?.batchDraw();
-      return res;
-    }
-    return origStrokeWidth();
-  };
+  let lastAnchor = '';
+  shape.on('transformstart transform', function () {
+    const tr = shape.getStage()?.findOne('Transformer');
+    if (tr) lastAnchor = tr.getActiveAnchor() || lastAnchor;
+  });
 
-  shape.on('transform', function () {
-    const sx = shape.scaleX();
-    const newWidth = Math.max(shape.width() * sx, 40);
-    shape.width(newWidth);
+  shape.on('transformend', function () {
+    const tr = shape.getStage()?.findOne('Transformer');
+    const anchor = lastAnchor || tr?.getActiveAnchor() || '';
+    lastAnchor = '';
+
+    const sx = Math.abs(shape.scaleX());
+    const sy = Math.abs(shape.scaleY());
+    if (Math.abs(sx - 1) < 0.001 && Math.abs(sy - 1) < 0.001) return;
+
+    const fixed = shape.getTransform().point(getOppositeAnchorPoint(shape, anchor));
+
+    if (anchor === 'middle-left' || anchor === 'middle-right') {
+      shape.width(Math.max(Math.round(shape.width() * sx), 40));
+    } else {
+      const isVertical = anchor === 'top-center' || anchor === 'bottom-center';
+      const scale = isVertical ? sy : Math.max(sx, sy);
+      const curFont = shape.getAttr('fontSize') || 44;
+      const newFontSize = Math.max(Math.round(curFont * scale), 10);
+      shape.setAttr('fontSize', newFontSize);
+      rawFontSize = newFontSize;
+      if (!isVertical) {
+        shape.width(Math.max(Math.round(shape.width() * sx), 40));
+      }
+    }
+
     shape.scaleX(1);
     shape.scaleY(1);
     updateRichTextLayout(shape);
+
+    const cur = shape.getTransform().point(getOppositeAnchorPoint(shape, anchor));
+    shape.x(shape.x() + (fixed.x - cur.x));
+    shape.y(shape.y() + (fixed.y - cur.y));
+
+    tr?.forceUpdate();
+    shape.getLayer()?.batchDraw();
   });
 
   updateRichTextLayout(shape);
