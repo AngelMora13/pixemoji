@@ -8,19 +8,19 @@ const isHome = currentPath === '/' || currentPath === '';
 const isMeme = currentPath.startsWith('/meme');
 ---
 
-<header class="relative z-30 w-full border-b border-app-border bg-app-header/90 backdrop-blur-md sticky top-0 shadow-xs">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-4">
+<header class="relative z-50 w-full border-b border-app-border bg-app-header/90 backdrop-blur-md sticky top-0 shadow-xs">
+  <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3">
     <!-- Brand -->
-    <a href="/" class="flex items-center gap-3 group transition-transform hover:scale-[1.02]">
-      <div class="w-10 h-10 rounded-2xl bg-primary-gradient-tr flex items-center justify-center text-xl text-white font-black shadow-md shadow-primary-600/20">
+    <a href="/" class="flex items-center gap-2.5 sm:gap-3 group transition-transform hover:scale-[1.02] shrink-0">
+      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-primary-gradient-tr flex items-center justify-center text-lg sm:text-xl text-white font-black shadow-md shadow-primary-600/20">
         ✨
       </div>
       <div>
-        <div class="flex items-center gap-2">
-          <span class="text-xl font-extrabold tracking-tight text-text-main group-hover:text-primary-600 transition-colors">
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <span class="text-lg sm:text-xl font-extrabold tracking-tight text-text-main group-hover:text-primary-600 transition-colors">
             PixEmoji
           </span>
-          <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-primary-100 border border-primary-300 text-primary-800">
+          <span class="text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-primary-100 border border-primary-300 text-primary-800">
             Studio
           </span>
         </div>
@@ -28,8 +28,8 @@ const isMeme = currentPath.startsWith('/meme');
       </div>
     </a>
 
-    <!-- Navigation Tabs / Mode Switcher -->
-    <nav class="flex items-center p-1 bg-primary-100/70 rounded-2xl border border-primary-200">
+    <!-- Desktop Navigation Tabs / Mode Switcher -->
+    <nav class="hidden md:flex items-center p-1 bg-primary-100/70 rounded-2xl border border-primary-200">
       <a
         href="/"
         class:list={[
@@ -60,12 +60,180 @@ const isMeme = currentPath.startsWith('/meme');
       </a>
     </nav>
 
-    <!-- Quick shortcuts pill -->
-    <div class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/70 border border-app-border text-xs font-medium text-text-muted">
-      <span class="text-[11px] text-text-subtle">Teclado:</span>
-      <kbd class="px-1.5 py-0.5 rounded bg-stone-100 border border-stone-300 font-mono text-[10px] text-text-main">Win + .</kbd>
-      <span>o</span>
-      <kbd class="px-1.5 py-0.5 rounded bg-stone-100 border border-stone-300 font-mono text-[10px] text-text-main">Cmd + Ctrl + Space</kbd>
+    <!-- Right Actions / Controls -->
+    <div class="flex items-center gap-2">
+      <!-- Quick shortcuts pill (Desktop only) -->
+      <div class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/70 border border-app-border text-xs font-medium text-text-muted">
+        <span class="text-[11px] text-text-subtle">Teclado:</span>
+        <kbd class="px-1.5 py-0.5 rounded bg-stone-100 border border-stone-300 font-mono text-[10px] text-text-main">Win + .</kbd>
+        <span>o</span>
+        <kbd class="px-1.5 py-0.5 rounded bg-stone-100 border border-stone-300 font-mono text-[10px] text-text-main">Cmd + Ctrl + Space</kbd>
+      </div>
+
+      <!-- Current Active Mode Indicator (Mobile only) -->
+      <div class="md:hidden hidden min-[360px]:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-primary-100/70 border border-primary-200/80 text-xs font-bold text-primary-900">
+        <span>{isHome ? '🧁' : '🎨'}</span>
+        <span class="text-[11px] font-semibold">{isHome ? 'Exportador' : 'Meme Studio'}</span>
+      </div>
+
+      <!-- Mobile Hamburger Button -->
+      <button
+        id="navbar-mobile-toggle"
+        type="button"
+        aria-label="Abrir menú de navegación"
+        aria-expanded="false"
+        aria-controls="navbar-mobile-menu"
+        class="md:hidden flex items-center justify-center w-9 h-9 rounded-xl bg-white/80 hover:bg-white active:scale-95 border border-app-border text-text-main shadow-xs transition-all cursor-pointer"
+      >
+        <div class="relative w-4 h-3.5 flex flex-col justify-between items-center pointer-events-none">
+          <span class="w-full h-0.5 bg-text-main rounded-full transition-all duration-300 origin-center" id="nav-line-top"></span>
+          <span class="w-full h-0.5 bg-text-main rounded-full transition-all duration-200" id="nav-line-mid"></span>
+          <span class="w-full h-0.5 bg-text-main rounded-full transition-all duration-300 origin-center" id="nav-line-bot"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Top-Down Dropdown Menu (does not cover full screen) -->
+  <div
+    id="navbar-mobile-menu"
+    class="absolute top-full left-0 right-0 w-full px-3.5 pt-2 pb-4 opacity-0 pointer-events-none -translate-y-2 transition-all duration-200 ease-out md:hidden"
+    aria-hidden="true"
+  >
+    <div class="max-w-md mx-auto bg-white/95 backdrop-blur-xl rounded-2xl border border-app-border-strong shadow-floating p-3 sm:p-4 space-y-3">
+      <!-- Section Header -->
+      <div class="flex items-center justify-between px-1 text-xs font-bold text-text-muted">
+        <span>HERRAMIENTAS</span>
+        <span class="text-[10px] uppercase font-semibold text-primary-700 bg-primary-100/70 px-2 py-0.5 rounded-full border border-primary-200">
+          PixEmoji Studio
+        </span>
+      </div>
+
+      <!-- Navigation routes list -->
+      <div class="grid grid-cols-1 gap-2">
+        <!-- Route 1: Emoji Exporter -->
+        <a
+          href="/"
+          class:list={[
+            'flex items-center gap-3 p-2.5 rounded-xl border transition-all',
+            isHome
+              ? 'bg-primary-50/90 border-primary-300 text-primary-950 shadow-xs ring-1 ring-primary-300/60'
+              : 'bg-white/70 border-app-border/70 hover:bg-stone-50 text-text-main'
+          ]}
+        >
+          <div class="w-10 h-10 rounded-xl bg-white border border-primary-200 flex items-center justify-center text-xl shadow-xs shrink-0">
+            🧁
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sm">Exportador Emoji</span>
+              {isHome && <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary-600 text-white">Activo</span>}
+            </div>
+            <p class="text-xs text-text-muted truncate">Lienzo libre, capas y exportación en alta resolución</p>
+          </div>
+        </a>
+
+        <!-- Route 2: Meme Studio -->
+        <a
+          href="/meme"
+          class:list={[
+            'flex items-center gap-3 p-2.5 rounded-xl border transition-all',
+            isMeme
+              ? 'bg-primary-50/90 border-primary-300 text-primary-950 shadow-xs ring-1 ring-primary-300/60'
+              : 'bg-white/70 border-app-border/70 hover:bg-stone-50 text-text-main'
+          ]}
+        >
+          <div class="w-10 h-10 rounded-xl bg-white border border-primary-200 flex items-center justify-center text-xl shadow-xs shrink-0">
+            🎨
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-sm">Meme & Sticker Studio</span>
+                <span class="text-[9px] uppercase px-1.5 py-0.5 bg-primary-gradient text-white rounded font-extrabold leading-none">Pro</span>
+              </div>
+              {isMeme && <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary-600 text-white">Activo</span>}
+            </div>
+            <p class="text-xs text-text-muted truncate">Plantillas, textos meme con trazo y herramientas avanzadas</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Quick Shortcuts Tip -->
+      <div class="pt-2 border-t border-app-border/70 flex items-center justify-between text-[11px] text-text-muted px-1">
+        <span class="flex items-center gap-1 font-medium"><span>💡</span> Selector del sistema:</span>
+        <span class="font-mono bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200 text-text-main text-[10px]">
+          Win + . / Cmd + Ctrl + Space
+        </span>
+      </div>
     </div>
   </div>
 </header>
+
+<!-- Backdrop overlay (under the header, closes menu on outside click) -->
+<div
+  id="navbar-mobile-overlay"
+  class="fixed inset-0 bg-stone-900/25 backdrop-blur-xs z-40 opacity-0 pointer-events-none transition-opacity duration-200 md:hidden"
+  aria-hidden="true"
+></div>
+
+<script>
+  function initMobileMenu() {
+    const toggleBtn = document.getElementById('navbar-mobile-toggle');
+    const menu = document.getElementById('navbar-mobile-menu');
+    const overlay = document.getElementById('navbar-mobile-overlay');
+    const lineTop = document.getElementById('nav-line-top');
+    const lineMid = document.getElementById('nav-line-mid');
+    const lineBot = document.getElementById('nav-line-bot');
+
+    if (!toggleBtn || !menu || !overlay) return;
+    let isOpen = false;
+
+    function setMenuState(open: boolean) {
+      isOpen = open;
+      toggleBtn?.setAttribute('aria-expanded', String(open));
+      menu?.setAttribute('aria-hidden', String(!open));
+      overlay?.setAttribute('aria-hidden', String(!open));
+
+      overlay?.classList.toggle('opacity-0', !open);
+      overlay?.classList.toggle('pointer-events-none', !open);
+      overlay?.classList.toggle('opacity-100', open);
+      overlay?.classList.toggle('pointer-events-auto', open);
+
+      menu?.classList.toggle('opacity-0', !open);
+      menu?.classList.toggle('pointer-events-none', !open);
+      menu?.classList.toggle('-translate-y-2', !open);
+      menu?.classList.toggle('opacity-100', open);
+      menu?.classList.toggle('pointer-events-auto', open);
+      menu?.classList.toggle('translate-y-0', open);
+
+      lineTop?.classList.toggle('translate-y-[6px]', open);
+      lineTop?.classList.toggle('rotate-45', open);
+      lineMid?.classList.toggle('opacity-0', open);
+      lineBot?.classList.toggle('-translate-y-[6px]', open);
+      lineBot?.classList.toggle('-rotate-45', open);
+    }
+
+    toggleBtn.onclick = (e) => {
+      e.stopPropagation();
+      setMenuState(!isOpen);
+    };
+
+    overlay.onclick = () => setMenuState(false);
+
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) setMenuState(false);
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 768 && isOpen) setMenuState(false);
+    });
+
+    menu.querySelectorAll('a').forEach((link) => {
+      link.onclick = () => setMenuState(false);
+    });
+  }
+
+  initMobileMenu();
+  document.addEventListener('astro:page-load', initMobileMenu);
+</script>
