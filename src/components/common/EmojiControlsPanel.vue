@@ -7,8 +7,9 @@
           1. Selecciona tu Emoji
         </label>
         <button
+          ref="pickerBtnRef"
           type="button"
-          @click="showPicker = !showPicker"
+          @click="togglePicker"
           :class="[
             'text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer',
             showPicker
@@ -20,13 +21,6 @@
           <span>{{ showPicker ? 'Cerrar Buscador' : 'Abrir Emoji Picker Completo' }}</span>
         </button>
       </div>
-
-      <!-- Emoji Picker Modal Component -->
-      <EmojiPickerModal
-        :is-open="showPicker"
-        @select="onPickerSelect"
-        @close="showPicker = false"
-      />
 
       <!-- Quick Presets Grid -->
       <div class="grid grid-cols-5 gap-2.5 mt-3">
@@ -153,8 +147,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import EmojiPickerModal from './EmojiPickerModal.vue';
+import { ref, computed } from 'vue';
+import { useGlobalEmojiPicker } from '../../composables/useGlobalEmojiPicker';
 
 export interface EmojiItem {
   name: string;
@@ -182,7 +176,20 @@ const emit = defineEmits<{
   (e: 'reset-transform'): void;
 }>();
 
-const showPicker = ref(false);
+const globalPicker = useGlobalEmojiPicker();
+const showPicker = computed(() => globalPicker.isOpen.value);
+const pickerBtnRef = ref<HTMLElement | null>(null);
+
+const togglePicker = () => {
+  if (globalPicker.isOpen.value) {
+    globalPicker.closePicker();
+  } else {
+    globalPicker.openPicker({
+      anchorEl: pickerBtnRef.value,
+      onSelect: onPickerSelect
+    });
+  }
+};
 
 const resolutionOptions = [
   { label: '128px', val: 128, tag: 'Icono' },

@@ -30,6 +30,7 @@ src/components/
 │   ├── ExportModal.vue           # Modal global de exportación PNG con resolución
 │   ├── EmojiPickerModal.vue      # Envoltorio del web component emoji-picker
 │   ├── EmojiControlsPanel.vue    # Panel de presets de emoji, resolución y alineación
+│   ├── EmojiQuickSelector.vue    # Tarjeta unificada de preview y atajos rápidos FIFO para selección de emojis
 │   └── CropModal.vue             # Modal interactivo reutilizable de recorte con controles tipo lienzo
 │
 ├── canvas/                  # Componentes específicos del lienzo gráfico
@@ -78,6 +79,7 @@ src/composables/
 ├── useSocialPresets.ts       # Catálogo de ratios de redes sociales (base 512px / HD 1024px)
 ├── useCanvasStudioContext.ts # Contexto reactivo unificado (provide/inject) para toda la app
 ├── useEmojiPattern.ts        # Cálculo geométrico y distribución de patrones de emojis (ordenado, ladrillo, diagonal, disperso)
+├── useGlobalEmojiPicker.ts   # Instancia singleton global y asíncrona del selector de emojis compartido
 └── useStudioShortcuts.ts     # Atajos globales de teclado (Ctrl+Z, Ctrl+Y, Supr)
 ```
 

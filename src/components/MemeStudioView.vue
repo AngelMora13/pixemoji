@@ -95,11 +95,7 @@
     />
 
     <!-- Global Modals -->
-    <EmojiPickerModal
-      :is-open="showPicker"
-      @select="handleAddEmoji"
-      @close="showPicker = false"
-    />
+    <EmojiPickerModal />
 
     <ExportModal
       :is-open="isExportModalOpen"
@@ -166,7 +162,6 @@ const templates = useKonvaTemplates(
 const isLeftSidebarOpen = ref(true);
 const isRightSidebarOpen = ref(true);
 const mobileDrawersRef = ref<InstanceType<typeof StudioMobileDrawers> | null>(null);
-const showPicker = ref(false);
 const isExportModalOpen = ref(false);
 
 // Auto-open right inspector when a node is selected on desktop

@@ -163,7 +163,7 @@ const currentBgColor = computed(() => props.bgColor ?? studio?.stage.bgColor.val
 const currentActiveGradient = computed(() => props.activeGradient ?? studio?.stage.activeGradient.value ?? null);
 const currentGradientPresets = computed(() => props.gradientPresets ?? studio?.stage.gradientPresets ?? []);
 
-const activeTab = ref<'add' | 'layers'>('layers');
+const activeTab = ref<'add' | 'layers'>('add');
 const layersSubMode = ref<'layers' | 'background'>('layers');
 
 const tabList = [

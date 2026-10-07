@@ -72,6 +72,9 @@
         />
       </div>
     </div>
+
+    <!-- Global Emoji Picker Modal -->
+    <EmojiPickerModal />
   </div>
 </template>
 
@@ -85,6 +88,7 @@ import { patchKonvaEmojiShadow, patchKonvaEmojiBounds, syncEmojiMetrics } from '
 import KonvaStage from './canvas/KonvaStage.vue';
 import ExportActions from './common/ExportActions.vue';
 import EmojiControlsPanel, { type EmojiItem } from './common/EmojiControlsPanel.vue';
+import EmojiPickerModal from './common/EmojiPickerModal.vue';
 
 const emojiList: EmojiItem[] = Object.entries(emojiFallback).map(([name, char]) => ({
   name,
