@@ -50,6 +50,7 @@ src/components/
 │   ├── ImageInspector.vue        # Inspector de imágenes, reemplazo y filtros
 │   ├── CropControls.vue          # Control de recorte no destructivo de dimensiones (Crop)
 │   ├── BackgroundTool.vue        # Controles de transparencia, color y degradado de fondo
+│   ├── BackgroundPatternControls.vue # Controles avanzados de patrón de emojis (selector, tamaño, separación, distribución)
 │   └── TemplatesTool.vue         # Catálogo de plantillas rápidas prediseñadas
 │
 ├── Navbar.astro             # Barra de navegación global
@@ -76,6 +77,7 @@ src/composables/
 ├── useCanvasExport.ts        # Descarga PNG (1x/2x), copiado al portapapeles y ocultado del transformer
 ├── useSocialPresets.ts       # Catálogo de ratios de redes sociales (base 512px / HD 1024px)
 ├── useCanvasStudioContext.ts # Contexto reactivo unificado (provide/inject) para toda la app
+├── useEmojiPattern.ts        # Cálculo geométrico y distribución de patrones de emojis (ordenado, ladrillo, diagonal, disperso)
 └── useStudioShortcuts.ts     # Atajos globales de teclado (Ctrl+Z, Ctrl+Y, Supr)
 ```
 

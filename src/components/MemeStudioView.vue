@@ -50,6 +50,7 @@
         :can-undo="history.canUndo.value"
         :can-redo="history.canRedo.value"
         :templates="templates.availableTemplates"
+        :frame="frame"
         @undo="history.undo"
         @redo="history.redo"
         @open-inspector="openInspectorPanel"
@@ -103,8 +104,8 @@
     <ExportModal
       :is-open="isExportModalOpen"
       :export-scale="exporter.exportScale.value"
-      :canvas-width="stage.canvasWidth.value"
-      :canvas-height="stage.canvasHeight.value"
+      :canvas-width="exporter.effectiveWidth.value"
+      :canvas-height="exporter.effectiveHeight.value"
       :copied="exporter.copied.value"
       @close="isExportModalOpen = false"
       @update:export-scale="exporter.exportScale.value = $event"
@@ -122,6 +123,7 @@ import { useKonvaLayers, type TextNodeOptions } from '../composables/useKonvaLay
 import { useKonvaEffects } from '../composables/useKonvaEffects';
 import { useKonvaTemplates } from '../composables/useKonvaTemplates';
 import { useCanvasExport } from '../composables/useCanvasExport';
+import { useCanvasFrame } from '../composables/useCanvasFrame';
 import { useHistoryUndo } from '../composables/useHistoryUndo';
 import { useStudioShortcuts } from '../composables/useStudioShortcuts';
 import { createStudioContext, provideCanvasStudio } from '../composables/useCanvasStudioContext';
@@ -141,11 +143,12 @@ const { currentPreset, formatPresets, selectPreset } = useSocialPresets();
 const stage = useKonvaStage();
 const layers = useKonvaLayers(stage);
 const effects = useKonvaEffects(stage, layers);
-const exporter = useCanvasExport(stage);
+const frame = useCanvasFrame();
+const exporter = useCanvasExport(stage, frame);
 const history = useHistoryUndo(stage, layers);
 
 // Centralized Studio Context
-const studio = createStudioContext(stage, layers, history);
+const studio = createStudioContext(stage, layers, history, frame);
 provideCanvasStudio(studio);
 
 const templates = useKonvaTemplates(
@@ -187,6 +190,18 @@ const openInspectorPanel = () => {
 const handlePresetSelect = (preset: FormatPreset) => {
   selectPreset(preset);
   stage.changeDimensions(preset.baseWidth, preset.baseHeight);
+  if (frame.active.value && stage.stageInstance.value && stage.layerInstance.value) {
+    frame.syncFrame(
+      stage.stageInstance.value,
+      stage.layerInstance.value,
+      preset.baseWidth,
+      preset.baseHeight,
+      stage.transformerInstance.value,
+      stage.bgRectNode.value
+    );
+    stage.canvasWidth.value = stage.stageInstance.value.width();
+    stage.canvasHeight.value = stage.stageInstance.value.height();
+  }
 };
 
 const handleTemplateSelect = (templateId: string) => {
@@ -247,7 +262,8 @@ onMounted(async () => {
     initialHeight: currentPreset.value.baseHeight
   });
 
-  if (stage.stageInstance.value) {
+  if (stage.stageInstance.value && stage.layerInstance.value && stage.KonvaModule.value) {
+    frame.initFrameNode(stage.KonvaModule.value, stage.stageInstance.value, stage.layerInstance.value);
     stage.stageInstance.value.on('dragend transformend', () => {
       history.saveState();
     });

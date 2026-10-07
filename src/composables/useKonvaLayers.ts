@@ -3,8 +3,9 @@ import type { useKonvaStage } from './useKonvaStage';
 import { patchKonvaEmojiShadow, patchKonvaEmojiBounds, syncEmojiMetrics } from './useKonvaEmojiFix';
 import { patchKonvaCrop, type CropInset, DEFAULT_CROP } from './useKonvaCrop';
 import { createRichTextShape } from '../utils/konvaRichText';
+import { renderEmojiPattern, type EmojiPatternOptions, type PatternLayoutMode } from './useEmojiPattern';
 
-export type { CropInset };
+export type { CropInset, EmojiPatternOptions, PatternLayoutMode };
 export { DEFAULT_CROP };
 
 export interface LayerItem {
@@ -583,32 +584,21 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     layerInstance.value.draw();
   };
 
-  const fillEmojiPattern = (emojiChar: string) => {
+  const fillEmojiPattern = (emojiChar: string, options?: EmojiPatternOptions) => {
     if (!layerInstance.value || !KonvaModule.value) return;
 
     // Remove existing pattern if any
     clearEmojiPattern();
 
-    const step = 64;
-    for (let x = 32; x < canvasWidth.value; x += step) {
-      for (let y = 32; y < canvasHeight.value; y += step) {
-        const patternItem = new KonvaModule.value.Text({
-          x,
-          y,
-          text: emojiChar,
-          fontSize: 26,
-          opacity: 0.18,
-          draggable: false,
-          name: 'patternItem'
-        });
-        patternItem.offsetX(13);
-        patternItem.offsetY(13);
-        layerInstance.value.add(patternItem);
-        patternItem.moveToBottom();
-      }
-    }
-    if (bgRectNode.value) bgRectNode.value.moveToBottom();
-    layerInstance.value.draw();
+    renderEmojiPattern({
+      Konva: KonvaModule.value,
+      layer: layerInstance.value,
+      bgRect: bgRectNode.value,
+      width: canvasWidth.value,
+      height: canvasHeight.value,
+      emoji: emojiChar,
+      options
+    });
   };
 
   // Layer hierarchy operations

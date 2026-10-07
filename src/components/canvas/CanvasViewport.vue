@@ -57,6 +57,7 @@
           :height="height"
           :is-transparent="isTransparent"
           :bg-color="bgColor"
+          :frame="frame"
         />
       </div>
     </div>
@@ -79,6 +80,8 @@ import KonvaStage from './KonvaStage.vue';
 import CanvasToolbar from './CanvasToolbar.vue';
 import CanvasBottomBar from '../studio/CanvasBottomBar.vue';
 
+import type { useCanvasFrame } from '../../composables/useCanvasFrame';
+
 defineProps<{
   width: number;
   height: number;
@@ -88,6 +91,7 @@ defineProps<{
   canUndo: boolean;
   canRedo: boolean;
   templates: any[];
+  frame?: ReturnType<typeof useCanvasFrame>;
 }>();
 
 defineEmits<{

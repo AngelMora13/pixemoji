@@ -35,6 +35,8 @@ export function useKonvaStage() {
   const bgRectNode = shallowRef<any>(null);
   const KonvaModule = shallowRef<any>(null);
 
+  const baseWidth = ref(512);
+  const baseHeight = ref(512);
   const canvasWidth = ref(512);
   const canvasHeight = ref(512);
   const isBgTransparent = ref(true);
@@ -55,10 +57,14 @@ export function useKonvaStage() {
         transformerInstance.value.nodes([]);
       } else {
         transformerInstance.value.nodes([node]);
+        const cutFrame = layerInstance.value.findOne?.('.sticker-cut-frame');
+        if (cutFrame) cutFrame.moveToTop();
         transformerInstance.value.moveToTop();
       }
     } else {
       transformerInstance.value.nodes([]);
+      const cutFrame = layerInstance.value.findOne?.('.sticker-cut-frame');
+      if (cutFrame) cutFrame.moveToTop();
     }
     layerInstance.value.draw();
   };
@@ -76,8 +82,10 @@ export function useKonvaStage() {
     const container = document.getElementById(options.containerId);
     if (!container) return;
 
-    canvasWidth.value = options.initialWidth ?? 512;
-    canvasHeight.value = options.initialHeight ?? 512;
+    baseWidth.value = options.initialWidth ?? 512;
+    baseHeight.value = options.initialHeight ?? 512;
+    canvasWidth.value = baseWidth.value;
+    canvasHeight.value = baseHeight.value;
     bgColor.value = options.initialBgColor ?? '#ffffff';
 
     const stage = new KonvaModule.value.Stage({
@@ -174,6 +182,8 @@ export function useKonvaStage() {
   };
 
   const changeDimensions = (w: number, h: number) => {
+    baseWidth.value = w;
+    baseHeight.value = h;
     canvasWidth.value = w;
     canvasHeight.value = h;
     if (stageInstance.value && layerInstance.value) {
@@ -248,6 +258,8 @@ export function useKonvaStage() {
     transformerInstance,
     bgRectNode,
     KonvaModule,
+    baseWidth,
+    baseHeight,
     canvasWidth,
     canvasHeight,
     isBgTransparent,

@@ -145,65 +145,37 @@
         </div>
       </div>
 
+      <!-- SECCIÓN: MARCO Y CORTE DE STICKER -->
+      <div class="mt-4">
+        <CanvasFrameControls
+          v-if="currentFrame"
+          :frame="currentFrame"
+          @sync="syncStage"
+        />
+      </div>
+
       <!-- HERRAMIENTA: PATRÓN DE EMOJIS (WALLPAPER) -->
-      <div class="mt-4 p-3 bg-white border border-app-border rounded-2xl space-y-2.5 shadow-2xs">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-text-main flex items-center gap-1">
-            <span>✨</span>
-            <span>Patrón de Emojis de Fondo</span>
-          </span>
-          <button
-            type="button"
-            @click="$emit('clearPattern')"
-            class="text-[10px] font-semibold text-red-600 hover:underline cursor-pointer"
-          >
-            Limpiar patrón
-          </button>
-        </div>
-
-        <p class="text-[10px] text-text-subtle">
-          Rellena todo el fondo en cuadrícula con tu emoji favorito en marca de agua suave:
-        </p>
-
-        <!-- Emojis rápidos para patrón -->
-        <div class="flex flex-wrap gap-1">
-          <button
-            v-for="e in patternEmojiPresets"
-            :key="e"
-            type="button"
-            @click="onApplyPattern(e)"
-            class="w-7 h-7 rounded-lg bg-primary-50 hover:bg-primary-100 border border-app-border-strong flex items-center justify-center text-sm cursor-pointer transition-transform hover:scale-110"
-          >
-            {{ e }}
-          </button>
-        </div>
-
-        <!-- Custom emoji pattern input -->
-        <div class="flex gap-1.5 pt-1">
-          <input
-            v-model="customPatternEmoji"
-            type="text"
-            maxlength="2"
-            placeholder="Emoji..."
-            class="w-16 px-2 py-1 bg-white border border-app-border-strong rounded-xl text-center text-sm text-text-main focus:outline-none focus:ring-1 focus:ring-primary-500 shadow-2xs"
-          />
-          <button
-            type="button"
-            @click="onApplyCustomPattern"
-            class="flex-1 py-1 px-2.5 rounded-xl bg-primary-gradient text-white font-bold text-xs shadow-2xs hover:opacity-95 transition-all cursor-pointer"
-          >
-            Llenar con este Emoji
-          </button>
-        </div>
+      <div class="mt-4">
+        <BackgroundPatternControls
+          @apply-pattern="onApplyPattern"
+          @clear-pattern="$emit('clearPattern')"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import type { GradientPreset } from '../../composables/useKonvaStage';
+import { useCanvasStudio } from '../../composables/useCanvasStudioContext';
+import type { useCanvasFrame } from '../../composables/useCanvasFrame';
+import type { EmojiPatternOptions } from '../../composables/useEmojiPattern';
 import ColorPalettePicker from '../common/ColorPalettePicker.vue';
+import CanvasFrameControls from './CanvasFrameControls.vue';
+import BackgroundPatternControls from './BackgroundPatternControls.vue';
+
+const studio = useCanvasStudio();
 
 const props = defineProps<{
   isTransparent: boolean;
@@ -211,18 +183,18 @@ const props = defineProps<{
   bgColor: string;
   activeGradient: GradientPreset | null;
   gradientPresets: GradientPreset[];
+  frame?: ReturnType<typeof useCanvasFrame>;
 }>();
+
+const currentFrame = computed(() => props.frame || studio?.frame);
 
 const emit = defineEmits<{
   (e: 'setTransparent'): void;
   (e: 'setColor', color: string): void;
   (e: 'setGradient', preset: GradientPreset): void;
-  (e: 'fillPattern', char: string): void;
+  (e: 'fillPattern', char: string, options?: EmojiPatternOptions): void;
   (e: 'clearPattern'): void;
 }>();
-
-const customPatternEmoji = ref('✨');
-const patternEmojiPresets = ['🧁', '✨', '🍕', '🚀', '🐱', '🔥', '💀', '💖'];
 
 const customColor1 = ref('#833ab4');
 const customColor2 = ref('#fd1d1d');
@@ -243,13 +215,29 @@ const onApplyCustomGradient = () => {
   });
 };
 
-const onApplyPattern = (emojiChar: string) => {
-  emit('fillPattern', emojiChar);
+const onApplyPattern = (payload: { emoji: string; options: EmojiPatternOptions }) => {
+  emit('fillPattern', payload.emoji, payload.options);
 };
 
-const onApplyCustomPattern = () => {
-  if (customPatternEmoji.value.trim()) {
-    emit('fillPattern', customPatternEmoji.value.trim());
+const syncStage = () => {
+  if (!currentFrame.value || !studio) return;
+  const stage = studio.stage.stageInstance.value;
+  const layer = studio.stage.layerInstance.value;
+  if (!stage || !layer) return;
+
+  if (!currentFrame.value.frameNode.value && studio.stage.KonvaModule.value) {
+    currentFrame.value.initFrameNode(studio.stage.KonvaModule.value, stage, layer);
   }
+
+  currentFrame.value.syncFrame(
+    stage,
+    layer,
+    studio.stage.baseWidth.value,
+    studio.stage.baseHeight.value,
+    studio.stage.transformerInstance.value,
+    studio.stage.bgRectNode.value
+  );
+  studio.stage.canvasWidth.value = stage.width();
+  studio.stage.canvasHeight.value = stage.height();
 };
 </script>

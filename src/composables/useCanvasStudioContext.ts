@@ -2,6 +2,7 @@ import { inject, provide, type InjectionKey, type ShallowRef, type Ref, type Com
 import type { useKonvaStage } from './useKonvaStage';
 import type { useKonvaLayers, LayerItem, ActiveElementState, TextNodeOptions, CustomShadowOptions, StickerOptions } from './useKonvaLayers';
 import type { useHistoryUndo } from './useHistoryUndo';
+import type { useCanvasFrame } from './useCanvasFrame';
 
 export type ActiveElementSnapshot = ActiveElementState;
 
@@ -37,6 +38,7 @@ export interface CanvasStudioContext {
   stage: ReturnType<typeof useKonvaStage>;
   layers: ReturnType<typeof useKonvaLayers>;
   history: ReturnType<typeof useHistoryUndo>;
+  frame?: ReturnType<typeof useCanvasFrame>;
   activeElement: ShallowRef<ActiveElementSnapshot | null>;
   layersList: Ref<LayerItem[]>;
   layersListReversed: ComputedRef<LayerItem[]>;
@@ -53,7 +55,8 @@ export const CANVAS_STUDIO_KEY: InjectionKey<CanvasStudioContext> = Symbol('CANV
 export function createStudioContext(
   stage: ReturnType<typeof useKonvaStage>,
   layers: ReturnType<typeof useKonvaLayers>,
-  history: ReturnType<typeof useHistoryUndo>
+  history: ReturnType<typeof useHistoryUndo>,
+  frame?: ReturnType<typeof useCanvasFrame>
 ): CanvasStudioContext {
 
 
@@ -185,6 +188,7 @@ export function createStudioContext(
     stage,
     layers,
     history,
+    frame,
     activeElement: layers.activeElement,
     layersList: layers.layersList,
     layersListReversed: layers.layersListReversed,

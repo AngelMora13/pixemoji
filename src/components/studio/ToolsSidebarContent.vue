@@ -107,6 +107,7 @@
             :bgColor="currentBgColor"
             :active-gradient="currentActiveGradient"
             :gradient-presets="currentGradientPresets"
+            :frame="studio?.frame"
             @set-transparent="onSetTransparent"
             @set-color="onSetColor"
             @set-gradient="onSetGradient"
@@ -121,7 +122,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import type { TextNodeOptions } from '../../composables/useKonvaLayers';
+import type { TextNodeOptions, EmojiPatternOptions } from '../../composables/useKonvaLayers';
 import type { GradientPreset } from '../../composables/useKonvaStage';
 import { useCanvasStudio } from '../../composables/useCanvasStudioContext';
 import AddTool from './AddTool.vue';
@@ -236,8 +237,8 @@ const onSetGradient = (preset: GradientPreset) => {
   studio?.stage.setBgGradient(preset);
 };
 
-const onFillPattern = (emojiChar: string) => {
-  studio?.layers.fillEmojiPattern(emojiChar);
+const onFillPattern = (emojiChar: string, options?: EmojiPatternOptions) => {
+  studio?.layers.fillEmojiPattern(emojiChar, options);
   studio?.history.saveState();
 };
 
