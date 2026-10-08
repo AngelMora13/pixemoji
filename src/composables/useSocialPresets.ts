@@ -9,6 +9,9 @@ export interface FormatPreset {
   icon: string;
   baseWidth: number;
   baseHeight: number;
+  targetWidth?: number;
+  targetHeight?: number;
+  targetScale?: number;
   export2xLabel: string;
   description: string;
 }
@@ -89,7 +92,7 @@ export const baseFormatPresets: FormatPreset[] = [
 ];
 
 export const CUSTOM_STORAGE_KEY = 'pixemoji_custom_canvas_size';
-export const DEFAULT_CUSTOM_SIZE = { width: 800, height: 600 };
+export const DEFAULT_CUSTOM_SIZE = { width: 1024, height: 1024 };
 
 export function loadStoredCustomSize(): { width: number; height: number } {
   if (typeof window === 'undefined') return DEFAULT_CUSTOM_SIZE;
@@ -99,8 +102,8 @@ export function loadStoredCustomSize(): { width: number; height: number } {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed.width === 'number' && typeof parsed.height === 'number') {
         return {
-          width: Math.max(50, Math.min(4096, Math.round(parsed.width))),
-          height: Math.max(50, Math.min(4096, Math.round(parsed.height)))
+          width: Math.max(50, Math.round(parsed.width)),
+          height: Math.max(50, Math.round(parsed.height))
         };
       }
     }
@@ -119,18 +122,52 @@ export function saveStoredCustomSize(width: number, height: number): void {
   }
 }
 
-export function buildCustomPreset(width: number, height: number): FormatPreset {
+/**
+ * Calcula el escalado manteniendo el aspect ratio con base 512px.
+ * Si el usuario introduce 2048x2048 -> base 512x512 con escala deseada 4x.
+ * Si introduce 2048x1024 -> base 512x256 con escala deseada 4x.
+ * Soporta cualquier resolución alta (8x, 16x o más) con hasta 2 decimales.
+ */
+export function calculateCustomDimensions(targetW: number, targetH: number) {
+  const validW = Math.max(50, Math.round(targetW));
+  const validH = Math.max(50, Math.round(targetH));
+  const maxDim = Math.max(validW, validH);
+
+  let scale = 1;
+  let baseW = validW;
+  let baseH = validH;
+
+  if (maxDim > 512) {
+    scale = Math.round((maxDim / 512) * 100) / 100;
+    baseW = Math.round(validW / scale);
+    baseH = Math.round(validH / scale);
+  }
+
+  return {
+    targetWidth: validW,
+    targetHeight: validH,
+    baseWidth: baseW,
+    baseHeight: baseH,
+    targetScale: scale
+  };
+}
+
+export function buildCustomPreset(targetW: number, targetH: number): FormatPreset {
+  const calc = calculateCustomDimensions(targetW, targetH);
   return {
     id: 'custom',
     name: 'Personalizado',
     category: 'custom',
-    ratioLabel: `${width} × ${height} px`,
-    platform: 'Medidas Libres',
+    ratioLabel: `${calc.targetWidth} × ${calc.targetHeight} px`,
+    platform: `Lienzo ${calc.baseWidth}×${calc.baseHeight} (${calc.targetScale}x)`,
     icon: '📐',
-    baseWidth: width,
-    baseHeight: height,
-    export2xLabel: `${width * 2} × ${height * 2} px`,
-    description: 'Dimensiones personalizadas configuradas por el usuario'
+    baseWidth: calc.baseWidth,
+    baseHeight: calc.baseHeight,
+    targetWidth: calc.targetWidth,
+    targetHeight: calc.targetHeight,
+    targetScale: calc.targetScale,
+    export2xLabel: `${calc.targetWidth} × ${calc.targetHeight} px (${calc.targetScale}x)`,
+    description: `Lienzo base normalizado a ${calc.baseWidth}×${calc.baseHeight} px para exportar a ${calc.targetWidth}×${calc.targetHeight} px (${calc.targetScale}x)`
   };
 }
 
@@ -151,8 +188,8 @@ export function useSocialPresets() {
   };
 
   const setCustomDimensions = (width: number, height: number): FormatPreset => {
-    const validW = Math.max(50, Math.min(4096, Math.round(width)));
-    const validH = Math.max(50, Math.min(4096, Math.round(height)));
+    const validW = Math.max(50, Math.round(width));
+    const validH = Math.max(50, Math.round(height));
 
     customDimensions.value = { width: validW, height: validH };
     saveStoredCustomSize(validW, validH);
@@ -179,4 +216,5 @@ export function useSocialPresets() {
     setCustomDimensions
   };
 }
+
 

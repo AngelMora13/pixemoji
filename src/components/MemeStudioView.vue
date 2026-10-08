@@ -6,7 +6,7 @@
       :format-presets="formatPresets"
       @select-preset="handlePresetSelect"
       @open-custom-modal="isCustomModalOpen = true"
-      @open-export="isExportModalOpen = true"
+      @open-export="openExportModal"
     />
 
     <!-- Main Workspace 3-Column Layout -->
@@ -101,6 +101,7 @@
     <ExportModal
       :is-open="isExportModalOpen"
       :export-scale="exporter.exportScale.value"
+      :suggested-scale="currentPreset.targetScale"
       :canvas-width="exporter.effectiveWidth.value"
       :canvas-height="exporter.effectiveHeight.value"
       :copied="exporter.copied.value"
@@ -194,6 +195,13 @@ const openInspectorPanel = () => {
   }
 };
 
+const openExportModal = () => {
+  if (currentPreset.value.targetScale && currentPreset.value.targetScale > 1) {
+    exporter.exportScale.value = currentPreset.value.targetScale;
+  }
+  isExportModalOpen.value = true;
+};
+
 const handlePresetSelect = (preset: FormatPreset) => {
   selectPreset(preset);
   stage.changeDimensions(preset.baseWidth, preset.baseHeight);
@@ -239,15 +247,7 @@ const handleAddImage = (url: string) => {
 
 const handleQuickAdd = (type: 'text' | 'emoji' | 'image') => {
   if (type === 'text') {
-    handleAddText({
-      text: 'Escribe tu texto...',
-      fontFamily: 'Plus Jakarta Sans',
-      fontSize: 44,
-      textColor: '#1e293b',
-      strokeWidth: 0,
-      strokeColor: undefined,
-      fontStyle: 'normal'
-    });
+    handleAddText({ text: 'Escribe tu texto...', fontFamily: 'Plus Jakarta Sans', fontSize: 44, textColor: '#1e293b', strokeWidth: 0, strokeColor: undefined, fontStyle: 'normal' });
   } else if (type === 'emoji') {
     handleAddEmoji('🧁');
   } else if (type === 'image') {

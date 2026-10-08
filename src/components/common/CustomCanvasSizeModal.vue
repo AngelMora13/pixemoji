@@ -5,7 +5,7 @@
     @click.self="$emit('close')"
   >
     <div
-      class="w-full max-w-md bg-white rounded-3xl border border-app-border-strong shadow-2xl p-5 sm:p-6 space-y-4 animate-scale-up"
+      class="w-full max-w-md bg-white rounded-3xl border border-app-border-strong shadow-2xl p-5 sm:p-6 space-y-3.5 animate-scale-up"
       role="dialog"
       aria-modal="true"
       aria-labelledby="custom-size-title"
@@ -21,7 +21,7 @@
               Tamaño Personalizado
             </h3>
             <p class="text-[11px] text-text-muted">
-              Define ancho y alto exactos en píxeles
+              Define ancho y alto deseados (resolución libre)
             </p>
           </div>
         </div>
@@ -36,19 +36,18 @@
       </div>
 
       <!-- Inputs de Ancho y Alto con botón de intercambio -->
-      <div class="space-y-3">
+      <div class="space-y-2.5">
         <div class="flex items-center gap-2">
           <!-- Campo Ancho -->
           <div class="flex-1 space-y-1">
             <label class="block text-[11px] font-bold uppercase tracking-wider text-text-muted">
-              Ancho (Width)
+              Ancho Objetivo
             </label>
             <div class="relative flex items-center">
               <input
                 type="number"
                 v-model.number="width"
                 min="50"
-                max="4096"
                 step="10"
                 class="w-full px-3 py-2 bg-stone-50 border border-app-border-strong rounded-xl text-sm font-mono font-bold text-text-main focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                 placeholder="Ancho en px"
@@ -74,14 +73,13 @@
           <!-- Campo Alto -->
           <div class="flex-1 space-y-1">
             <label class="block text-[11px] font-bold uppercase tracking-wider text-text-muted">
-              Alto (Height)
+              Alto Objetivo
             </label>
             <div class="relative flex items-center">
               <input
                 type="number"
                 v-model.number="height"
                 min="50"
-                max="4096"
                 step="10"
                 class="w-full px-3 py-2 bg-stone-50 border border-app-border-strong rounded-xl text-sm font-mono font-bold text-text-main focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                 placeholder="Alto en px"
@@ -92,18 +90,62 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Indicador de Ratio Calculado -->
-        <div class="flex items-center justify-between px-3 py-1.5 rounded-xl bg-stone-50 border border-app-border text-[11px] text-text-muted">
-          <span>Proporción calculada:</span>
-          <span class="font-mono font-bold text-text-main">
-            {{ calculatedRatio }}
+      <!-- Tarjeta de Normalización con Base 512px y Escala -->
+      <div class="p-3 bg-stone-50 border border-app-border rounded-2xl space-y-2">
+        <div class="flex items-center justify-between text-xs font-bold text-text-main pb-1 border-b border-app-border/70">
+          <span class="flex items-center gap-1.5">
+            <span>✨</span>
+            <span>Escala Adaptativa (Base 512px)</span>
           </span>
+          <span class="text-[10px] font-mono font-extrabold px-2 py-0.5 rounded-full bg-primary-100 border border-primary-200 text-primary-800">
+            {{ customCalc.targetScale }}x Deseado
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <div class="p-2 rounded-xl bg-white border border-app-border shadow-2xs">
+            <span class="block text-[10px] font-bold text-text-subtle uppercase">Lienzo de Edición</span>
+            <span class="font-mono font-black text-text-main text-xs">{{ customCalc.baseWidth }} &times; {{ customCalc.baseHeight }} px</span>
+            <span class="block text-[9px] text-text-muted mt-0.5">Rápido a 60 FPS y controles nítidos</span>
+          </div>
+
+          <div class="p-2 rounded-xl bg-white border border-app-border shadow-2xs">
+            <span class="block text-[10px] font-bold text-text-subtle uppercase">Resolución Final</span>
+            <span class="font-mono font-black text-primary-600 text-xs">{{ customCalc.targetWidth }} &times; {{ customCalc.targetHeight }} px</span>
+            <span class="block text-[9px] text-text-muted mt-0.5">Ratio: {{ calculatedRatio }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerta cuando la escala supera los 2x o ultra alta (> 4x / 8x / 16x) -->
+      <div
+        v-if="customCalc.targetScale > 2"
+        :class="[
+          'p-2.5 rounded-2xl flex items-start gap-2 animate-fade-in text-[11px] leading-snug',
+          customCalc.targetScale > 4
+            ? 'bg-rose-50 border border-rose-200 text-rose-950'
+            : 'bg-amber-50/90 border border-amber-200/90 text-amber-950'
+        ]"
+      >
+        <span class="text-base leading-none shrink-0">{{ customCalc.targetScale > 4 ? '🚨' : '⚠️' }}</span>
+        <div class="space-y-0.5">
+          <span class="font-extrabold block">
+            {{ customCalc.targetScale > 4 ? `Aviso de Ultra Resolución (${customCalc.targetScale}x)` : `Aviso de Alta Resolución (${customCalc.targetScale}x)` }}
+          </span>
+          <p :class="customCalc.targetScale > 4 ? 'text-rose-900 text-[10px]' : 'text-amber-800 text-[10px]'">
+            {{
+              customCalc.targetScale > 4
+                ? 'Exportar a escalas ultra altas (8x, 16x o más) puede demorar bastante tiempo o fallar si el navegador agota el límite de memoria gráfica del lienzo. Además, la nitidez dependerá de la calidad de los assets utilizados.'
+                : 'Exportar por encima de 2x tomará más tiempo de procesamiento. La calidad final dependerá de los assets usados (las imágenes de baja resolución añadidas no ganarán definición original).'
+            }}
+          </p>
         </div>
       </div>
 
       <!-- Atajos Rápidos de Medidas Populares -->
-      <div class="space-y-1.5">
+      <div class="space-y-1">
         <span class="block text-[10px] font-bold uppercase tracking-wider text-text-subtle">
           Sugerencias rápidas:
         </span>
@@ -150,6 +192,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { calculateCustomDimensions } from '../../composables/useSocialPresets';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -162,8 +205,8 @@ const emit = defineEmits<{
   (e: 'apply', size: { width: number; height: number }): void;
 }>();
 
-const width = ref(props.initialWidth ?? 800);
-const height = ref(props.initialHeight ?? 600);
+const width = ref(props.initialWidth ?? 1024);
+const height = ref(props.initialHeight ?? 1024);
 
 watch(
   () => props.isOpen,
@@ -175,13 +218,17 @@ watch(
   }
 );
 
+const customCalc = computed(() => {
+  return calculateCustomDimensions(width.value || 512, height.value || 512);
+});
+
 const popularPresets = [
-  { w: 800, h: 600, label: '4:3 Estándar' },
-  { w: 1200, h: 630, label: 'Facebook Post' },
-  { w: 1280, h: 720, label: 'HD 720p' },
+  { w: 2048, h: 2048, label: 'Feed HD (4x)' },
+  { w: 4096, h: 4096, label: 'Ultra 4K (8x)' },
+  { w: 8192, h: 8192, label: 'Ultra 8K (16x)' },
   { w: 1920, h: 1080, label: 'Full HD 16:9' },
-  { w: 1080, h: 1350, label: 'Instagram 4:5' },
-  { w: 500, h: 500, label: 'Sticker 1:1' }
+  { w: 1080, h: 1920, label: 'Stories / Reels' },
+  { w: 512, h: 512, label: 'Base 1:1 (1x)' }
 ];
 
 const setDimensions = (w: number, h: number) => {
@@ -200,9 +247,7 @@ const isValid = computed(() => {
     Number.isFinite(width.value) &&
     Number.isFinite(height.value) &&
     width.value >= 50 &&
-    width.value <= 4096 &&
-    height.value >= 50 &&
-    height.value <= 4096
+    height.value >= 50
   );
 });
 
@@ -242,3 +287,5 @@ onUnmounted(() => {
   }
 });
 </script>
+
+
