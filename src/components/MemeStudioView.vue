@@ -101,12 +101,14 @@
     <ExportModal
       :is-open="isExportModalOpen"
       :export-scale="exporter.exportScale.value"
+      :image-format="exporter.exportFormat.value"
       :suggested-scale="currentPreset.targetScale"
       :canvas-width="exporter.effectiveWidth.value"
       :canvas-height="exporter.effectiveHeight.value"
       :copied="exporter.copied.value"
       @close="isExportModalOpen = false"
       @update:export-scale="exporter.exportScale.value = $event"
+      @update:image-format="exporter.exportFormat.value = $event"
       @download="handleDownload"
       @copy="exporter.copyToClipboard"
     />
@@ -257,7 +259,7 @@ const handleQuickAdd = (type: 'text' | 'emoji' | 'image') => {
 
 const handleDownload = () => {
   const cleanName = currentPreset.value.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-  exporter.downloadPng(`pixemoji-${cleanName}`);
+  exporter.downloadImage(`pixemoji-${cleanName}`);
 };
 
 // Global Studio Keyboard Shortcuts

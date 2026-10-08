@@ -7,7 +7,7 @@
         Lienzo Interactivo con Konva.js & Emojis Unicode
       </div>
       <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-text-main">
-        Exportador de Emojis a PNG Transparente
+        Exportador de Emojis en Alta Resolución
       </h2>
       <p class="text-sm md:text-base text-text-muted max-w-2xl mx-auto">
         Posiciona, escala o rota tu emoji libremente en el lienzo interactivo de 250x250 px. Usa el selector completo con miles de emojis o elige uno de la galería rápida.
@@ -24,6 +24,7 @@
           v-model:custom-input="customInput"
           v-model:custom-name="customName"
           v-model:target-resolution="targetResolution"
+          v-model:image-format="imageFormat"
           :emoji-list="emojiList"
           @select-preset="selectPreset"
           @custom-input-change="onCustomInputChange"
@@ -58,14 +59,16 @@
         <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary-50 border border-primary-200 text-[11px] text-text-muted">
           <span class="font-mono font-bold text-base leading-none text-primary-600">{{ selected.char }}</span>
           <span>&bull;</span>
-          <span class="font-semibold text-text-main">{{ fileName }}.png</span>
+          <span class="font-semibold text-text-main">{{ fileName }}.{{ fileExtension }}</span>
           <span>&bull;</span>
           <span class="font-mono">{{ targetResolution }}&times;{{ targetResolution }}px</span>
+          <span>&bull;</span>
+          <span class="font-bold uppercase text-primary-600">{{ imageFormat }}</span>
         </div>
 
         <!-- Action Buttons -->
         <ExportActions
-          :download-text="`Descargar ${fileName}.png`"
+          :download-text="`Descargar ${fileName}.${fileExtension}`"
           :copied="copied"
           @download="handleDownload"
           @copy="handleCopy"
@@ -87,7 +90,7 @@ import { patchKonvaEmojiShadow, patchKonvaEmojiBounds, syncEmojiMetrics } from '
 // Modular Subcomponents
 import KonvaStage from './canvas/KonvaStage.vue';
 import ExportActions from './common/ExportActions.vue';
-import EmojiControlsPanel, { type EmojiItem } from './common/EmojiControlsPanel.vue';
+import EmojiControlsPanel, { type EmojiItem, type ExportImageFormat } from './common/EmojiControlsPanel.vue';
 import EmojiPickerModal from './common/EmojiPickerModal.vue';
 
 const emojiList: EmojiItem[] = Object.entries(emojiFallback).map(([name, char]) => ({
@@ -100,12 +103,15 @@ const customInput = ref('');
 const customName = ref('');
 const isCustom = ref(false);
 const targetResolution = ref<number>(512);
+const imageFormat = ref<ExportImageFormat>('png');
 const copied = ref(false);
 
 const stage = useKonvaStage();
 let emojiNode: any = null;
 
 const CANVAS_SIZE = 250;
+
+const fileExtension = computed(() => (imageFormat.value === 'jpeg' ? 'jpg' : imageFormat.value));
 
 const fileName = computed(() => {
   if (customName.value.trim()) {
@@ -182,16 +188,38 @@ const handleDownload = () => {
 
   stage.clearSelection();
   const multiplier = targetResolution.value / CANVAS_SIZE;
+  const mimeType = imageFormat.value === 'jpeg' ? 'image/jpeg' : imageFormat.value === 'webp' ? 'image/webp' : 'image/png';
+
+  let tempBg: any = null;
+  if (imageFormat.value === 'jpeg' && stage.KonvaModule.value) {
+    tempBg = new stage.KonvaModule.value.Rect({
+      x: 0,
+      y: 0,
+      width: CANVAS_SIZE,
+      height: CANVAS_SIZE,
+      fill: '#ffffff',
+      listening: false
+    });
+    stage.layerInstance.value.add(tempBg);
+    tempBg.moveToBottom();
+    stage.layerInstance.value.draw();
+  }
+
   const dataUrl = stage.stageInstance.value.toDataURL({
     pixelRatio: multiplier,
-    mimeType: 'image/png'
+    mimeType
   });
+
+  if (tempBg) {
+    tempBg.destroy();
+    stage.layerInstance.value.draw();
+  }
 
   stage.selectNode(emojiNode);
 
   const a = document.createElement('a');
   a.href = dataUrl;
-  a.download = `${fileName.value}-${targetResolution.value}x${targetResolution.value}.png`;
+  a.download = `${fileName.value}-${targetResolution.value}x${targetResolution.value}.${fileExtension.value}`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

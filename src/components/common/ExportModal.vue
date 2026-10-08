@@ -121,18 +121,50 @@
         </div>
       </div>
 
+      <!-- Tipo de Imagen -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <label class="block text-[11px] font-bold uppercase tracking-wider text-text-main">
+            Tipo de Imagen
+          </label>
+          <span class="text-[10px] font-mono font-bold uppercase text-primary-600">
+            .{{ (imageFormat || 'png') === 'jpeg' ? 'jpg' : (imageFormat || 'png') }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-3 gap-1.5">
+          <button
+            v-for="fmt in formatOptions"
+            :key="fmt.val"
+            type="button"
+            @click="selectFormat(fmt.val)"
+            :class="[
+              'p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center select-none flex flex-col items-center justify-center gap-0.5',
+              (imageFormat || 'png') === fmt.val
+                ? 'bg-primary-600 text-white border-primary-600 shadow-xs'
+                : 'bg-white text-text-main border-app-border-strong hover:bg-stone-50'
+            ]"
+          >
+            <span class="block text-xs font-mono font-bold">{{ fmt.label }}</span>
+            <span :class="['text-[9px] font-semibold block leading-tight', (imageFormat || 'png') === fmt.val ? 'text-primary-100' : 'text-text-subtle']">
+              {{ fmt.tag }}
+            </span>
+          </button>
+        </div>
+      </div>
+
       <!-- Action buttons -->
       <div class="pt-1">
         <ExportActions
           :copied="copied"
-          download-text="Descargar Imagen PNG"
+          :download-text="`Descargar Imagen ${imageFormat?.toUpperCase() || 'PNG'}`"
           @download="$emit('download')"
           @copy="$emit('copy')"
         />
       </div>
 
       <p class="text-[10px] text-center text-text-subtle pt-0.5">
-        🔒 Procesado 100% en tu navegador con Konva.js.
+        🔒 Solo tu tienes acceso
       </p>
     </div>
   </div>
@@ -142,21 +174,46 @@
 import { ref, watch } from 'vue';
 import ExportActions from './ExportActions.vue';
 
-const props = defineProps<{
-  isOpen: boolean;
-  exportScale: number;
-  canvasWidth: number;
-  canvasHeight: number;
-  copied: boolean;
-  suggestedScale?: number;
-}>();
+export type ExportImageFormat = 'png' | 'webp' | 'jpeg';
+
+export interface FormatOption {
+  label: string;
+  val: ExportImageFormat;
+  tag: string;
+}
+
+const formatOptions: FormatOption[] = [
+  { label: 'PNG', val: 'png', tag: 'Transparente' },
+  { label: 'WEBP', val: 'webp', tag: 'Ligero' },
+  { label: 'JPEG', val: 'jpeg', tag: 'Fondo Blanco' }
+];
+
+const props = withDefaults(
+  defineProps<{
+    isOpen: boolean;
+    exportScale: number;
+    canvasWidth: number;
+    canvasHeight: number;
+    copied: boolean;
+    suggestedScale?: number;
+    imageFormat?: ExportImageFormat;
+  }>(),
+  {
+    imageFormat: 'png'
+  }
+);
 
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'update:exportScale', scale: number): void;
+  (e: 'update:imageFormat', format: ExportImageFormat): void;
   (e: 'download'): void;
   (e: 'copy'): void;
 }>();
+
+const selectFormat = (fmt: ExportImageFormat) => {
+  emit('update:imageFormat', fmt);
+};
 
 const customMultiplier = ref(props.suggestedScale ?? (props.exportScale > 2 ? props.exportScale : 4));
 

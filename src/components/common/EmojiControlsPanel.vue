@@ -70,12 +70,12 @@
       </div>
     </div>
 
-    <!-- Resolution & Alignment -->
+    <!-- Resolution & Format & Alignment -->
     <div class="pt-2 border-t border-app-border space-y-4">
       <div>
         <div class="flex items-center justify-between mb-2">
           <label class="text-xs font-bold uppercase tracking-wider text-text-main">
-            2. Resolución de Descarga PNG
+            2. Resolución de Descarga
           </label>
           <span class="text-[11px] text-text-subtle font-mono font-semibold">
             {{ targetResolution }} &times; {{ targetResolution }} px
@@ -97,6 +97,37 @@
             <span class="text-xs font-bold font-mono">{{ item.label }}</span>
             <span :class="['text-[9px] font-semibold', targetResolution === item.val ? 'text-primary-100' : 'text-text-subtle']">
               {{ item.tag }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Image Format Selector -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-xs font-bold uppercase tracking-wider text-text-main">
+            3. Tipo de Imagen
+          </label>
+          <span class="text-[11px] text-text-subtle font-mono font-semibold uppercase">
+            .{{ (imageFormat || 'png') === 'jpeg' ? 'jpg' : (imageFormat || 'png') }}
+          </span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <button
+            v-for="fmt in formatOptions"
+            :key="fmt.val"
+            type="button"
+            @click="$emit('update:imageFormat', fmt.val)"
+            :class="[
+              'py-2 px-1.5 rounded-xl border transition-all cursor-pointer text-center select-none flex flex-col items-center justify-center gap-0.5',
+              (imageFormat || 'png') === fmt.val
+                ? 'bg-primary-600 text-white border-primary-600 shadow-brand'
+                : 'bg-white text-text-main border-app-border-strong hover:bg-primary-50/70'
+            ]"
+          >
+            <span class="text-xs font-bold font-mono">{{ fmt.label }}</span>
+            <span :class="['text-[9px] font-semibold', (imageFormat || 'png') === fmt.val ? 'text-primary-100' : 'text-text-subtle']">
+              {{ fmt.tag }}
             </span>
           </button>
         </div>
@@ -155,20 +186,35 @@ export interface EmojiItem {
   char: string;
 }
 
-defineProps<{
-  selectedChar: string;
-  isCustom: boolean;
-  customInput: string;
-  customName: string;
-  targetResolution: number;
-  emojiList: EmojiItem[];
-}>();
+export type ExportImageFormat = 'png' | 'webp' | 'jpeg';
+
+export interface FormatOption {
+  label: string;
+  val: ExportImageFormat;
+  tag: string;
+}
+
+withDefaults(
+  defineProps<{
+    selectedChar: string;
+    isCustom: boolean;
+    customInput: string;
+    customName: string;
+    targetResolution: number;
+    imageFormat?: ExportImageFormat;
+    emojiList: EmojiItem[];
+  }>(),
+  {
+    imageFormat: 'png'
+  }
+);
 
 const emit = defineEmits<{
   (e: 'select-preset', item: EmojiItem): void;
   (e: 'update:customInput', val: string): void;
   (e: 'update:customName', val: string): void;
   (e: 'update:targetResolution', val: number): void;
+  (e: 'update:imageFormat', val: ExportImageFormat): void;
   (e: 'custom-input-change'): void;
   (e: 'apply-picker', unicode: string, name: string): void;
   (e: 'center'): void;
@@ -196,6 +242,12 @@ const resolutionOptions = [
   { label: '256px', val: 256, tag: 'Estándar' },
   { label: '512px', val: 512, tag: 'HD' },
   { label: '1024px', val: 1024, tag: 'Ultra' }
+];
+
+const formatOptions: FormatOption[] = [
+  { label: 'PNG', val: 'png', tag: 'Transparente' },
+  { label: 'WEBP', val: 'webp', tag: 'Ligero' },
+  { label: 'JPEG', val: 'jpeg', tag: 'Fondo Blanco' }
 ];
 
 const onInputEmoji = (e: Event) => {
