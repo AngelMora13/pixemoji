@@ -3,8 +3,8 @@
     class="w-full bg-white/90 backdrop-blur-md border-b border-app-border px-4 sm:px-6 py-2.5 flex items-center justify-between gap-4 shrink-0 z-20"
     data-purpose="editor-toolbar"
   >
-    <!-- Aspect Ratio Dropdown -->
-    <div class="relative">
+    <!-- Aspect Ratio Dropdown & Custom Edit Button -->
+    <div class="relative flex items-center gap-1.5">
       <select
         :value="currentPreset.id"
         @change="onPresetSelect"
@@ -15,6 +15,18 @@
           {{ p.icon }} {{ p.name }} ({{ p.ratioLabel }})
         </option>
       </select>
+
+      <!-- Botón para modificar medidas cuando el preset activo es personalizado -->
+      <button
+        v-if="currentPreset.id === 'custom'"
+        type="button"
+        @click="$emit('openCustomModal')"
+        class="flex items-center gap-1 px-2.5 py-1.5 bg-primary-50 hover:bg-primary-100 border border-primary-300 text-primary-800 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs active:scale-95"
+        title="Cambiar medidas personalizadas de ancho y alto"
+      >
+        <span>📐</span>
+        <span class="hidden sm:inline text-[11px]">Medidas</span>
+      </button>
     </div>
 
     <!-- Download Button -->
@@ -41,12 +53,19 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'selectPreset', preset: FormatPreset): void;
+  (e: 'openCustomModal'): void;
   (e: 'openExport'): void;
 }>();
 
 const onPresetSelect = (e: Event) => {
   const target = e.target as HTMLSelectElement;
   const found = props.formatPresets.find((p) => p.id === target.value);
-  if (found) emit('selectPreset', found);
+  if (found) {
+    emit('selectPreset', found);
+    if (found.id === 'custom') {
+      emit('openCustomModal');
+    }
+  }
 };
 </script>
+

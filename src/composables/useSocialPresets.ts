@@ -3,7 +3,7 @@ import { ref } from 'vue';
 export interface FormatPreset {
   id: string;
   name: string;
-  category: 'social' | 'square' | 'story' | 'banner';
+  category: 'social' | 'square' | 'story' | 'banner' | 'custom';
   ratioLabel: string;
   platform: string;
   icon: string;
@@ -13,7 +13,7 @@ export interface FormatPreset {
   description: string;
 }
 
-export const formatPresets: FormatPreset[] = [
+export const baseFormatPresets: FormatPreset[] = [
   {
     id: 'square-post',
     name: 'Cuadrado Feed / Avatar',
@@ -88,16 +88,95 @@ export const formatPresets: FormatPreset[] = [
   }
 ];
 
+export const CUSTOM_STORAGE_KEY = 'pixemoji_custom_canvas_size';
+export const DEFAULT_CUSTOM_SIZE = { width: 800, height: 600 };
+
+export function loadStoredCustomSize(): { width: number; height: number } {
+  if (typeof window === 'undefined') return DEFAULT_CUSTOM_SIZE;
+  try {
+    const raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.width === 'number' && typeof parsed.height === 'number') {
+        return {
+          width: Math.max(50, Math.min(4096, Math.round(parsed.width))),
+          height: Math.max(50, Math.min(4096, Math.round(parsed.height)))
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Error loading custom canvas size from localStorage:', err);
+  }
+  return DEFAULT_CUSTOM_SIZE;
+}
+
+export function saveStoredCustomSize(width: number, height: number): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify({ width, height }));
+  } catch (err) {
+    console.warn('Error saving custom canvas size to localStorage:', err);
+  }
+}
+
+export function buildCustomPreset(width: number, height: number): FormatPreset {
+  return {
+    id: 'custom',
+    name: 'Personalizado',
+    category: 'custom',
+    ratioLabel: `${width} × ${height} px`,
+    platform: 'Medidas Libres',
+    icon: '📐',
+    baseWidth: width,
+    baseHeight: height,
+    export2xLabel: `${width * 2} × ${height * 2} px`,
+    description: 'Dimensiones personalizadas configuradas por el usuario'
+  };
+}
+
 export function useSocialPresets() {
-  const currentPreset = ref<FormatPreset>(formatPresets[0]);
+  const initialCustom = loadStoredCustomSize();
+  const customDimensions = ref(initialCustom);
+  const customPreset = ref<FormatPreset>(buildCustomPreset(initialCustom.width, initialCustom.height));
+
+  const formatPresets = ref<FormatPreset[]>([
+    ...baseFormatPresets,
+    customPreset.value
+  ]);
+
+  const currentPreset = ref<FormatPreset>(formatPresets.value[0]);
 
   const selectPreset = (preset: FormatPreset) => {
     currentPreset.value = preset;
   };
 
+  const setCustomDimensions = (width: number, height: number): FormatPreset => {
+    const validW = Math.max(50, Math.min(4096, Math.round(width)));
+    const validH = Math.max(50, Math.min(4096, Math.round(height)));
+
+    customDimensions.value = { width: validW, height: validH };
+    saveStoredCustomSize(validW, validH);
+
+    const updated = buildCustomPreset(validW, validH);
+    customPreset.value = updated;
+
+    const idx = formatPresets.value.findIndex((p) => p.id === 'custom');
+    if (idx !== -1) {
+      formatPresets.value[idx] = updated;
+    } else {
+      formatPresets.value.push(updated);
+    }
+
+    currentPreset.value = updated;
+    return updated;
+  };
+
   return {
     currentPreset,
     formatPresets,
-    selectPreset
+    customDimensions,
+    selectPreset,
+    setCustomDimensions
   };
 }
+

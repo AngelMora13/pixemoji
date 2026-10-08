@@ -5,6 +5,7 @@
       :current-preset="currentPreset"
       :format-presets="formatPresets"
       @select-preset="handlePresetSelect"
+      @open-custom-modal="isCustomModalOpen = true"
       @open-export="isExportModalOpen = true"
     />
 
@@ -108,6 +109,15 @@
       @download="handleDownload"
       @copy="exporter.copyToClipboard"
     />
+
+    <!-- Custom Canvas Size Modal -->
+    <CustomCanvasSizeModal
+      :is-open="isCustomModalOpen"
+      :initial-width="customDimensions.width"
+      :initial-height="customDimensions.height"
+      @close="isCustomModalOpen = false"
+      @apply="handleCustomSizeApply"
+    />
   </div>
 </template>
 
@@ -133,9 +143,10 @@ import ToolsSidebarContent from './studio/ToolsSidebarContent.vue';
 import StudioMobileDrawers from './studio/StudioMobileDrawers.vue';
 import EmojiPickerModal from './common/EmojiPickerModal.vue';
 import ExportModal from './common/ExportModal.vue';
+import CustomCanvasSizeModal from './common/CustomCanvasSizeModal.vue';
 
 // Composables & State
-const { currentPreset, formatPresets, selectPreset } = useSocialPresets();
+const { currentPreset, formatPresets, customDimensions, selectPreset, setCustomDimensions } = useSocialPresets();
 const stage = useKonvaStage();
 const layers = useKonvaLayers(stage);
 const effects = useKonvaEffects(stage, layers);
@@ -152,7 +163,7 @@ const templates = useKonvaTemplates(
   layers,
   effects,
   (width, height, presetId) => {
-    const found = formatPresets.find((p) => p.id === presetId || (presetId === 'stories-reels' && p.id === 'story-reels'));
+    const found = formatPresets.value.find((p) => p.id === presetId || (presetId === 'stories-reels' && p.id === 'story-reels'));
     if (found) selectPreset(found);
     stage.changeDimensions(width, height);
   }
@@ -163,6 +174,7 @@ const isLeftSidebarOpen = ref(true);
 const isRightSidebarOpen = ref(true);
 const mobileDrawersRef = ref<InstanceType<typeof StudioMobileDrawers> | null>(null);
 const isExportModalOpen = ref(false);
+const isCustomModalOpen = ref(false);
 
 // Auto-open right inspector when a node is selected on desktop
 watch(
@@ -197,6 +209,12 @@ const handlePresetSelect = (preset: FormatPreset) => {
     stage.canvasWidth.value = stage.stageInstance.value.width();
     stage.canvasHeight.value = stage.stageInstance.value.height();
   }
+};
+
+const handleCustomSizeApply = (size: { width: number; height: number }) => {
+  const updatedPreset = setCustomDimensions(size.width, size.height);
+  handlePresetSelect(updatedPreset);
+  isCustomModalOpen.value = false;
 };
 
 const handleTemplateSelect = (templateId: string) => {
