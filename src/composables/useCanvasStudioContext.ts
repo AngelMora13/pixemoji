@@ -16,6 +16,7 @@ export type StudioAction =
   | 'crop'
   | 'shadow'
   | 'filter'
+  | 'opacity'
   | 'text3D'
   | 'stroke'
   | 'fill'
@@ -102,6 +103,10 @@ export function createStudioContext(
         break;
       case 'filter':
         layers.updateSelectedFilters(payload);
+        isDiscrete = false;
+        break;
+      case 'opacity':
+        layers.updateSelectedOpacity(payload);
         isDiscrete = false;
         break;
       case 'crop':

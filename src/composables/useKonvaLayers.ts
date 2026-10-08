@@ -69,6 +69,7 @@ export interface ActiveElementState {
   fontStyle: string;
   filterBlur: number;
   filterContrast: number;
+  opacity: number;
   cropInset?: CropInset;
   is3D?: boolean;
   depth3D?: number;
@@ -187,6 +188,9 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     const rawDirY = node.getAttr?.('dirY3D');
     const dirY3D = (rawDirY !== undefined && !isNaN(Number(rawDirY))) ? Number(rawDirY) : 1;
 
+    const rawOpacity = typeof node.opacity === 'function' ? node.opacity() : node.getAttr?.('opacity');
+    const opacity = (rawOpacity !== undefined && !isNaN(Number(rawOpacity))) ? Number(rawOpacity) : 1;
+
     activeElement.value = {
       id: node._id ? String(node._id) : (item?.id || ''),
       type,
@@ -212,6 +216,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
       fontStyle: typeof node.fontStyle === 'function' ? (node.fontStyle() || 'normal') : 'normal',
       filterBlur,
       filterContrast,
+      opacity,
       cropInset: (node.getAttr?.('cropInset') as CropInset) ? { ...node.getAttr('cropInset') } : { ...DEFAULT_CROP },
       is3D,
       depth3D,
@@ -684,6 +689,20 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     syncActiveElement();
   };
 
+  const updateSelectedOpacity = (val: number) => {
+    if (!selectedNode.value || !layerInstance.value) return;
+    const node = selectedNode.value;
+    const clamped = Math.max(0, Math.min(1, Number(val)));
+    if (typeof node.opacity === 'function') {
+      node.opacity(clamped);
+    } else {
+      node.setAttr('opacity', clamped);
+    }
+    node.getLayer()?.batchDraw();
+    layerInstance.value.batchDraw();
+    syncActiveElement();
+  };
+
   const updateSelectedCrop = (crop: Partial<CropInset>) => {
     if (!selectedNode.value || !layerInstance.value) return;
     const node = selectedNode.value;
@@ -1004,6 +1023,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     applyTextPreset,
     applyImagePreset,
     updateSelectedFilters,
+    updateSelectedOpacity,
     updateSelectedCrop,
     updateSelectedText3D,
     updateSelectedShadow,

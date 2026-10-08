@@ -39,6 +39,7 @@ export interface SerializedNode {
   shadowOpacity?: number;
   filterBlur?: number;
   filterContrast?: number;
+  opacity?: number;
   cropInset?: { top: number; right: number; bottom: number; left: number };
 }
 
@@ -94,6 +95,7 @@ export function serializeCanvasState(layer: any, selectedNode: any): string {
       shadowOpacity: getProp(node, 'shadowOpacity', 1),
       filterBlur: node.getAttr?.('filterBlur') ?? 0,
       filterContrast: node.getAttr?.('filterContrast') ?? 100,
+      opacity: getProp(node, 'opacity', 1),
       cropInset: node.getAttr?.('cropInset') ?? undefined
     };
 
@@ -175,6 +177,7 @@ export function restoreCanvasState(jsonString: string, stage: any, layers: any) 
         filterBlur: item.filterBlur ?? 0, filterContrast: item.filterContrast ?? 100
       });
 
+      if (item.opacity !== undefined) shape.opacity(item.opacity);
       if (item.isLocked) {
         shape.removeName('selectable');
         shape.addName('locked');
@@ -196,6 +199,7 @@ export function restoreCanvasState(jsonString: string, stage: any, layers: any) 
       emoji.setAttr('nodeType', 'emoji');
       emoji.setAttr('filterBlur', item.filterBlur ?? 0);
       emoji.setAttr('filterContrast', item.filterContrast ?? 100);
+      if (item.opacity !== undefined) emoji.opacity(item.opacity);
       if (item.cropInset) emoji.setAttr('cropInset', item.cropInset);
       if (item.offsetX !== undefined && item.offsetY !== undefined) {
         emoji.offsetX(item.offsetX);
@@ -219,6 +223,7 @@ export function restoreCanvasState(jsonString: string, stage: any, layers: any) 
       kImg.setAttr('src', item.src || '');
       kImg.setAttr('filterBlur', item.filterBlur ?? 0);
       kImg.setAttr('filterContrast', item.filterContrast ?? 100);
+      if (item.opacity !== undefined) kImg.opacity(item.opacity);
       if (item.cropInset) kImg.setAttr('cropInset', item.cropInset);
       kImg.offsetX(item.offsetX || 0);
       kImg.offsetY(item.offsetY || 0);
