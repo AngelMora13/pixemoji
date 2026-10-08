@@ -1,7 +1,21 @@
 <template>
   <section
-    class="flex-1 bg-app-canvas flex flex-col relative overflow-hidden bg-grid-pattern min-w-0 h-full"
+    ref="viewportRef"
+    class="flex-1 bg-app-canvas flex flex-col relative overflow-hidden bg-grid-pattern min-w-0 h-full select-none touch-none"
+    :class="{
+      'cursor-grab': (activeTool === 'hand' || isSpacePressed) && !isPanning,
+      'cursor-grabbing': isPanning
+    }"
     data-purpose="canvas-viewport"
+    @pointerdown="onViewportPointerDown"
+    @pointermove="handlePointerMove"
+    @pointerup="handlePointerUp"
+    @pointercancel="handlePointerUp"
+    @touchstart="onTouchStart"
+    @touchmove="onTouchMove"
+    @touchend="onTouchEnd"
+    @touchcancel="onTouchEnd"
+    @wheel.prevent="onWheel"
   >
     <!-- Floating Info Badge: Canvas Resolution & Ratio -->
     <div class="absolute top-4 left-4 lg:left-6 z-10 flex items-center gap-2 pointer-events-none">
@@ -42,13 +56,14 @@
     <!-- Contextual Quick-Action Floating Bar -->
     <CanvasToolbar @open-inspector="$emit('open-inspector')" />
 
-    <!-- Main Working Stage (Konva Canvas) -->
-    <div class="flex-1 w-full h-full flex items-center justify-center overflow-auto p-4 sm:p-8">
+    <!-- Main Working Stage (Konva Canvas Pan & Zoom) -->
+    <div class="flex-1 w-full h-full relative overflow-hidden flex items-center justify-center pointer-events-none">
       <div
+        class="will-change-transform pointer-events-auto"
+        :class="{ 'transition-transform duration-150 ease-out': !isPanning && !isTouchPinching }"
         :style="{
-          transform: `scale(${zoomLevel})`,
-          transformOrigin: 'center center',
-          transition: 'transform 0.15s ease'
+          transform: `translate3d(${panX}px, ${panY}px, 0px) scale(${zoomLevel})`,
+          transformOrigin: 'center center'
         }"
       >
         <KonvaStage
@@ -62,27 +77,29 @@
       </div>
     </div>
 
-    <!-- Floating Bottom Zoom & Templates Bar Component -->
+    <!-- Floating Bottom Zoom, Move Tool & Templates Bar Component -->
     <CanvasBottomBar
       :zoom-level="zoomLevel"
       :templates="templates"
+      :active-tool="activeTool"
       @zoom-in="zoomIn"
       @zoom-out="zoomOut"
       @reset-zoom="resetZoom"
+      @toggle-tool="setTool($event)"
       @select-template="$emit('select-template', $event)"
     />
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import KonvaStage from './KonvaStage.vue';
 import CanvasToolbar from './CanvasToolbar.vue';
 import CanvasBottomBar from '../studio/CanvasBottomBar.vue';
-
+import { useViewportPanZoom } from '../../composables/useViewportPanZoom';
 import type { useCanvasFrame } from '../../composables/useCanvasFrame';
 
-defineProps<{
+const props = defineProps<{
   width: number;
   height: number;
   ratioLabel: string;
@@ -101,15 +118,92 @@ defineEmits<{
   (e: 'select-template', templateId: string): void;
 }>();
 
-// Zoom Level state
-const zoomLevel = ref(1.0);
-const zoomIn = () => {
-  zoomLevel.value = Math.min(2.5, Math.round((zoomLevel.value + 0.1) * 10) / 10);
+const viewportRef = ref<HTMLElement | null>(null);
+const hasUserManuallyInteracted = ref(false);
+let resizeObserver: ResizeObserver | null = null;
+
+const {
+  zoomLevel,
+  panX,
+  panY,
+  isPanning,
+  isTouchPinching,
+  isSpacePressed,
+  activeTool,
+  fitToViewport,
+  zoomIn,
+  zoomOut,
+  resetZoom,
+  setTool,
+  handleWheel,
+  handlePointerDown,
+  handlePointerMove,
+  handlePointerUp,
+  handleTouchStart,
+  handleTouchMove,
+  handleTouchEnd
+} = useViewportPanZoom();
+
+const triggerFit = () => {
+  if (!viewportRef.value) return;
+  const rect = viewportRef.value.getBoundingClientRect();
+  fitToViewport(rect.width, rect.height, props.width, props.height);
 };
-const zoomOut = () => {
-  zoomLevel.value = Math.max(0.4, Math.round((zoomLevel.value - 0.1) * 10) / 10);
+
+// Pointer and Wheel Event Handlers
+const onViewportPointerDown = (e: PointerEvent) => {
+  const target = e.target as HTMLElement;
+  if (target.closest('button, a, input, select, textarea, [data-purpose="canvas-bottom-bar"], [data-purpose="canvas-toolbar"]')) {
+    return;
+  }
+
+  hasUserManuallyInteracted.value = true;
+  const isStageContent = !!target.closest('#konva-meme-stage');
+  const isBackground = !isStageContent || activeTool.value === 'hand';
+
+  handlePointerDown(e, isBackground);
 };
-const resetZoom = () => {
-  zoomLevel.value = 1.0;
+
+const onWheel = (e: WheelEvent) => {
+  hasUserManuallyInteracted.value = true;
+  handleWheel(e, viewportRef.value);
 };
+
+const onTouchStart = (e: TouchEvent) => {
+  handleTouchStart(e);
+};
+
+const onTouchMove = (e: TouchEvent) => {
+  handleTouchMove(e);
+};
+
+const onTouchEnd = (e: TouchEvent) => {
+  handleTouchEnd(e);
+};
+
+// Watch resolution or screen changes
+watch([() => props.width, () => props.height], () => {
+  triggerFit();
+});
+
+onMounted(() => {
+  // Ajuste inicial adaptativo según la pantalla del dispositivo
+  triggerFit();
+
+  if (typeof ResizeObserver !== 'undefined' && viewportRef.value) {
+    resizeObserver = new ResizeObserver(() => {
+      if (!hasUserManuallyInteracted.value) {
+        triggerFit();
+      }
+    });
+    resizeObserver.observe(viewportRef.value);
+  }
+});
+
+onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+    resizeObserver = null;
+  }
+});
 </script>

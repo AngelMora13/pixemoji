@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-1 w-full h-full flex items-center justify-center p-3 sm:p-6 overflow-auto bg-grid-pattern select-none">
+  <div class="flex items-center justify-center p-2 sm:p-4 select-none">
     <!-- Dashed Artboard Safe Area Boundary from demo.html -->
     <div class="p-3 sm:p-4 border-2 border-dashed border-app-border-strong/80 rounded-3xl bg-transparent transition-all shadow-xs">
       <div

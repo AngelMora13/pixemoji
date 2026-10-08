@@ -35,9 +35,26 @@
       type="button"
       @click="$emit('resetZoom')"
       class="px-2 py-0.5 rounded-md hover:bg-stone-100 text-[11px] font-semibold text-text-muted hover:text-text-main transition-colors cursor-pointer"
-      title="Restablecer tamaño original (100%)"
+      title="Restablecer y ajustar al tamaño de pantalla"
     >
       Ajustar
+    </button>
+
+    <div class="h-4 w-px bg-stone-200 mx-0.5"></div>
+
+    <!-- Hand / Move Tool Toggle -->
+    <button
+      type="button"
+      @click="$emit('toggleTool', activeTool === 'hand' ? 'select' : 'hand')"
+      :class="[
+        'w-6 h-6 rounded-full flex items-center justify-center transition-all cursor-pointer text-xs',
+        activeTool === 'hand'
+          ? 'bg-primary-600 text-white shadow-xs'
+          : 'hover:bg-stone-100 text-text-muted hover:text-text-main'
+      ]"
+      :title="activeTool === 'hand' ? 'Modo Selección activo (V)' : 'Activar Modo Mano / Arrastrar (H o Espacio)'"
+    >
+      ✋
     </button>
 
     <div class="h-4 w-px bg-stone-200 mx-1"></div>
@@ -108,12 +125,14 @@ import TemplatesTool from './TemplatesTool.vue';
 defineProps<{
   zoomLevel: number;
   templates: StudioTemplate[];
+  activeTool?: 'select' | 'hand';
 }>();
 
 defineEmits<{
   (e: 'zoomIn'): void;
   (e: 'zoomOut'): void;
   (e: 'resetZoom'): void;
+  (e: 'toggleTool', tool: 'select' | 'hand'): void;
   (e: 'selectTemplate', templateId: string): void;
 }>();
 

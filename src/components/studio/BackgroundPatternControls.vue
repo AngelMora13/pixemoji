@@ -9,10 +9,10 @@
         <button
           type="button"
           @click="resetToDefaults"
-          class="text-[10px] font-semibold text-text-muted hover:text-primary-600 transition-colors cursor-pointer flex items-center gap-0.5"
+          class="text-base font-semibold text-text-muted hover:text-primary-600 transition-colors cursor-pointer flex items-center gap-0.5"
           title="Restablecer tamaño, separación, estilo y rotación a valores por defecto"
         >
-          <span>↺</span><span>Por defecto</span>
+          <span>↺</span>
         </button>
         <span class="text-stone-300 text-xs">|</span>
         <button type="button" @click="handleClear" class="text-[10px] font-semibold text-red-600 hover:underline cursor-pointer">
