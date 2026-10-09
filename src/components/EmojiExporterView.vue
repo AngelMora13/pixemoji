@@ -16,22 +16,13 @@
 
     <!-- Main Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      <!-- Left Controls: Emoji Selector, Resolution & Alignment -->
+      <!-- Left Controls: Emoji Selector, Resolution & Format -->
       <div class="lg:col-span-7">
         <EmojiControlsPanel
-          :selected-char="selected.char"
-          :is-custom="isCustom"
-          v-model:custom-input="customInput"
-          v-model:custom-name="customName"
+          :selected-char="selectedChar"
           v-model:target-resolution="targetResolution"
           v-model:image-format="imageFormat"
-          :emoji-list="emojiList"
-          @select-preset="selectPreset"
-          @custom-input-change="onCustomInputChange"
-          @apply-picker="applyFromPicker"
-          @center="centerEmoji"
-          @fit="fitEmoji"
-          @reset-transform="resetTransform"
+          @update:selected-char="onSelectEmoji"
         />
       </div>
 
@@ -57,7 +48,7 @@
 
         <!-- Live Status Pill -->
         <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary-50 border border-primary-200 text-[11px] text-text-muted">
-          <span class="font-mono font-bold text-base leading-none text-primary-600">{{ selected.char }}</span>
+          <span class="font-mono font-bold text-base leading-none text-primary-600">{{ selectedChar }}</span>
           <span>&bull;</span>
           <span class="font-semibold text-text-main">{{ fileName }}.{{ fileExtension }}</span>
           <span>&bull;</span>
@@ -90,18 +81,10 @@ import { patchKonvaEmojiShadow, patchKonvaEmojiBounds, syncEmojiMetrics } from '
 // Modular Subcomponents
 import KonvaStage from './canvas/KonvaStage.vue';
 import ExportActions from './common/ExportActions.vue';
-import EmojiControlsPanel, { type EmojiItem, type ExportImageFormat } from './common/EmojiControlsPanel.vue';
+import EmojiControlsPanel, { type ExportImageFormat } from './common/EmojiControlsPanel.vue';
 import EmojiPickerModal from './common/EmojiPickerModal.vue';
 
-const emojiList: EmojiItem[] = Object.entries(emojiFallback).map(([name, char]) => ({
-  name,
-  char
-}));
-
-const selected = ref<EmojiItem>(emojiList[0]);
-const customInput = ref('');
-const customName = ref('');
-const isCustom = ref(false);
+const selectedChar = ref('🧁');
 const targetResolution = ref<number>(512);
 const imageFormat = ref<ExportImageFormat>('png');
 const copied = ref(false);
@@ -111,44 +94,23 @@ let emojiNode: any = null;
 
 const CANVAS_SIZE = 250;
 
-const fileExtension = computed(() => (imageFormat.value === 'jpeg' ? 'jpg' : imageFormat.value));
+const charToNameMap = Object.entries(emojiFallback).reduce<Record<string, string>>((acc, [name, char]) => {
+  acc[char] = name;
+  return acc;
+}, {});
 
 const fileName = computed(() => {
-  if (customName.value.trim()) {
-    return customName.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
-  }
-  return selected.value.name || 'emoji';
+  const char = selectedChar.value;
+  if (charToNameMap[char]) return charToNameMap[char];
+  const codePoints = Array.from(char).map(c => c.codePointAt(0)?.toString(16)).filter(Boolean);
+  return codePoints.length ? `emoji_${codePoints.join('_')}` : 'emoji';
 });
 
-const selectPreset = (item: EmojiItem) => {
-  selected.value = item;
-  customInput.value = '';
-  customName.value = '';
-  isCustom.value = false;
-  updateEmoji(item.char);
-};
+const fileExtension = computed(() => (imageFormat.value === 'jpeg' ? 'jpg' : imageFormat.value));
 
-const onCustomInputChange = () => {
-  const val = customInput.value.trim();
-  if (val) {
-    isCustom.value = true;
-    selected.value = {
-      name: customName.value.trim() || 'emoji-custom',
-      char: val
-    };
-    updateEmoji(val);
-  }
-};
-
-const applyFromPicker = (unicode: string, name: string) => {
-  isCustom.value = true;
-  customInput.value = unicode;
-  customName.value = name || 'emoji';
-  selected.value = {
-    name: name || 'emoji',
-    char: unicode
-  };
-  updateEmoji(unicode);
+const onSelectEmoji = (char: string) => {
+  selectedChar.value = char;
+  updateEmoji(char);
 };
 
 const updateEmoji = (char: string) => {
@@ -156,30 +118,6 @@ const updateEmoji = (char: string) => {
   emojiNode.text(char);
   syncEmojiMetrics(emojiNode, char);
   stage.transformerInstance.value?.forceUpdate();
-  stage.layerInstance.value.draw();
-};
-
-const centerEmoji = () => {
-  if (!emojiNode || !stage.layerInstance.value) return;
-  emojiNode.position({ x: CANVAS_SIZE / 2, y: CANVAS_SIZE / 2 });
-  stage.layerInstance.value.draw();
-};
-
-const fitEmoji = () => {
-  if (!emojiNode || !stage.layerInstance.value) return;
-  emojiNode.position({ x: CANVAS_SIZE / 2, y: CANVAS_SIZE / 2 });
-  emojiNode.scale({ x: 1, y: 1 });
-  emojiNode.fontSize(160);
-  emojiNode.rotation(0);
-  syncEmojiMetrics(emojiNode, emojiNode.text(), 160);
-  stage.transformerInstance.value?.forceUpdate();
-  stage.layerInstance.value.draw();
-};
-
-const resetTransform = () => {
-  if (!emojiNode || !stage.layerInstance.value) return;
-  emojiNode.rotation(0);
-  emojiNode.scale({ x: 1, y: 1 });
   stage.layerInstance.value.draw();
 };
 
@@ -267,7 +205,7 @@ onMounted(async () => {
   emojiNode = new stage.KonvaModule.value.Text({
     x: CANVAS_SIZE / 2,
     y: CANVAS_SIZE / 2,
-    text: selected.value.char,
+    text: selectedChar.value,
     fontSize: 130,
     fontFamily: '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif',
     draggable: true,
@@ -275,7 +213,7 @@ onMounted(async () => {
     nodeType: 'emoji'
   });
   emojiNode.setAttr('nodeType', 'emoji');
-  syncEmojiMetrics(emojiNode, selected.value.char, 130);
+  syncEmojiMetrics(emojiNode, selectedChar.value, 130);
 
   stage.layerInstance.value.add(emojiNode);
   stage.selectNode(emojiNode);

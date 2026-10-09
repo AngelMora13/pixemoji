@@ -145,14 +145,15 @@ onMounted(() => {
 });
 
 const commitToShortcuts = (char: string) => {
-  const list = [...shortcutEmojis.value];
-  const idx = list.indexOf(char);
-  if (idx !== -1) {
-    list.splice(idx, 1);
+  // Si el emoji ya está en el listado, no cambiamos nada
+  if (shortcutEmojis.value.includes(char)) {
+    return;
   }
-  list.push(char);
+
+  // Si es nuevo, se agrega al final y los primeros van saliendo (FIFO)
+  const list = [...shortcutEmojis.value, char];
   while (list.length > 10) {
-    list.shift(); // FIFO
+    list.shift();
   }
   shortcutEmojis.value = list;
   try {
