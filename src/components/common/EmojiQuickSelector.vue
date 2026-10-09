@@ -81,7 +81,7 @@
           type="button"
           @click="selectChar(char)"
           :class="[
-            'h-8 rounded-xl border transition-all flex items-center justify-center cursor-pointer select-none text-lg hover:scale-115 active:scale-95 shadow-2xs',
+            'h-8 rounded-xl border transition-all flex items-center justify-center cursor-pointer select-all text-lg hover:scale-115 active:scale-95 shadow-2xs',
             modelValue === char
               ? 'bg-primary-100 border-primary-500 scale-105 ring-1 ring-primary-500'
               : 'bg-white border-app-border hover:bg-primary-50'
