@@ -6,10 +6,22 @@ import tailwindcss from '@tailwindcss/vite';
 import cloudflare from '@astrojs/cloudflare';
 
 // https://astro.build/config
+/*/
+      "@/*": ["src/*"]*/
 export default defineConfig({
+  site: 'https://pixemoji.com',
   output: 'static',
   adapter: cloudflare(),
+  redirects: {
+    '/privacy': '/politicas-privacidad',
+    '/terms': '/terminos-condiciones',
+  },
   vite: {
+    resolve: {
+      alias: {
+        "@": "/src",
+      },
+    },
     build: {
       minify: false,
     },

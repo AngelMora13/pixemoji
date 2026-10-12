@@ -1,0 +1,129 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import {
+  SERVICE_NAME,
+  PRIVACY_LAST_UPDATED_ES,
+  ROUTES,
+} from "@/utils/constant";
+---
+
+<Layout
+  title={ROUTES.privacy.title}
+  description={ROUTES.privacy.description}
+  currentPath="/politicas-privacidad"
+  showAmbientGlows={true}
+  mainClass="relative z-10 flex-1 py-10 sm:py-16 px-4 sm:px-6 flex flex-col items-center"
+>
+  <article
+    class="max-w-3xl w-full glass-card p-6 sm:p-12 rounded-3xl border border-app-border shadow-card text-text-main"
+  >
+    <!-- Header -->
+    <header
+      class="border-b border-app-border pb-6 mb-8 text-center sm:text-left"
+    >
+      <div
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-100 text-primary-800 border border-primary-300 text-xs font-bold mb-3"
+      >
+        <span>🔒</span>
+        <span>Privacidad y Protección de Datos</span>
+      </div>
+      <h1
+        class="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-main mb-2"
+      >
+        Política de Privacidad
+      </h1>
+      <p class="text-xs text-text-muted">
+        Última actualización: <strong>{PRIVACY_LAST_UPDATED_ES}</strong>
+      </p>
+    </header>
+
+    <!-- Content Sections -->
+    <div class="space-y-6 text-sm text-text-muted leading-relaxed">
+      <section>
+        <h2
+          class="text-base font-bold text-text-main mb-2 flex items-center gap-2"
+        >
+          <span>1.</span> Procesamiento Local (En tu Navegador)
+        </h2>
+        <p class="mb-2">
+          {SERVICE_NAME} opera completamente en tu dispositivo
+        </p>
+        <ul class="list-disc list-inside space-y-1.5 pl-2">
+          <li>
+            <strong>Imágenes y Archivos:</strong> Los emojis, imágenes y textos que
+            utilizas se procesan exclusivamente en la memoria de tu navegador. <strong
+              >Nunca se suben ni se almacenan en servidores externos.</strong
+            >
+          </li>
+          <li>
+            <strong>Almacenamiento Local:</strong> Podemos usar la memoria local de
+            tu navegador únicamente para guardar tus preferencias de uso. Estos datos
+            se quedan en tu dispositivo y puedes borrarlos limpiando la memoria de
+            tu navegador.
+          </li>
+        </ul>
+      </section>
+
+      <hr class="border-app-border" />
+
+      <section>
+        <h2
+          class="text-base font-bold text-text-main mb-2 flex items-center gap-2"
+        >
+          <span>2.</span> Información de Infraestructura y Red
+        </h2>
+        <p class="mb-2">
+          Al ser un sitio web estático alojado en proveedores de red y utilizar
+          fuentes web externas:
+        </p>
+        <ul class="list-disc list-inside space-y-1.5 pl-2">
+          <li>
+            Estos proveedores pueden recibir temporalmente datos técnicos
+            estándar de tu conexión (como tu dirección IP o tipo de navegador)
+            exclusivamente para <strong
+              >entregar el sitio web de forma segura y funcional</strong
+            >.
+          </li>
+        </ul>
+      </section>
+
+      <hr class="border-app-border" />
+
+      <section>
+        <h2
+          class="text-base font-bold text-text-main mb-2 flex items-center gap-2"
+        >
+          <span>3.</span> Cookies y Rastreo
+        </h2>
+        <ul class="list-disc list-inside space-y-1.5 pl-2">
+          <li>
+            <strong>Sin Registro:</strong> No solicitamos cuentas, nombres ni correos
+            electrónicos.
+          </li>
+          <li>
+            <strong>Sin Rastreo:</strong> No utilizamos cookies de seguimiento publicitario
+            ni analíticas invasivas.
+          </li>
+        </ul>
+      </section>
+    </div>
+
+    <!-- Back to App Link -->
+    <div
+      class="mt-8 pt-6 border-t border-app-border flex justify-between items-center text-xs"
+    >
+      <a
+        href="/"
+        class="inline-flex items-center gap-1.5 text-primary-600 hover:text-primary-700 font-bold"
+      >
+        <span>&larr;</span> Volver al Exportador de Emojis
+      </a>
+      <a
+        href="/terminos-condiciones"
+        class="text-text-muted hover:text-text-main underline"
+      >
+        Ver Términos y Condiciones
+      </a>
+    </div>
+  </article>
+</Layout>

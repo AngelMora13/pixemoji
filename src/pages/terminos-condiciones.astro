@@ -1,0 +1,104 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import {
+  SERVICE_NAME,
+  TERMS_LAST_UPDATED_ES,
+  ROUTES,
+} from "@/utils/constant";
+---
+
+<Layout
+  title={ROUTES.terms.title}
+  description={ROUTES.terms.description}
+  currentPath="/terminos-condiciones"
+  showAmbientGlows={true}
+  mainClass="relative z-10 flex-1 py-10 sm:py-16 px-4 sm:px-6 flex flex-col items-center"
+>
+  <article
+    class="max-w-3xl w-full glass-card p-6 sm:p-12 rounded-3xl border border-app-border shadow-card text-text-main"
+  >
+    <!-- Header -->
+    <header
+      class="border-b border-app-border pb-6 mb-8 text-center sm:text-left"
+    >
+      <div
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-100 text-primary-800 border border-primary-300 text-xs font-bold mb-3"
+      >
+        <span>📜</span>
+        <span>Aviso Legal</span>
+      </div>
+      <h1
+        class="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-main mb-2"
+      >
+        Términos y Condiciones de Uso
+      </h1>
+      <p class="text-xs text-text-muted">
+        Última actualización: <strong>{TERMS_LAST_UPDATED_ES}</strong>
+      </p>
+    </header>
+
+    <!-- Content Sections -->
+    <div class="space-y-6 text-sm text-text-muted leading-relaxed">
+      <p class="text-text-main font-medium">
+        Al acceder y utilizar <strong>{SERVICE_NAME}</strong>, aceptas las siguientes condiciones de uso simples:
+      </p>
+
+      <hr class="border-app-border" />
+
+      <section>
+        <h2
+          class="text-base font-bold text-text-main mb-2 flex items-center gap-2"
+        >
+          <span>1.</span> Propiedad de lo que creas
+        </h2>
+        <ul class="list-disc list-inside space-y-2 pl-2">
+          <li>
+            <strong class="text-text-main">Tus contenidos:</strong> Todo lo que edites, diseñes o exportes (memes, imágenes o emojis) es 100 % tuyo. No reclamamos ningún derecho sobre tus creaciones.
+          </li>
+          <li>
+            <strong class="text-text-main">Recursos del sitio:</strong> Los emojis y fuentes utilizados pertenecen a las librerías públicas estándar y a los sistemas operativos correspondientes. El diseño y código de la aplicación pertenecen a {SERVICE_NAME}.
+          </li>
+        </ul>
+      </section>
+
+      <hr class="border-app-border" />
+
+      <section>
+        <h2
+          class="text-base font-bold text-text-main mb-2 flex items-center gap-2"
+        >
+          <span>2.</span> Responsabilidad de uso
+        </h2>
+        <p class="mb-2">
+          {SERVICE_NAME} es una herramienta web gratuita que funciona directamente en tu navegador.
+        </p>
+        <ul class="list-disc list-inside space-y-1.5 pl-2">
+          <li>
+            Eres el único responsable del uso que le des a las imágenes generadas y de asegurar que no infrinjan derechos de terceros.
+          </li>
+          <li>
+            La herramienta se ofrece "tal como está". No garantizamos que el sitio esté disponible de forma ininterrumpida ni nos hacemos responsables por fallos técnicos en tu dispositivo.
+          </li>
+        </ul>
+      </section>
+    </div>
+
+    <!-- Back to App Link -->
+    <div
+      class="mt-8 pt-6 border-t border-app-border flex justify-between items-center text-xs"
+    >
+      <a
+        href="/"
+        class="inline-flex items-center gap-1.5 text-primary-600 hover:text-primary-700 font-bold"
+      >
+        <span>&larr;</span> Volver al Exportador de Emojis
+      </a>
+      <a
+        href="/politicas-privacidad"
+        class="text-text-muted hover:text-text-main underline"
+      >
+        Ver Política de Privacidad
+      </a>
+    </div>
+  </article>
+</Layout>

@@ -1,0 +1,122 @@
+---
+import { SERVICE_NAME } from "@/utils/constant";
+import {
+  SITE_URL,
+  getCanonicalUrl,
+  getAlternateUrls,
+  getAutoSchema,
+  type SEOProps,
+} from "@/utils/seo";
+
+interface Props extends Partial<SEOProps> {
+  pathname?: string;
+}
+
+const {
+  title = "PixEmoji — Exportador de Emojis a PNG Transparente",
+  description = "Exporta cualquier emoji a imagen PNG en alta resolución (256px a 2048px) con fondo transparente y crea stickers troquelados, memes y composiciones gráficas.",
+  lang = "es",
+  canonicalUrl,
+  ogImage = "/logo.webp",
+  ogImageAlt,
+  ogType = "website",
+  noIndex = false,
+  noFollow = false,
+  dateModified,
+  schema,
+  pathname = Astro.url.pathname,
+} = Astro.props;
+
+const siteUrl = Astro.site ? Astro.site.origin : SITE_URL;
+const canonical = canonicalUrl || getCanonicalUrl(pathname, siteUrl);
+const alternates = getAlternateUrls(pathname, siteUrl);
+const isEs = lang === "es";
+
+// Resolver URL absoluta para og:image
+const resolvedOgImage = ogImage.startsWith("http")
+  ? ogImage
+  : `${siteUrl}${ogImage.startsWith("/") ? ogImage : `/${ogImage}`}`;
+
+const ogImageType = resolvedOgImage.endsWith(".png")
+  ? "image/png"
+  : resolvedOgImage.endsWith(".svg")
+    ? "image/svg+xml"
+    : resolvedOgImage.endsWith(".webp")
+      ? "image/webp"
+      : "image/jpeg";
+
+// Construir directiva de robots
+const robotsDirective = noIndex
+  ? `${noFollow ? "noindex, nofollow" : "noindex, follow"}`
+  : `${noFollow ? "index, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"}`;
+
+// Generar Schema.org JSON-LD
+const structuredData =
+  schema ||
+  getAutoSchema({
+    pathname,
+    title,
+    description,
+    lang,
+    dateModified,
+    siteUrl,
+  });
+---
+
+<!-- Metadatos de codificación y viewport -->
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="generator" content={Astro.generator} />
+
+<!-- SEO Básico -->
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="author" content={SERVICE_NAME} />
+<meta name="robots" content={robotsDirective} />
+
+<!-- URL Canónica y Sitemap -->
+<link rel="canonical" href={canonical} />
+<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+
+<!-- Hreflang Alternates Multilingües -->
+{
+  alternates.map((alt) => (
+    <link rel="alternate" hreflang={alt.lang} href={alt.href} />
+  ))
+}
+
+<!-- Open Graph / Redes Sociales -->
+<meta property="og:site_name" content={SERVICE_NAME} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:type" content={ogType} />
+<meta property="og:locale" content={isEs ? "es_ES" : "en_US"} />
+<meta property="og:image" content={resolvedOgImage} />
+<meta property="og:image:secure_url" content={resolvedOgImage} />
+<meta property="og:image:alt" content={ogImageAlt || title} />
+<meta property="og:image:type" content={ogImageType} />
+
+<!-- Twitter Cards -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={resolvedOgImage} />
+<meta name="twitter:image:alt" content={ogImageAlt || title} />
+
+<!-- Favicons & Iconos PWA -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="alternate icon" href="/favicon.ico" />
+<meta name="theme-color" content="#d97736" />
+<meta name="color-scheme" content="light dark" />
+
+<!-- Preconnect Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+<!-- Schema.org JSON-LD Datos Estructurados -->
+<script
+  type="application/ld+json"
+  is:inline
+  set:html={JSON.stringify(structuredData, null, 2)}
+/>
