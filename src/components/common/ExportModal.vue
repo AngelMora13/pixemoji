@@ -36,43 +36,30 @@
         </div>
 
         <div class="grid grid-cols-3 gap-1.5">
-          <!-- 1x -->
+          <!-- 1x y 2x -->
           <button
+            v-for="scale in ([1, 2] as const)"
+            :key="scale"
             type="button"
-            @click="selectScale(1)"
+            @click="selectPresetScale(scale)"
             :class="[
               'p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center',
-              exportScale === 1
+              !isCustomMode && exportScale === scale
                 ? 'bg-primary-600 text-white border-primary-600 shadow-xs'
                 : 'bg-white text-text-main border-app-border-strong hover:bg-stone-50'
             ]"
           >
-            <span class="block text-xs">1x</span>
-            <span class="text-[9px] font-mono block opacity-85 leading-tight">{{ canvasWidth }}&times;{{ canvasHeight }}</span>
-          </button>
-
-          <!-- 2x -->
-          <button
-            type="button"
-            @click="selectScale(2)"
-            :class="[
-              'p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center',
-              exportScale === 2
-                ? 'bg-primary-600 text-white border-primary-600 shadow-xs'
-                : 'bg-white text-text-main border-app-border-strong hover:bg-stone-50'
-            ]"
-          >
-            <span class="block text-xs">2x Ultra</span>
-            <span class="text-[9px] font-mono block opacity-85 leading-tight">{{ canvasWidth * 2 }}&times;{{ canvasHeight * 2 }}</span>
+            <span class="block text-xs">{{ scale === 1 ? '1x' : '2x Ultra' }}</span>
+            <span class="text-[9px] font-mono block opacity-85 leading-tight">{{ canvasWidth * scale }}&times;{{ canvasHeight * scale }}</span>
           </button>
 
           <!-- 3er Botón Custom Nx -->
           <button
             type="button"
-            @click="selectScale(customMultiplier)"
+            @click="selectCustom"
             :class="[
               'p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center',
-              exportScale !== 1 && exportScale !== 2
+              isCustomMode
                 ? 'bg-primary-600 text-white border-primary-600 shadow-xs'
                 : 'bg-white text-text-main border-app-border-strong hover:bg-stone-50'
             ]"
@@ -84,8 +71,11 @@
           </button>
         </div>
 
-        <!-- Input editable para el multiplicador Nx (hasta 2 decimales y sin tope de 8x) -->
-        <div class="flex items-center justify-between p-2 rounded-xl bg-stone-50 border border-app-border text-xs">
+        <!-- Input editable para el multiplicador Nx (solo visible al presionar custom) -->
+        <div
+          v-if="isCustomMode"
+          class="flex items-center justify-between p-2 rounded-xl bg-stone-50 border border-app-border text-xs animate-fade-in"
+        >
           <div class="flex items-center gap-1.5 text-text-muted">
             <span>📐</span>
             <span class="text-[11px] font-semibold">Multiplicador Nx:</span>
@@ -93,9 +83,10 @@
           <div class="flex items-center gap-1">
             <input
               type="number"
-              v-model.number="customMultiplier"
+              :value="customMultiplier"
               @input="onCustomInput"
-              min="0.1"
+              @blur="onCustomBlur"
+              min="1"
               step="0.01"
               class="w-20 px-2 py-0.5 bg-white border border-app-border-strong rounded-lg text-xs font-mono font-bold text-center text-text-main focus:outline-none focus:ring-1 focus:ring-primary-500"
               placeholder="Ej. 3.75"
@@ -104,20 +95,16 @@
           </div>
         </div>
 
-        <!-- Alerta de escala alta (> 2x o > 4x / 8x / 16x) -->
+        <!-- Alerta de escala alta (> 2x o > 4x) -->
         <div
-          v-if="exportScale > 4"
-          class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-[10.5px] text-rose-950 flex items-start gap-1.5 animate-fade-in"
+          v-if="exportScale > 2"
+          :class="[
+            'p-2 rounded-xl text-[10.5px] flex items-start gap-1.5 animate-fade-in border',
+            exportScale > 4 ? 'bg-rose-50 border-rose-200 text-rose-950' : 'bg-amber-50 border-amber-200 text-amber-900'
+          ]"
         >
-          <span class="text-xs leading-none shrink-0">🚨</span>
-          <span>Escalas ultra altas ({{ exportScale }}x) pueden demorar bastante tiempo o fallar si el navegador agota el búfer de memoria del lienzo.</span>
-        </div>
-        <div
-          v-else-if="exportScale > 2"
-          class="p-2 rounded-xl bg-amber-50 border border-amber-200 text-[10.5px] text-amber-900 flex items-start gap-1.5 animate-fade-in"
-        >
-          <span class="text-xs leading-none shrink-0">⚠️</span>
-          <span>Escalas superiores a 2x requieren mayor memoria y tiempo de renderizado en el navegador.</span>
+          <span class="text-xs leading-none shrink-0">{{ exportScale > 4 ? '🚨' : '⚠️' }}</span>
+          <span>{{ exportScale > 4 ? `Escalas ultra altas (${exportScale}x) pueden demorar bastante tiempo o agotar la memoria del navegador.` : 'Escalas superiores a 2x requieren mayor memoria y tiempo de renderizado.' }}</span>
         </div>
       </div>
 
@@ -215,15 +202,26 @@ const selectFormat = (fmt: ExportImageFormat) => {
   emit('update:imageFormat', fmt);
 };
 
-const customMultiplier = ref(props.suggestedScale ?? (props.exportScale > 2 ? props.exportScale : 4));
+const isCustomMode = ref(props.exportScale !== 1 && props.exportScale !== 2);
+const customMultiplier = ref(
+  Math.max(1, props.suggestedScale ?? (props.exportScale > 2 ? props.exportScale : 4))
+);
 
 watch(
   () => props.isOpen,
   (open) => {
     if (open) {
       if (props.suggestedScale && props.suggestedScale > 1) {
-        customMultiplier.value = props.suggestedScale;
-        emit('update:exportScale', props.suggestedScale);
+        if (props.suggestedScale === 2) {
+          isCustomMode.value = false;
+          emit('update:exportScale', 2);
+        } else {
+          customMultiplier.value = Math.max(1, props.suggestedScale);
+          isCustomMode.value = true;
+          emit('update:exportScale', customMultiplier.value);
+        }
+      } else {
+        isCustomMode.value = props.exportScale !== 1 && props.exportScale !== 2;
       }
     }
   }
@@ -233,20 +231,66 @@ watch(
   () => props.suggestedScale,
   (scale) => {
     if (scale && scale > 1) {
-      customMultiplier.value = scale;
+      customMultiplier.value = Math.max(1, scale);
     }
   }
 );
 
-const selectScale = (scale: number) => {
+const selectPresetScale = (scale: 1 | 2) => {
+  isCustomMode.value = false;
   emit('update:exportScale', scale);
 };
 
-const onCustomInput = () => {
-  const raw = Number(customMultiplier.value);
-  if (Number.isFinite(raw) && raw > 0) {
-    const val = Math.round(raw * 100) / 100;
-    emit('update:exportScale', val);
+const selectCustom = () => {
+  isCustomMode.value = true;
+  emit('update:exportScale', customMultiplier.value);
+};
+
+const onCustomInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const rawStr = target.value;
+  if (!rawStr) return;
+
+  const normalized = rawStr.replace(',', '.');
+  const num = parseFloat(normalized);
+  if (isNaN(num)) return;
+
+  // 1. Validar que las Nx no puedan ser menores a 1
+  if (num < 1) {
+    customMultiplier.value = 1;
+    target.value = '1';
+    emit('update:exportScale', 1);
+    return;
+  }
+
+  // 2. Validar máximo 2 decimales.
+  // Si se coloca un decimal de más (> 2), pasar al siguiente número entero con toFixed(0)
+  const parts = normalized.split('.');
+  if (parts.length > 1 && parts[1].length > 2) {
+    const nextInt = Math.ceil(num) > num ? Math.ceil(num) : Math.floor(num) + 1;
+    const fixedVal = Number(nextInt.toFixed(0));
+    customMultiplier.value = fixedVal;
+    target.value = String(fixedVal);
+    emit('update:exportScale', fixedVal);
+    return;
+  }
+
+  // Hasta 2 decimales válidos
+  const val = Math.round(num * 100) / 100;
+  customMultiplier.value = val;
+  emit('update:exportScale', val);
+};
+
+const onCustomBlur = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const rawStr = target.value;
+  const num = parseFloat(rawStr.replace(',', '.'));
+  if (isNaN(num) || num < 1) {
+    customMultiplier.value = 1;
+    target.value = '1';
+    emit('update:exportScale', 1);
+  } else {
+    target.value = String(customMultiplier.value);
   }
 };
 </script>
