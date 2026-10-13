@@ -13,7 +13,7 @@ interface Props extends Partial<SEOProps> {
 }
 
 const {
-  title = "PixEmoji — Exportador de Emojis a PNG Transparente",
+  title = "PixEmoji — Exportador de Emojis",
   description = "Exporta cualquier emoji a imagen PNG en alta resolución (256px a 2048px) con fondo transparente y crea stickers troquelados, memes y composiciones gráficas.",
   lang = "es",
   canonicalUrl,
@@ -76,7 +76,12 @@ const structuredData =
 
 <!-- URL Canónica y Sitemap -->
 <link rel="canonical" href={canonical} />
-<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+<link
+  rel="sitemap"
+  type="application/xml"
+  title="Sitemap"
+  href="/sitemap.xml"
+/>
 
 <!-- Hreflang Alternates Multilingües -->
 {
@@ -104,9 +109,8 @@ const structuredData =
 <meta name="twitter:image" content={resolvedOgImage} />
 <meta name="twitter:image:alt" content={ogImageAlt || title} />
 
-<!-- Favicons & Iconos PWA -->
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="alternate icon" href="/favicon.ico" />
+<!-- Favicon -->
+<link rel="icon" type="image/webp" href="/logo.webp" />
 <meta name="theme-color" content="#d97736" />
 <meta name="color-scheme" content="light dark" />
 

@@ -6,8 +6,10 @@
     <!-- Aspect Ratio Dropdown & Custom Edit Button -->
     <div class="relative flex items-center gap-1.5">
       <select
+        id="format-select"
         :value="currentPreset.id"
         @change="onPresetSelect"
+        aria-label="Seleccionar formato"
         class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-app-border-strong hover:border-text-muted rounded-xl text-xs font-semibold text-text-main shadow-2xs transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary-500"
         title="Proporción / Formato del lienzo"
       >

@@ -6,7 +6,7 @@ export const TAGLINE_ES = "Exportador de Emojis a PNG Transparente & Meme Studio
 export const TAGLINE_EN = "Transparent PNG Emoji Exporter & Meme Studio";
 
 export const DEFAULT_DESCRIPTION_ES =
-  "Exporta cualquier emoji a imagen PNG en alta resolución (256px a 2048px) con fondo transparente y crea stickers troquelados, memes y composiciones gráficas.";
+  "Convierte cualquier emoji en imagen PNG transparente, ajusta su tamaño y calidad, o combina texto e imágenes para crear tus propios stickers y memes.";
 export const DEFAULT_DESCRIPTION_EN =
   "Export any emoji to high-resolution transparent PNG (256px to 2048px) and craft die-cut stickers, memes, and graphic compositions.";
 
@@ -35,7 +35,7 @@ export interface RouteMetadata {
 export const ROUTES: Record<string, RouteMetadata> = {
   home: {
     path: "/",
-    title: "PixEmoji — Exportador de Emojis a PNG Transparente",
+    title: "PixEmoji — Exportador de Emojis",
     description:
       "Exporta cualquier emoji a imagen PNG en alta resolución (256px a 2048px) con fondo transparente y posicionamiento interactivo sobre lienzo.",
     changefreq: "weekly",

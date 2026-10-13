@@ -90,7 +90,7 @@ export function getHomeSchema(
         logo: {
           "@type": "ImageObject",
           "@id": `${base}/#logo`,
-          url: `${base}/favicon.svg`,
+          url: `${base}/logo.webp`,
           caption: SERVICE_NAME,
         },
         contactPoint: [
@@ -275,7 +275,7 @@ export function getLegalSchema({
           logo: {
             "@type": "ImageObject",
             "@id": `${base}/#logo`,
-            url: `${base}/favicon.svg`,
+            url: `${base}/logo.webp`,
           },
         },
       },

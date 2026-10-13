@@ -1,18 +1,18 @@
 <template>
-  <div class="w-full max-w-5xl mx-auto space-y-8">
+  <section class="w-full max-w-5xl mx-auto space-y-8">
     <!-- Header -->
-    <div class="text-center space-y-2">
+    <header class="text-center space-y-2">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-100 border border-primary-200 text-primary-800 text-xs font-semibold uppercase tracking-wider mb-1">
         <span class="inline-block w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
-        Lienzo Interactivo con Emojis
+        Diseña en tiempo real
       </div>
-      <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-text-main">
-        Exportador de Emojis en Alta Resolución
-      </h2>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-text-main">
+        Exportador de Emojis a Imagen
+      </h1>
       <p class="text-sm md:text-base text-text-muted max-w-2xl mx-auto">
-        Posiciona, escala o rota tu emoji libremente en el lienzo interactivo de 250x250 px. Usa el selector completo con decenas de emojis o elige uno de la galería rápida.
+        Mueve, gira y redimensiona cada elemento a tu gusto. Elige cualquier emoji de la colección y prepáralo para descargar.
       </p>
-    </div>
+    </header>
 
     <!-- Main Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -69,7 +69,7 @@
 
     <!-- Global Emoji Picker Modal -->
     <EmojiPickerModal />
-  </div>
+  </section>
 </template>
 
 <script setup lang="ts">
