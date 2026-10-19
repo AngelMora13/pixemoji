@@ -12,7 +12,6 @@
       >
         ✕
       </button>
-
       <!-- Header -->
       <div class="text-left space-y-1">
         <div class="flex items-center gap-2">
@@ -52,7 +51,6 @@
             <span class="block text-xs">{{ scale === 1 ? '1x' : '2x Ultra' }}</span>
             <span class="text-[9px] font-mono block opacity-85 leading-tight">{{ canvasWidth * scale }}&times;{{ canvasHeight * scale }}</span>
           </button>
-
           <!-- 3er Botón Custom Nx -->
           <button
             type="button"
@@ -70,7 +68,6 @@
             </span>
           </button>
         </div>
-
         <!-- Input editable para el multiplicador Nx (solo visible al presionar custom) -->
         <div
           v-if="isCustomMode"
@@ -94,7 +91,6 @@
             <span class="font-bold text-xs text-text-muted">x</span>
           </div>
         </div>
-
         <!-- Alerta de escala alta (> 2x o > 4x) -->
         <div
           v-if="exportScale > 2"
@@ -107,7 +103,6 @@
           <span>{{ exportScale > 4 ? `Escalas ultra altas (${exportScale}x) pueden demorar bastante tiempo o agotar la memoria del navegador.` : 'Escalas superiores a 2x requieren mayor memoria y tiempo de renderizado.' }}</span>
         </div>
       </div>
-
       <!-- Tipo de Imagen -->
       <div class="space-y-1.5">
         <div class="flex items-center justify-between">
@@ -145,11 +140,14 @@
         <ExportActions
           :copied="copied"
           :download-text="`Descargar Imagen ${imageFormat?.toUpperCase() || 'PNG'}`"
-          @download="$emit('download')"
-          @copy="$emit('copy')"
+          @download="onDownload"
+          @copy="onCopy"
         />
       </div>
-
+      <!-- Apoyo / Donación Buy Me a Coffee (solo tras exportar o copiar) -->
+      <div v-if="hasExported" class="pt-1 animate-fade-in">
+        <DonationInlineBanner />
+      </div>
       <p class="text-[10px] text-center text-text-subtle pt-0.5">
         🔒 Solo tu tienes acceso
       </p>
@@ -160,6 +158,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import ExportActions from './ExportActions.vue';
+import DonationInlineBanner from './DonationInlineBanner.vue';
 
 export type ExportImageFormat = 'png' | 'webp' | 'jpeg';
 
@@ -185,9 +184,7 @@ const props = withDefaults(
     suggestedScale?: number;
     imageFormat?: ExportImageFormat;
   }>(),
-  {
-    imageFormat: 'png'
-  }
+  { imageFormat: 'png' }
 );
 
 const emit = defineEmits<{
@@ -198,19 +195,29 @@ const emit = defineEmits<{
   (e: 'copy'): void;
 }>();
 
-const selectFormat = (fmt: ExportImageFormat) => {
-  emit('update:imageFormat', fmt);
-};
+const selectFormat = (fmt: ExportImageFormat) => emit('update:imageFormat', fmt);
 
 const isCustomMode = ref(props.exportScale !== 1 && props.exportScale !== 2);
 const customMultiplier = ref(
   Math.max(1, props.suggestedScale ?? (props.exportScale > 2 ? props.exportScale : 4))
 );
+const hasExported = ref(false);
+
+const onDownload = () => {
+  hasExported.value = true;
+  emit('download');
+};
+
+const onCopy = () => {
+  hasExported.value = true;
+  emit('copy');
+};
 
 watch(
   () => props.isOpen,
   (open) => {
     if (open) {
+      hasExported.value = false;
       if (props.suggestedScale && props.suggestedScale > 1) {
         if (props.suggestedScale === 2) {
           isCustomMode.value = false;
@@ -262,9 +269,6 @@ const onCustomInput = (event: Event) => {
     emit('update:exportScale', 1);
     return;
   }
-
-  // 2. Validar máximo 2 decimales.
-  // Si se coloca un decimal de más (> 2), pasar al siguiente número entero con toFixed(0)
   const parts = normalized.split('.');
   if (parts.length > 1 && parts[1].length > 2) {
     const nextInt = Math.ceil(num) > num ? Math.ceil(num) : Math.floor(num) + 1;
@@ -274,8 +278,6 @@ const onCustomInput = (event: Event) => {
     emit('update:exportScale', fixedVal);
     return;
   }
-
-  // Hasta 2 decimales válidos
   const val = Math.round(num * 100) / 100;
   customMultiplier.value = val;
   emit('update:exportScale', val);
@@ -294,4 +296,3 @@ const onCustomBlur = (event: Event) => {
   }
 };
 </script>
-
