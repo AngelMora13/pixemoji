@@ -64,11 +64,22 @@
           @download="handleDownload"
           @copy="handleCopy"
         />
+
+        <!-- Buy Me a Coffee Inline Banner (solo visible tras descargar o copiar) -->
+        <div v-if="hasExported" class="w-full animate-fade-in pt-1">
+          <DonationInlineBanner />
+        </div>
       </div>
     </div>
 
     <!-- Global Emoji Picker Modal -->
     <EmojiPickerModal />
+
+    <!-- Global Donation Modal -->
+    <DonationModal
+      :is-open="donationModal.isOpen.value"
+      @close="donationModal.closeModal"
+    />
   </section>
 </template>
 
@@ -81,13 +92,19 @@ import { patchKonvaEmojiShadow, patchKonvaEmojiBounds, syncEmojiMetrics } from '
 // Modular Subcomponents
 import KonvaStage from './canvas/KonvaStage.vue';
 import ExportActions from './common/ExportActions.vue';
+import DonationInlineBanner from './common/DonationInlineBanner.vue';
+import DonationModal from './common/DonationModal.vue';
 import EmojiControlsPanel, { type ExportImageFormat } from './common/EmojiControlsPanel.vue';
 import EmojiPickerModal from './common/EmojiPickerModal.vue';
+import { provideDonationModal } from '../composables/useDonationModal';
+
+const donationModal = provideDonationModal();
 
 const selectedChar = ref('🧁');
 const targetResolution = ref<number>(512);
 const imageFormat = ref<ExportImageFormat>('png');
 const copied = ref(false);
+const hasExported = ref(false);
 
 const stage = useKonvaStage();
 let emojiNode: any = null;
@@ -123,6 +140,7 @@ const updateEmoji = (char: string) => {
 
 const handleDownload = () => {
   if (!stage.stageInstance.value || !stage.layerInstance.value) return;
+  hasExported.value = true;
 
   stage.clearSelection();
   const multiplier = targetResolution.value / CANVAS_SIZE;
@@ -165,6 +183,7 @@ const handleDownload = () => {
 
 const handleCopy = async () => {
   if (!stage.stageInstance.value || !stage.layerInstance.value) return;
+  hasExported.value = true;
 
   stage.clearSelection();
   const multiplier = targetResolution.value / CANVAS_SIZE;

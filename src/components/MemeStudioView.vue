@@ -94,10 +94,12 @@
       @add-image="handleAddImage"
       @quick-add="handleQuickAdd"
     />
-
     <!-- Global Modals -->
     <EmojiPickerModal />
-
+    <DonationModal
+      :is-open="donationModal.isOpen.value"
+      @close="donationModal.closeModal"
+    />
     <ExportModal
       :is-open="isExportModalOpen"
       :export-scale="exporter.exportScale.value"
@@ -123,7 +125,6 @@
     />
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useSocialPresets, type FormatPreset } from '../composables/useSocialPresets';
@@ -137,7 +138,6 @@ import { useHistoryUndo } from '../composables/useHistoryUndo';
 import { useStudioShortcuts } from '../composables/useStudioShortcuts';
 import { createStudioContext, provideCanvasStudio } from '../composables/useCanvasStudioContext';
 import { PLACEHOLDER_IMAGE_URL } from '../utils/index.ts';
-
 // Modular Components
 import StudioHeader from './studio/StudioHeader.vue';
 import CanvasViewport from './canvas/CanvasViewport.vue';
@@ -146,8 +146,11 @@ import ToolsSidebarContent from './studio/ToolsSidebarContent.vue';
 import StudioMobileDrawers from './studio/StudioMobileDrawers.vue';
 import EmojiPickerModal from './common/EmojiPickerModal.vue';
 import ExportModal from './common/ExportModal.vue';
+import DonationModal from './common/DonationModal.vue';
 import CustomCanvasSizeModal from './common/CustomCanvasSizeModal.vue';
+import { provideDonationModal } from '../composables/useDonationModal';
 
+const donationModal = provideDonationModal();
 // Composables & State
 const { currentPreset, formatPresets, customDimensions, selectPreset, setCustomDimensions } = useSocialPresets();
 const stage = useKonvaStage();

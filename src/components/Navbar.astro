@@ -1,4 +1,6 @@
 ---
+import BuyMeCoffeeButton from "@/components/common/BuyMeCoffeeButton.vue";
+
 interface Props {
   currentPath?: string;
 }
@@ -81,20 +83,9 @@ const isMeme = currentPath.startsWith("/meme");
 
     <!-- Right Actions / Controls -->
     <div class="flex items-center gap-2">
-      <!-- Quick shortcuts pill (Desktop only) -->
-      <div
-        class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/70 border border-app-border text-xs font-medium text-text-muted"
-      >
-        <span class="text-[11px] text-text-subtle">Teclado:</span>
-        <kbd
-          class="px-1.5 py-0.5 rounded bg-stone-100 border border-stone-300 font-mono text-[10px] text-text-main"
-          >Win + .</kbd
-        >
-        <span>o</span>
-        <kbd
-          class="px-1.5 py-0.5 rounded bg-stone-100 border border-stone-300 font-mono text-[10px] text-text-main"
-          >Cmd + Ctrl + Space</kbd
-        >
+      <!-- Buy Me a Coffee Button (Desktop / Tablet) -->
+      <div class="hidden md:flex items-center">
+        <BuyMeCoffeeButton client:only="vue" />
       </div>
 
       <!-- Current Active Mode Indicator (Mobile only) -->
@@ -225,6 +216,12 @@ const isMeme = currentPath.startsWith("/meme");
             </p>
           </div>
         </a>
+      </div>
+
+      <!-- Buy Me a Coffee (Mobile Menu) -->
+      <div class="pt-2 border-t border-app-border/70 flex items-center justify-between px-1">
+        <span class="text-xs font-bold text-text-muted">Apoya el proyecto:</span>
+        <BuyMeCoffeeButton client:only="vue" forceText={true} />
       </div>
 
       <!-- Quick Shortcuts Tip -->
