@@ -4,11 +4,12 @@ Este documento establece las **reglas obligatorias de desarrollo** para el proye
 
 ---
 
-## 1. Regla de Oro: Prohibidos los "Archivos Dios" (Anti-God Files)
+## 1. Principio Fundamental: Evitar "Archivos Dios" con Pragmatismo (Anti-God Files)
 
-- Ningún componente `.vue` o archivo `.ts` debe superar las **250 - 300 líneas**.
-- Si un componente maneja al mismo tiempo: UI de herramientas, manipulación de lienzo, gestión de capas, atajos de teclado y exportación, **está violando la separación de responsabilidades** y debe fragmentarse.
-- Se busca un código **fácil de leer y navegar**, donde cada pieza tenga un propósito concreto.
+- **Sin obsesión por límites arbitrarios de líneas:** No existe una cota rígida de 250 - 300 líneas; un componente o archivo puede superar las 500 líneas si alberga pura lógica propia, cohesiva y necesaria (incluso reutilizando).
+- **Separación real de responsabilidades:** El objetivo es evitar que un único archivo acumule responsabilidades dispares (por ejemplo: manipular el lienzo Konva, gestionar el catálogo de capas, manejar atajos de teclado y controlar la exportación simultáneamente).
+- **Abstracción con sentido y utilidad:** Utilizar componentes (`src/components/`) y composables (`src/composables/`) como recursos para fomentar la modularidad y la reutilización. Se deben evitar sobre-abstracciones vacías o innecesarias (no tiene sentido crear un composable trivial que retorne `{ some: true }` para luego hacer `const some = composable.some`).
+- Se busca un código **fácil de leer, navegar y mantener**, donde cada pieza tenga un propósito concreto y justificado.
 
 ---
 
@@ -28,6 +29,7 @@ src/components/
 │   ├── BottomSheetModal.vue      # Drawer y hoja inferior táctil para dispositivos móviles
 │   ├── ColorPalettePicker.vue    # Selector y paleta flotante de color con guardados
 │   ├── ExportModal.vue           # Modal global de exportación PNG con resolución
+│   ├── ImageFormatSelector.vue   # Selector unificado de formato de imagen (PNG, WEBP, JPEG)
 │   ├── EmojiPickerModal.vue      # Envoltorio del web component emoji-picker
 │   ├── EmojiControlsPanel.vue    # Panel de presets de emoji, resolución y alineación
 │   ├── EmojiQuickSelector.vue    # Tarjeta unificada de preview y atajos rápidos FIFO para selección de emojis
@@ -109,10 +111,18 @@ src/composables/
 
 ---
 
+### Pilar D: Cero `export` en Componentes Vue (`.vue`)
+- **Regla Estricta:** NUNCA utilizar `export const`, `export type`, `export interface` o `export function` dentro de bloques `<script setup>` o `<script>` en componentes `.vue`.
+- **Causa:** Los exports en SFCs (`.vue`) generan errores de compilación con el compilador de Astro y Vite.
+- **Solución Obligatoria:** Todo tipo, interfaz, constante, enum o función utilitaria que deba compartirse debe alojarse en un archivo TypeScript dedicado (`src/types/`, `src/utils/` o en `src/composables/`) e importarse desde allí.
+
+---
+
 ## 3. Checklist para Nuevos Desarrollos
 
 Antes de dar por completado un cambio o nueva funcionalidad, verifica:
-- [ ] ¿El archivo tiene menos de 250 líneas?
+- [ ] ¿El archivo mantiene responsabilidades claras y cohesivas sin convertirse en un archivo dios?
+- [ ] ¿Se verificó que ningún componente `.vue` contenga exports (`export type`, `export const`, etc.)?
 - [ ] ¿La lógica de canvas está dentro de un composable en `src/composables/`?
 - [ ] ¿Los controles o paneles tienen su propio archivo en `src/components/studio/` o `src/components/common/`?
 - [ ] ¿El código es legible para otro desarrollador sin requerir explicaciones complejas?

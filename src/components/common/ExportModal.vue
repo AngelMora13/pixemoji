@@ -104,36 +104,11 @@
         </div>
       </div>
       <!-- Tipo de Imagen -->
-      <div class="space-y-1.5">
-        <div class="flex items-center justify-between">
-          <label class="block text-[11px] font-bold uppercase tracking-wider text-text-main">
-            Tipo de Imagen
-          </label>
-          <span class="text-[10px] font-mono font-bold uppercase text-primary-600">
-            .{{ (imageFormat || 'png') === 'jpeg' ? 'jpg' : (imageFormat || 'png') }}
-          </span>
-        </div>
-
-        <div class="grid grid-cols-3 gap-1.5">
-          <button
-            v-for="fmt in formatOptions"
-            :key="fmt.val"
-            type="button"
-            @click="selectFormat(fmt.val)"
-            :class="[
-              'p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center select-none flex flex-col items-center justify-center gap-0.5',
-              (imageFormat || 'png') === fmt.val
-                ? 'bg-primary-600 text-white border-primary-600 shadow-xs'
-                : 'bg-white text-text-main border-app-border-strong hover:bg-stone-50'
-            ]"
-          >
-            <span class="block text-xs font-mono font-bold">{{ fmt.label }}</span>
-            <span :class="['text-[9px] font-semibold block leading-tight', (imageFormat || 'png') === fmt.val ? 'text-primary-100' : 'text-text-subtle']">
-              {{ fmt.tag }}
-            </span>
-          </button>
-        </div>
-      </div>
+      <ImageFormatSelector
+        :model-value="imageFormat"
+        label="Tipo de Imagen"
+        @update:model-value="selectFormat"
+      />
 
       <!-- Action buttons -->
       <div class="pt-1">
@@ -159,20 +134,8 @@
 import { ref, watch } from 'vue';
 import ExportActions from './ExportActions.vue';
 import DonationInlineBanner from './DonationInlineBanner.vue';
-
-export type ExportImageFormat = 'png' | 'webp' | 'jpeg';
-
-export interface FormatOption {
-  label: string;
-  val: ExportImageFormat;
-  tag: string;
-}
-
-const formatOptions: FormatOption[] = [
-  { label: 'PNG', val: 'png', tag: 'Transparente' },
-  { label: 'WEBP', val: 'webp', tag: 'Ligero' },
-  { label: 'JPEG', val: 'jpeg', tag: 'Fondo Blanco' }
-];
+import ImageFormatSelector from './ImageFormatSelector.vue';
+import type { ExportImageFormat } from '../../types/export';
 
 const props = withDefaults(
   defineProps<{

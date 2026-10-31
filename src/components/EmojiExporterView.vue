@@ -94,7 +94,8 @@ import KonvaStage from './canvas/KonvaStage.vue';
 import ExportActions from './common/ExportActions.vue';
 import DonationInlineBanner from './common/DonationInlineBanner.vue';
 import DonationModal from './common/DonationModal.vue';
-import EmojiControlsPanel, { type ExportImageFormat } from './common/EmojiControlsPanel.vue';
+import EmojiControlsPanel from './common/EmojiControlsPanel.vue';
+import type { ExportImageFormat } from '../types/export';
 import EmojiPickerModal from './common/EmojiPickerModal.vue';
 import { provideDonationModal } from '../composables/useDonationModal';
 
