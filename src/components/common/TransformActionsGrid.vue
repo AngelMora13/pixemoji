@@ -1,49 +1,47 @@
 <template>
-  <div class="space-y-2.5" data-purpose="transform-actions-grid">
-    <span v-if="showTitle" class="block text-xs font-bold text-text-main uppercase tracking-wider text-[11px]">
-      {{ title }}
-    </span>
-    <div class="grid grid-cols-4 gap-1.5">
-      <button
-        type="button"
-        @click="triggerAction('flipH')"
-        class="flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-white border border-app-border hover:bg-primary-50 hover:border-primary-400 text-text-main text-[11px] font-semibold cursor-pointer shadow-2xs transition-colors"
-        title="Reflejar Horizontalmente"
-      >
-        <span class="text-sm select-none">↔️</span>
-        <span>Reflejar</span>
-      </button>
+  <div class="flex items-center justify-between gap-1.5 pt-0.5 select-none" data-purpose="quick-orientation-buttons">
+    <!-- Reflejar -->
+    <button
+      type="button"
+      @click="triggerAction('flipH')"
+      class="flex-1 py-2 px-2 bg-[#FAF6EE] hover:bg-[#F3EDE0] border border-[#E8DEC9] rounded-xl text-xs font-bold text-text-main flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-2xs cursor-pointer"
+      title="Reflejar horizontalmente"
+    >
+      <svg class="w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+      </svg>
+      <span>Reflejar</span>
+    </button>
 
-      <button
-        type="button"
-        @click="triggerAction('flipV')"
-        class="flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-white border border-app-border hover:bg-primary-50 hover:border-primary-400 text-text-main text-[11px] font-semibold cursor-pointer shadow-2xs transition-colors"
-        title="Invertir Verticalmente"
-      >
-        <span class="text-sm select-none">↕️</span>
-        <span>Invertir</span>
-      </button>
+    <!-- Girar 90° -->
+    <button
+      type="button"
+      @click="triggerAction('rotate', 90)"
+      class="flex-1 py-2 px-2 bg-[#FAF6EE] hover:bg-[#F3EDE0] border border-[#E8DEC9] rounded-xl text-xs font-bold text-text-main flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-2xs cursor-pointer"
+      title="Girar 90 grados"
+    >
+      <svg class="w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        ></path>
+      </svg>
+      <span>Girar 90°</span>
+    </button>
 
-      <button
-        type="button"
-        @click="triggerAction('center')"
-        class="flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-white border border-app-border hover:bg-primary-50 hover:border-primary-400 text-text-main text-[11px] font-semibold cursor-pointer shadow-2xs transition-colors"
-        title="Centrar en el lienzo"
-      >
-        <span class="text-sm select-none">🎯</span>
-        <span>Centrar</span>
-      </button>
-
-      <button
-        type="button"
-        @click="triggerAction('rotate', 90)"
-        class="flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-white border border-app-border hover:bg-primary-50 hover:border-primary-400 text-text-main text-[11px] font-semibold cursor-pointer shadow-2xs transition-colors"
-        title="Girar 90 grados"
-      >
-        <span class="text-sm select-none">🔄</span>
-        <span>Rotar 90°</span>
-      </button>
-    </div>
+    <!-- Limpiar -->
+    <button
+      type="button"
+      @click="triggerAction('resetOrientation')"
+      class="flex-1 py-2 px-2 bg-[#FAF6EE] hover:bg-[#F3EDE0] border border-[#E8DEC9] rounded-xl text-xs font-bold text-text-main flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-2xs cursor-pointer"
+      title="Restablecer a 0° y sin reflejo"
+    >
+      <svg class="w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6" />
+      </svg>
+      <span>Limpiar</span>
+    </button>
   </div>
 </template>
 

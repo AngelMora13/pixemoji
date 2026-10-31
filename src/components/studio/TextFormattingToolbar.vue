@@ -4,6 +4,25 @@
     <div v-if="isWeightMenuOpen" class="fixed inset-0 z-20" @click="isWeightMenuOpen = false"></div>
 
     <div class="flex items-center gap-1.5 p-1 bg-stone-100 rounded-xl border border-app-border relative z-24">
+      <!-- Opciones compactas exclusivas de Móvil: Tipografía y Color -->
+      <div v-if="currentFont" class="md:hidden flex items-center gap-1">
+        <FontFamilyPicker
+          :current-font="currentFont"
+          compact
+          @select-font="$emit('selectFont', $event)"
+        />
+        <ColorPalettePicker
+          v-if="currentColor"
+          :current-color="currentColor"
+          compact
+          popover-align="left"
+          title="Color de texto"
+          @live-change="$emit('colorLiveChange', $event)"
+          @commit-change="$emit('colorCommitChange', $event)"
+        />
+        <div class="w-[1px] h-4 bg-stone-300 mx-0.5"></div>
+      </div>
+
       <!-- Botón Bold Unificado con selector integrado de grosores descriptivos (100 a 900) -->
       <div class="relative inline-flex items-center">
         <!-- B principal: alterna 400 <-> 700 -->
@@ -104,13 +123,23 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { WEIGHT_OPTIONS } from '../../utils/tiptapHelpers';
+import FontFamilyPicker from './FontFamilyPicker.vue';
+import ColorPalettePicker from '../common/ColorPalettePicker.vue';
 
-defineProps<{
-  currentWeight: string;
-  isItalic: boolean;
-  isBulletActive: boolean;
-  isOrderedActive: boolean;
-}>();
+withDefaults(
+  defineProps<{
+    currentWeight: string;
+    isItalic: boolean;
+    isBulletActive: boolean;
+    isOrderedActive: boolean;
+    currentFont?: string;
+    currentColor?: string;
+  }>(),
+  {
+    currentFont: '',
+    currentColor: ''
+  }
+);
 
 const emit = defineEmits<{
   (e: 'toggleBold'): void;
@@ -118,6 +147,9 @@ const emit = defineEmits<{
   (e: 'toggleItalic'): void;
   (e: 'toggleBulletList'): void;
   (e: 'toggleOrderedList'): void;
+  (e: 'selectFont', font: string): void;
+  (e: 'colorLiveChange', color: string): void;
+  (e: 'colorCommitChange', color: string): void;
 }>();
 
 const isWeightMenuOpen = ref(false);

@@ -1,6 +1,19 @@
 <template>
-  <div class="relative" data-purpose="font-family-picker">
+  <div class="relative" :class="compact ? 'inline-block shrink-0' : 'w-full'" data-purpose="font-family-picker">
+    <!-- Botón compacto para barra de formato inline (móvil) -->
     <button
+      v-if="compact"
+      type="button"
+      @click="isOpen = !isOpen"
+      class="w-7 h-7 rounded-lg border border-app-border-strong bg-white hover:bg-stone-50 text-text-main flex items-center justify-center font-bold text-xs shadow-2xs cursor-pointer active:scale-95 transition-all"
+      :title="`Tipografía actual: ${currentFont}`"
+    >
+      <span class="font-serif font-black text-xs leading-none">Aa</span>
+    </button>
+
+    <!-- Botón estándar con texto completo -->
+    <button
+      v-else
       type="button"
       @click="isOpen = !isOpen"
       class="w-full h-8.5 px-2.5 bg-white border border-app-border-strong rounded-xl text-xs font-bold text-text-main flex items-center justify-between shadow-2xs hover:bg-stone-50 cursor-pointer transition-colors"
@@ -107,9 +120,15 @@ import {
   extractGoogleFontUrl
 } from '../../composables/useCustomFontsAndColors';
 
-defineProps<{
-  currentFont: string;
-}>();
+withDefaults(
+  defineProps<{
+    currentFont: string;
+    compact?: boolean;
+  }>(),
+  {
+    compact: false
+  }
+);
 
 const emit = defineEmits<{
   (e: 'selectFont', fontName: string): void;

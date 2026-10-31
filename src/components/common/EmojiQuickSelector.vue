@@ -1,138 +1,212 @@
 <template>
-  <div class="p-3 bg-stone-50 border border-app-border rounded-2xl space-y-2.5 relative" data-purpose="emoji-quick-selector">
-    <!-- Cabecera con botón Pegar rápido -->
-    <div class="flex items-center justify-between">
-      <span class="text-[11px] font-bold uppercase tracking-wider text-text-main flex items-center gap-1.5">
-        <span v-if="icon">{{ icon }}</span>
-        <span>{{ title }}</span>
-      </span>
+  <div class="space-y-2 select-none" data-purpose="emoji-quick-selector">
+    <!-- MOBILE VIEW (2 FILAS MÁXIMO) -->
+    <div class="md:hidden space-y-2">
+      <!-- Fila 1: Icono de emoji seleccionado + Input de texto para escribir/pegar + Botón Pegar -->
       <div class="flex items-center gap-1.5">
-        <button
-          type="button"
-          @click="pasteFromClipboard"
-          class="text-[10.5px] font-semibold px-2 py-0.5 rounded-lg bg-white border border-app-border hover:bg-primary-50 hover:border-primary-300 text-primary-600 flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
-          :title="pasteSuccess ? '¡Emoji pegado con éxito!' : 'Pegar emoji copiado del portapapeles'"
+        <!-- Emoji Badge / Icono al inicio -->
+        <div
+          class="w-10 h-10 rounded-2xl bg-[#FFF6EE] border border-orange-200 flex items-center justify-center text-2xl shrink-0 select-none shadow-2xs"
+          :title="`Emoji activo: ${modelValue}`"
         >
-          <span>{{ pasteSuccess ? '✅' : '📋' }}</span>
-          <span>{{ pasteSuccess ? '¡Pegado!' : 'Pegar' }}</span>
-        </button>
-        <span class="text-[10px] text-text-subtle font-mono">
-          {{ shortcutEmojis.length }}/10
-        </span>
-      </div>
-    </div>
+          {{ modelValue }}
+        </div>
 
-    <!-- Preview del emoji activo: al hacer clic abre el selector global o Ctrl+V para pegar -->
-    <div
-      ref="pickerTriggerRef"
-      tabindex="0"
-      @click="openPicker"
-      @paste="onPasteEvent"
-      class="flex items-center gap-3 p-2 bg-white border border-app-border rounded-xl cursor-pointer hover:border-primary-400 hover:bg-stone-50/50 transition-colors shadow-2xs group focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-      title="Haz clic para abrir el buscador completo de emojis o presiona Ctrl+V para pegar"
-    >
-      <div class="w-11 h-11 rounded-xl bg-primary-50 border border-primary-200 flex items-center justify-center text-3xl shadow-2xs shrink-0 select-none group-hover:scale-105 transition-transform">
-        {{ modelValue }}
-      </div>
-      <div class="min-w-0 flex-1">
-        <span class="block text-xs font-bold text-text-main truncate">
-          Emoji: {{ modelValue }}
-        </span>
-        <span class="block text-[11px] text-text-muted">
-          Haz clic para buscar o pega con Ctrl+V
-        </span>
-      </div>
-    </div>
-
-    <!-- Entrada directa / Soporte móvil (menú contextual o teclado nativo de emojis) -->
-    <div class="flex items-center gap-1.5">
-      <div class="relative flex-1">
-        <input
-          ref="directInputRef"
-          type="text"
-          v-model="inputQuery"
-          @input="onInputQueryChange"
-          @paste="onInputPaste"
-          placeholder="O pega / escribe aquí cualquier emoji..."
-          class="w-full h-8 px-2.5 pr-14 bg-white border border-app-border rounded-xl text-xs text-text-main placeholder-text-hint focus:outline-none focus:ring-1 focus:ring-primary-500 shadow-2xs transition-colors"
-        />
-
-        <div class="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
-          <!-- Botón Limpiar texto -->
+        <!-- Input de texto -->
+        <div class="relative flex-1">
+          <input
+            ref="directInputRef"
+            type="text"
+            v-model="inputQuery"
+            @input="onInputQueryChange"
+            @paste="onInputPaste"
+            placeholder="Pega o escribe un emoji..."
+            class="w-full h-10 pl-3 pr-8 bg-[#FAF6EE] border border-[#E2D8C7] rounded-2xl text-xs font-semibold text-text-main placeholder-text-hint focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 shadow-2xs transition-colors"
+          />
           <button
             v-if="inputQuery"
             type="button"
             @click="inputQuery = ''"
-            class="w-5 h-5 flex items-center justify-center rounded-full text-text-subtle hover:text-text-main text-[11px] cursor-pointer"
+            class="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full text-text-subtle hover:text-text-main text-xs cursor-pointer"
             title="Limpiar"
           >
             ✕
           </button>
-
-          <!-- Botón de Ayuda con Tooltip (Desktop) -->
-          <div class="relative hidden md:inline-flex group/tip">
-            <button
-              type="button"
-              @click.stop="toggleTooltip"
-              class="w-5 h-5 flex items-center justify-center rounded-full bg-stone-100 hover:bg-primary-100 text-stone-500 hover:text-primary-700 text-[11px] font-bold cursor-pointer transition-colors shadow-2xs"
-              title="Atajos de teclado del sistema"
-            >
-              ?
-            </button>
-
-            <!-- Tooltip Flotante -->
-            <div
-              :class="[
-                'absolute bottom-full right-0 mb-2 w-64 p-3 bg-stone-900/95 backdrop-blur-md text-white rounded-2xl shadow-floating border border-stone-700/80 text-left transition-all duration-200 z-50 pointer-events-none',
-                isTooltipOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 group-hover/tip:opacity-100 group-hover/tip:scale-100 group-hover/tip:pointer-events-auto'
-              ]"
-            >
-              <div class="flex items-center gap-1.5 text-amber-400 font-bold text-xs mb-1">
-                <span>💡</span>
-                <span>Atajos del Sistema</span>
-              </div>
-              <p class="text-[11px] text-stone-300 leading-snug mb-2">
-                Abre el buscador nativo de emojis de tu equipo con:
-              </p>
-              <div class="space-y-1.5 font-mono text-[10.5px]">
-                <div class="flex items-center justify-between bg-stone-800/90 px-2.5 py-1 rounded-xl border border-stone-700/50">
-                  <span class="text-stone-400 font-sans text-[11px]">Windows:</span>
-                  <kbd class="text-amber-300 font-bold bg-stone-900/80 px-1.5 py-0.5 rounded border border-stone-600">Win + .</kbd>
-                </div>
-                <div class="flex items-center justify-between bg-stone-800/90 px-2.5 py-1 rounded-xl border border-stone-700/50">
-                  <span class="text-stone-400 font-sans text-[11px]">Mac:</span>
-                  <kbd class="text-amber-300 font-bold bg-stone-900/80 px-1.5 py-0.5 rounded border border-stone-600">Cmd + Ctrl + Space</kbd>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Reemplazo Rápido: Atajos FIFO (Máx 10) -->
-    <div>
-      <div class="flex items-center justify-between mb-1.5">
-        <span class="text-[10px] font-bold text-text-subtle uppercase tracking-wider">
-          Opciones Rápidas:
-        </span>
+        <!-- Botón Pegar -->
+        <button
+          type="button"
+          @click="pasteFromClipboard"
+          class="h-10 px-3 bg-white hover:bg-orange-50 border border-[#E0D5C3] text-primary-600 rounded-2xl text-xs font-bold shadow-2xs active:scale-95 transition-all flex items-center gap-1 cursor-pointer shrink-0"
+          :title="pasteSuccess ? '¡Pegado!' : 'Pegar del portapapeles'"
+        >
+          <span>{{ pasteSuccess ? '✅' : '📋' }}</span>
+          <span>{{ pasteSuccess ? 'Listo' : 'Pegar' }}</span>
+        </button>
       </div>
-      <div class="grid grid-cols-5 gap-1.5">
+
+      <!-- Fila 2: Barra de iconos de opciones rápidas en 1 sola fila + Botón de abrir buscador de iconos al final -->
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5" data-purpose="quick-emoji-scroll-row">
         <button
           v-for="char in shortcutEmojis"
           :key="char"
           type="button"
           @click="selectChar(char)"
           :class="[
-            'h-8 rounded-xl border transition-all flex items-center justify-center cursor-pointer select-all text-lg hover:scale-115 active:scale-95 shadow-2xs',
+            'flex-none w-9 h-9 rounded-xl border flex items-center justify-center text-lg active:scale-90 transition-all cursor-pointer shadow-2xs select-none',
             modelValue === char
-              ? 'bg-primary-100 border-primary-500 scale-105 ring-1 ring-primary-500'
-              : 'bg-white border-app-border hover:bg-primary-50'
+              ? 'bg-[#FFF6EE] border-primary-500 ring-2 ring-primary-500/20 scale-105'
+              : 'bg-[#FAF6EE] border-[#E9DFCF] hover:bg-white'
           ]"
           :title="`Usar ${char}`"
         >
-          <span>{{ char }}</span>
+          {{ char }}
         </button>
+
+        <!-- Botón al final para abrir el inspector/buscador completo de emojis -->
+        <button
+          type="button"
+          @click="openPicker"
+          class="flex-none px-2.5 h-9 rounded-xl bg-white hover:bg-primary-50 border border-app-border text-primary-600 flex items-center gap-1 text-xs font-bold shadow-2xs active:scale-95 transition-all shrink-0 cursor-pointer"
+          title="Abrir buscador completo de emojis"
+        >
+          <span>🔍</span>
+          <span class="text-[10px]">Más</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- DESKTOP VIEW (PANEL COMPLETO) -->
+    <div class="hidden md:block p-3 bg-stone-50 border border-app-border rounded-2xl space-y-2.5">
+      <!-- Cabecera con botón Pegar rápido -->
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-text-main flex items-center gap-1.5">
+          <span v-if="icon">{{ icon }}</span>
+          <span>{{ title }}</span>
+        </span>
+        <div class="flex items-center gap-1.5">
+          <button
+            type="button"
+            @click="pasteFromClipboard"
+            class="text-[10.5px] font-semibold px-2 py-0.5 rounded-lg bg-white border border-app-border hover:bg-primary-50 hover:border-primary-300 text-primary-600 flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+            :title="pasteSuccess ? '¡Emoji pegado con éxito!' : 'Pegar emoji copiado del portapapeles'"
+          >
+            <span>{{ pasteSuccess ? '✅' : '📋' }}</span>
+            <span>{{ pasteSuccess ? '¡Pegado!' : 'Pegar' }}</span>
+          </button>
+          <span class="text-[10px] text-text-subtle font-mono">
+            {{ shortcutEmojis.length }}/10
+          </span>
+        </div>
+      </div>
+
+      <!-- Preview del emoji activo: al hacer clic abre el selector global -->
+      <div
+        ref="pickerTriggerRef"
+        tabindex="0"
+        @click="openPicker"
+        @paste="onPasteEvent"
+        class="flex items-center gap-3 p-2 bg-white border border-app-border rounded-xl cursor-pointer hover:border-primary-400 hover:bg-stone-50/50 transition-colors shadow-2xs group focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+        title="Haz clic para abrir el buscador completo de emojis o presiona Ctrl+V para pegar"
+      >
+        <div class="w-11 h-11 rounded-xl bg-primary-50 border border-primary-200 flex items-center justify-center text-3xl shadow-2xs shrink-0 select-none group-hover:scale-105 transition-transform">
+          {{ modelValue }}
+        </div>
+        <div class="min-w-0 flex-1">
+          <span class="block text-xs font-bold text-text-main truncate">
+            Emoji: {{ modelValue }}
+          </span>
+          <span class="block text-[11px] text-text-muted">
+            Haz clic para buscar o pega con Ctrl+V
+          </span>
+        </div>
+      </div>
+
+      <!-- Entrada directa / Desktop -->
+      <div class="flex items-center gap-1.5">
+        <div class="relative flex-1">
+          <input
+            type="text"
+            v-model="inputQuery"
+            @input="onInputQueryChange"
+            @paste="onInputPaste"
+            placeholder="O pega / escribe aquí cualquier emoji..."
+            class="w-full h-8 px-2.5 pr-14 bg-white border border-app-border rounded-xl text-xs text-text-main placeholder-text-hint focus:outline-none focus:ring-1 focus:ring-primary-500 shadow-2xs transition-colors"
+          />
+
+          <div class="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            <button
+              v-if="inputQuery"
+              type="button"
+              @click="inputQuery = ''"
+              class="w-5 h-5 flex items-center justify-center rounded-full text-text-subtle hover:text-text-main text-[11px] cursor-pointer"
+              title="Limpiar"
+            >
+              ✕
+            </button>
+            <div class="relative inline-flex group/tip">
+              <button
+                type="button"
+                @click.stop="toggleTooltip"
+                class="w-5 h-5 flex items-center justify-center rounded-full bg-stone-100 hover:bg-primary-100 text-stone-500 hover:text-primary-700 text-[11px] font-bold cursor-pointer transition-colors shadow-2xs"
+                title="Atajos de teclado del sistema"
+              >
+                ?
+              </button>
+              <div
+                :class="[
+                  'absolute bottom-full right-0 mb-2 w-64 p-3 bg-stone-900/95 backdrop-blur-md text-white rounded-2xl shadow-floating border border-stone-700/80 text-left transition-all duration-200 z-50 pointer-events-none',
+                  isTooltipOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 group-hover/tip:opacity-100 group-hover/tip:scale-100 group-hover/tip:pointer-events-auto'
+                ]"
+              >
+                <div class="flex items-center gap-1.5 text-amber-400 font-bold text-xs mb-1">
+                  <span>💡</span>
+                  <span>Atajos del Sistema</span>
+                </div>
+                <p class="text-[11px] text-stone-300 leading-snug mb-2">
+                  Abre el buscador nativo de emojis de tu equipo con:
+                </p>
+                <div class="space-y-1.5 font-mono text-[10.5px]">
+                  <div class="flex items-center justify-between bg-stone-800/90 px-2.5 py-1 rounded-xl border border-stone-700/50">
+                    <span class="text-stone-400 font-sans text-[11px]">Windows:</span>
+                    <kbd class="text-amber-300 font-bold bg-stone-900/80 px-1.5 py-0.5 rounded border border-stone-600">Win + .</kbd>
+                  </div>
+                  <div class="flex items-center justify-between bg-stone-800/90 px-2.5 py-1 rounded-xl border border-stone-700/50">
+                    <span class="text-stone-400 font-sans text-[11px]">Mac:</span>
+                    <kbd class="text-amber-300 font-bold bg-stone-900/80 px-1.5 py-0.5 rounded border border-stone-600">Cmd + Ctrl + Space</kbd>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reemplazo Rápido: Atajos FIFO Desktop -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[10px] font-bold text-text-subtle uppercase tracking-wider">
+            Opciones Rápidas:
+          </span>
+        </div>
+        <div class="grid grid-cols-5 gap-1.5">
+          <button
+            v-for="char in shortcutEmojis"
+            :key="char"
+            type="button"
+            @click="selectChar(char)"
+            :class="[
+              'h-8 rounded-xl border transition-all flex items-center justify-center cursor-pointer select-all text-lg hover:scale-115 active:scale-95 shadow-2xs',
+              modelValue === char
+                ? 'bg-primary-100 border-primary-500 scale-105 ring-1 ring-primary-500'
+                : 'bg-white border-app-border hover:bg-primary-50'
+            ]"
+            :title="`Usar ${char}`"
+          >
+            <span>{{ char }}</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

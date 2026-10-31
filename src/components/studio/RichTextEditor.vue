@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-2.5 relative" data-purpose="rich-text-editor">
-    <!-- Fila 1: Menú de Fuentes y Selector de Color (Componentes Modulares) -->
-    <div class="grid grid-cols-2 gap-2 relative z-25">
+    <!-- Fila 1: Menú de Fuentes y Selector de Color (Solo Desktop, en móvil integrado abajo) -->
+    <div class="hidden md:grid grid-cols-2 gap-2 relative z-25">
       <FontFamilyPicker :current-font="currentFont" @select-font="applyFont" />
       <ColorPalettePicker
         :current-color="currentColor"
@@ -10,17 +10,22 @@
       />
     </div>
 
-    <!-- Fila 2: Formato Rápido (Bold Unificado + Menú de Pesos, Cursiva, Listas) -->
+    <!-- Fila 2: Formato Rápido (Bold Unificado + Menú de Pesos, Cursiva, Listas + Color/Font en móvil) -->
     <TextFormattingToolbar
       :current-weight="currentWeight"
       :is-italic="isItalic"
       :is-bullet-active="isBulletActive"
       :is-ordered-active="isOrderedActive"
+      :current-font="currentFont"
+      :current-color="currentColor"
       @toggle-bold="toggleBold"
       @select-weight="selectWeightOption"
       @toggle-italic="toggleItalic"
       @toggle-bullet-list="toggleBulletList"
       @toggle-ordered-list="toggleOrderedList"
+      @select-font="applyFont"
+      @color-live-change="onColorLiveChange"
+      @color-commit-change="onColorCommitChange"
     />
 
     <!-- Área de edición TipTap con estilo reactivo -->

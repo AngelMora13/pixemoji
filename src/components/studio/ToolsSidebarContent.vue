@@ -1,8 +1,8 @@
 <template>
   <div class="flex flex-col h-full overflow-hidden select-none" data-purpose="tools-sidebar-content">
-    <!-- Pestañas de Navegación: Añadir y Capas -->
+    <!-- Pestañas de Navegación: Añadir, Plantillas y Capas -->
     <div class="p-3 border-b border-app-border bg-app-header/70 flex items-center justify-between gap-2 shrink-0">
-      <nav class="grid grid-cols-2 gap-1 p-1 bg-primary-100/70 rounded-xl text-xs font-semibold flex-1 border border-primary-200">
+      <nav class="grid grid-cols-3 gap-1 p-1 bg-primary-100/70 rounded-xl text-xs font-semibold flex-1 border border-primary-200">
         <button
           v-for="tab in tabList"
           :key="tab.id"
@@ -45,7 +45,15 @@
         />
       </div>
 
-      <!-- TAB 2: CAPAS (con opción interna de modificar fondo) -->
+      <!-- TAB 2: PLANTILLAS -->
+      <div v-show="activeTab === 'templates'" class="space-y-4">
+        <TemplatesTool
+          :templates="templates || []"
+          @select-template="$emit('select-template', $event)"
+        />
+      </div>
+
+      <!-- TAB 3: CAPAS (con opción interna de modificar fondo) -->
       <div v-show="activeTab === 'layers'" class="space-y-3">
         <!-- MODO A: LISTA DE CAPAS -->
         <div v-if="layersSubMode === 'layers'" class="space-y-3">
@@ -126,13 +134,16 @@ import type { TextNodeOptions, EmojiPatternOptions } from '../../composables/use
 import type { GradientPreset } from '../../composables/useKonvaStage';
 import { useCanvasStudio } from '../../composables/useCanvasStudioContext';
 import AddTool from './AddTool.vue';
+import TemplatesTool from './TemplatesTool.vue';
 import LayersPanel from './LayersPanel.vue';
 import BackgroundTool from './BackgroundTool.vue';
+import type { StudioTemplate } from '../../composables/useKonvaTemplates';
 
 const studio = useCanvasStudio();
 
 const props = withDefaults(
   defineProps<{
+    templates?: StudioTemplate[];
     layersList?: any[];
     selectedNode?: any;
     isBgTransparent?: boolean;
@@ -153,6 +164,7 @@ const emit = defineEmits<{
   (e: 'select-emoji', char: string): void;
   (e: 'add-image', url: string): void;
   (e: 'select-layer', node: any): void;
+  (e: 'select-template', templateId: string): void;
 }>();
 
 const currentLayersList = computed(() => props.layersList ?? studio?.layersListReversed.value ?? []);
@@ -163,11 +175,12 @@ const currentBgColor = computed(() => props.bgColor ?? studio?.stage.bgColor.val
 const currentActiveGradient = computed(() => props.activeGradient ?? studio?.stage.activeGradient.value ?? null);
 const currentGradientPresets = computed(() => props.gradientPresets ?? studio?.stage.gradientPresets ?? []);
 
-const activeTab = ref<'add' | 'layers'>('add');
+const activeTab = ref<'add' | 'templates' | 'layers'>('add');
 const layersSubMode = ref<'layers' | 'background'>('layers');
 
 const tabList = [
   { id: 'add', label: 'Añadir', icon: '➕' },
+  { id: 'templates', label: 'Plantillas', icon: '📋' },
   { id: 'layers', label: 'Capas', icon: '📚' }
 ] as const;
 

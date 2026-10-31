@@ -1,102 +1,69 @@
 <template>
-  <div class="space-y-2.5" data-purpose="effect-presets-grid">
-    <span class="block text-xs font-bold text-text-main uppercase tracking-wider text-[11px]">
-      {{ title }}
-    </span>
-
-    <!-- Presets para Emojis e Imágenes (Objeto) -->
-    <div v-if="mode === 'object'" class="grid grid-cols-2 gap-2">
-      <button
-        type="button"
-        @click="applyPreset('sticker')"
-        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary-gradient text-white font-bold text-xs shadow-sm hover:opacity-95 transition-all cursor-pointer active:scale-98"
-      >
-        <span>✨</span>
-        <span>Borde Sticker</span>
-      </button>
-
-      <button
-        type="button"
-        @click="applyPreset({ preset: 'neon', color: '#00f0ff' })"
-        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-cyan-100 hover:bg-cyan-200 border border-cyan-400 text-cyan-900 font-bold text-xs transition-colors cursor-pointer active:scale-98"
-      >
-        <span>💎</span>
-        <span>Neón Cyan</span>
-      </button>
-
-      <button
-        type="button"
-        @click="applyPreset({ preset: 'neon', color: '#ff007f' })"
-        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-pink-100 hover:bg-pink-200 border border-pink-400 text-pink-900 font-bold text-xs transition-colors cursor-pointer active:scale-98"
-      >
-        <span>💖</span>
-        <span>Neón Rosa</span>
-      </button>
-
-      <button
-        type="button"
-        @click="applyPreset('soft-shadow')"
-        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 font-bold text-xs transition-colors cursor-pointer active:scale-98"
-      >
-        <span>🌑</span>
-        <span>Sombra</span>
-      </button>
-
-      <button
-        type="button"
-        @click="applyPreset('clean')"
-        class="col-span-2 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white hover:bg-primary-50 border border-app-border-strong text-stone-700 font-bold text-xs transition-colors cursor-pointer active:scale-98"
-      >
-        <span>🧼</span>
-        <span>Normal / Limpio</span>
-      </button>
+  <div class="space-y-2 select-none" data-purpose="effect-presets-grid">
+    <div class="flex items-center justify-between text-xs font-bold text-text-main">
+      <span class="text-[11px] uppercase tracking-wider">{{ title }}</span>
     </div>
 
-    <!-- Presets para Texto -->
-    <div v-else class="grid grid-cols-2 gap-2">
-      <button
-        type="button"
-        @click="applyPreset('meme')"
-        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs shadow-sm transition-all cursor-pointer active:scale-98"
-      >
-        <span>💥</span>
-        <span>Meme Clásico</span>
-      </button>
-
+    <!-- 4 Efectos Instantáneos 1-Clic (Compartido para Texto, Emojis e Imágenes) -->
+    <div class="grid grid-cols-2 gap-2" id="effects-grid">
+      <!-- 1. Borde Sticker WhatsApp -->
       <button
         type="button"
         @click="applyPreset('sticker')"
-        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary-50 hover:bg-primary-100 text-primary-900 border border-primary-300 font-bold text-xs transition-colors cursor-pointer active:scale-98"
+        class="flex items-center gap-2 p-2 rounded-2xl border border-[#E8DEC9] hover:border-primary-400 bg-[#FFF5EE] text-text-main font-bold text-xs shadow-2xs text-left active:scale-95 transition-all cursor-pointer group"
       >
-        <span>✨</span>
-        <span>Sticker</span>
+        <span class="w-7 h-7 rounded-xl bg-gradient-to-br from-primary-500 to-amber-500 text-white flex items-center justify-center text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+          ✨
+        </span>
+        <div class="leading-tight min-w-0">
+          <div class="truncate">Borde Sticker</div>
+          <span class="text-[10px] text-text-muted font-medium truncate block">Borde blanco WA</span>
+        </div>
       </button>
 
+      <!-- 2. Neón Cyan -->
       <button
         type="button"
-        @click="applyPreset('neon')"
-        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-300 font-bold text-xs transition-colors cursor-pointer active:scale-98"
+        @click="applyPreset({ preset: 'neon', color: '#00D1FF' })"
+        class="flex items-center gap-2 p-2 rounded-2xl border border-[#E8DEC9] hover:border-cyan-400 bg-[#FAF6EE] text-text-main font-bold text-xs shadow-2xs text-left active:scale-95 transition-all cursor-pointer group"
       >
-        <span>💡</span>
-        <span>Neón</span>
+        <span class="w-7 h-7 rounded-xl bg-[#E0F8FF] text-cyan-600 flex items-center justify-center text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+          💎
+        </span>
+        <div class="leading-tight min-w-0">
+          <div class="truncate">Neón Cyan</div>
+          <span class="text-[10px] text-text-muted font-medium truncate block">Resplandor 3D</span>
+        </div>
       </button>
 
+      <!-- 3. Neón Rosa -->
       <button
         type="button"
-        @click="applyPreset('soft-shadow')"
-        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-300 font-bold text-xs transition-colors cursor-pointer active:scale-98"
+        @click="applyPreset({ preset: 'neon', color: '#FF4D8D' })"
+        class="flex items-center gap-2 p-2 rounded-2xl border border-[#E8DEC9] hover:border-pink-400 bg-[#FAF6EE] text-text-main font-bold text-xs shadow-2xs text-left active:scale-95 transition-all cursor-pointer group"
       >
-        <span>🌑</span>
-        <span>Sombra</span>
+        <span class="w-7 h-7 rounded-xl bg-[#FFEAF3] text-pink-600 flex items-center justify-center text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+          💖
+        </span>
+        <div class="leading-tight min-w-0">
+          <div class="truncate">Neón Rosa</div>
+          <span class="text-[10px] text-text-muted font-medium truncate block">Vibrante</span>
+        </div>
       </button>
 
+      <!-- 4. Limpio / Plano -->
       <button
         type="button"
         @click="applyPreset('clean')"
-        class="col-span-2 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-900 border border-rose-300 font-bold text-xs transition-colors cursor-pointer active:scale-98"
+        class="flex items-center gap-2 p-2 rounded-2xl border border-[#E8DEC9] hover:border-stone-400 bg-[#FAF6EE] text-text-main font-bold text-xs shadow-2xs text-left active:scale-95 transition-all cursor-pointer group"
       >
-        <span>🌸</span>
-        <span>Plano Limpio</span>
+        <span class="w-7 h-7 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+          🫧
+        </span>
+        <div class="leading-tight min-w-0">
+          <div class="truncate">Limpio / Plano</div>
+          <span class="text-[10px] text-text-muted font-medium truncate block">Original HD</span>
+        </div>
       </button>
     </div>
   </div>
@@ -112,7 +79,7 @@ const props = withDefaults(
   }>(),
   {
     mode: 'object',
-    title: 'Efectos 1-Clic:'
+    title: '⚡ Efectos Instantáneos 1-Clic'
   }
 );
 

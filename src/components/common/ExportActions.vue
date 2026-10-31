@@ -29,7 +29,9 @@
       <svg v-else class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
       </svg>
-      <span>{{ copied ? copiedText : copyText }}</span>
+      <!-- WhatsApp label for mobile, generic copy label for desktop -->
+      <span class="sm:hidden">{{ copied ? copiedText : 'Copiar sticker para WhatsApp' }}</span>
+      <span class="hidden sm:inline">{{ copied ? copiedText : copyText }}</span>
     </button>
   </div>
 </template>
