@@ -2,43 +2,42 @@
   <div class="space-y-2 select-none" data-purpose="emoji-quick-selector">
     <!-- MOBILE VIEW (2 FILAS MÁXIMO) -->
     <div class="md:hidden space-y-2">
-      <!-- Fila 1: Icono de emoji seleccionado + Input de texto para escribir/pegar + Botón Pegar -->
-      <div class="flex items-center gap-1.5">
-        <!-- Emoji Badge / Icono al inicio -->
+      <!-- Fila 1: Campo unificado con emoji activo a la izquierda, input en el centro y botón pegar a la derecha -->
+      <div class="relative flex items-center bg-control-bg border border-control-border rounded-2xl p-1 shadow-2xs focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/20 transition-all">
+        <!-- Emoji Badge al inicio dentro del campo -->
         <div
-          class="w-10 h-10 rounded-2xl bg-control-bg-active border border-primary-200 flex items-center justify-center text-2xl shrink-0 select-none shadow-2xs"
+          class="w-8 h-8 rounded-xl bg-control-bg-active border border-primary-200/80 flex items-center justify-center text-xl shrink-0 select-none shadow-2xs ml-0.5"
           :title="`Emoji activo: ${modelValue}`"
         >
           {{ modelValue }}
         </div>
 
-        <!-- Input de texto -->
-        <div class="relative flex-1">
-          <input
-            ref="directInputRef"
-            type="text"
-            v-model="inputQuery"
-            @input="onInputQueryChange"
-            @paste="onInputPaste"
-            placeholder="Pega o escribe un emoji..."
-            class="w-full h-10 pl-3 pr-8 bg-control-bg border border-control-border rounded-2xl text-xs font-semibold text-text-main placeholder-text-hint focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 shadow-2xs transition-colors"
-          />
-          <button
-            v-if="inputQuery"
-            type="button"
-            @click="inputQuery = ''"
-            class="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full text-text-subtle hover:text-text-main text-xs cursor-pointer"
-            title="Limpiar"
-          >
-            ✕
-          </button>
-        </div>
+        <!-- Input de texto al centro -->
+        <input
+          ref="directInputRef"
+          type="text"
+          v-model="inputQuery"
+          @input="onInputQueryChange"
+          @paste="onInputPaste"
+          placeholder="Pega o escribe un emoji..."
+          class="flex-1 min-w-0 bg-transparent py-1.5 px-2.5 text-xs font-semibold text-text-main placeholder-text-hint outline-none border-none"
+        />
 
-        <!-- Botón Pegar -->
+        <button
+          v-if="inputQuery"
+          type="button"
+          @click="inputQuery = ''"
+          class="w-5 h-5 flex items-center justify-center rounded-full text-text-subtle hover:text-text-main text-xs cursor-pointer mr-1"
+          title="Limpiar"
+        >
+          ✕
+        </button>
+
+        <!-- Botón Pegar a la derecha dentro del mismo campo -->
         <button
           type="button"
           @click="pasteFromClipboard"
-          class="h-10 px-3 bg-white hover:bg-control-bg-hover border border-control-border text-primary-600 rounded-2xl text-xs font-bold shadow-2xs active:scale-95 transition-all flex items-center gap-1 cursor-pointer shrink-0"
+          class="px-2.5 py-1.5 bg-white hover:bg-orange-50 border border-control-border text-primary-600 rounded-xl text-xs font-bold shadow-2xs active:scale-95 transition-all flex items-center gap-1 cursor-pointer shrink-0 mr-0.5"
           :title="pasteSuccess ? '¡Pegado!' : 'Pegar del portapapeles'"
         >
           <span>{{ pasteSuccess ? '✅' : '📋' }}</span>

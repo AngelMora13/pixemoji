@@ -17,11 +17,12 @@
       <span>Arrastra <strong class="text-primary-600">⋮⋮</strong> para reordenar (arriba = al frente):</span>
     </p>
 
-    <!-- Lista de Capas con Drag & Drop -->
+    <!-- Lista de Capas con Drag & Drop táctil y desktop -->
     <div class="space-y-1.5 max-h-72 overflow-y-auto pr-1">
       <div
         v-for="(layer, index) in layers"
         :key="layer.id"
+        :data-layer-index="index"
         draggable="true"
         @dragstart="onDragStart(index, $event)"
         @dragover="onDragOver(index, $event)"
@@ -45,7 +46,11 @@
         <!-- Grip handle & Info de la capa -->
         <div class="flex items-center gap-2 min-w-0">
           <span
-            class="text-text-subtle hover:text-primary-600 cursor-grab active:cursor-grabbing text-sm font-mono select-none px-0.5"
+            @touchstart="onTouchStart(index, $event)"
+            @touchmove="onTouchMove($event)"
+            @touchend="onTouchEnd"
+            @touchcancel="onTouchEnd"
+            class="text-text-subtle hover:text-primary-600 cursor-grab active:cursor-grabbing text-sm font-mono select-none px-1.5 py-1 -my-1 touch-none"
             title="Arrastra para reordenar esta capa"
           >
             ⋮⋮
@@ -130,7 +135,7 @@
 import { ref } from 'vue';
 import type { LayerItem } from '../../composables/useKonvaLayers';
 
-defineProps<{
+const props = defineProps<{
   layers: LayerItem[];
   selectedNode: any;
 }>();
@@ -149,6 +154,9 @@ const emit = defineEmits<{
 const draggedIndex = ref<number | null>(null);
 const dropTargetIndex = ref<number | null>(null);
 
+// ==========================================
+// DESKTOP HTML5 DRAG & DROP
+// ==========================================
 const onDragStart = (index: number, e: DragEvent) => {
   draggedIndex.value = index;
   if (e.dataTransfer) {
@@ -181,6 +189,50 @@ const onDrop = (index: number, e: DragEvent) => {
 };
 
 const onDragEnd = () => {
+  draggedIndex.value = null;
+  dropTargetIndex.value = null;
+};
+
+// ==========================================
+// MOBILE TOUCH DRAG & DROP
+// ==========================================
+const onTouchStart = (index: number, e: TouchEvent) => {
+  draggedIndex.value = index;
+  dropTargetIndex.value = index;
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    try { navigator.vibrate(20); } catch {}
+  }
+};
+
+const onTouchMove = (e: TouchEvent) => {
+  if (draggedIndex.value === null) return;
+  const touch = e.touches[0];
+  if (!touch) return;
+
+  const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+  if (!targetEl) return;
+
+  const layerItemEl = targetEl.closest('[data-layer-index]');
+  if (layerItemEl) {
+    const targetIdx = parseInt(layerItemEl.getAttribute('data-layer-index') || '-1', 10);
+    if (targetIdx >= 0 && targetIdx < props.layers.length) {
+      if (dropTargetIndex.value !== targetIdx) {
+        dropTargetIndex.value = targetIdx;
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+          try { navigator.vibrate(10); } catch {}
+        }
+      }
+    }
+  }
+};
+
+const onTouchEnd = () => {
+  if (draggedIndex.value !== null && dropTargetIndex.value !== null && draggedIndex.value !== dropTargetIndex.value) {
+    emit('reorder', { fromIndex: draggedIndex.value, toIndex: dropTargetIndex.value });
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try { navigator.vibrate(30); } catch {}
+    }
+  }
   draggedIndex.value = null;
   dropTargetIndex.value = null;
 };

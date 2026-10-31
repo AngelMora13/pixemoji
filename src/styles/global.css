@@ -225,6 +225,16 @@ body {
   background: var(--primary-600);
 }
 
+/* Hide scrollbars while preserving touch/wheel scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Animations */
 @keyframes fadeIn {
   from {
