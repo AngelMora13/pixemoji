@@ -1,5 +1,9 @@
 <template>
-  <div class="glass-card rounded-3xl p-6 md:p-7 border border-app-border shadow-soft space-y-5">
+  <div :class="[
+    borderless
+      ? 'space-y-5'
+      : 'glass-card rounded-3xl p-6 md:p-7 border border-app-border shadow-soft space-y-5'
+  ]">
     <!-- 1. Emoji Quick Selector (Buscador, Atajos FIFO, Pegar y Entrada Móvil) -->
     <div>
       <EmojiQuickSelector
@@ -64,9 +68,11 @@ withDefaults(
     selectedChar: string;
     targetResolution: number;
     imageFormat?: ExportImageFormat;
+    borderless?: boolean;
   }>(),
   {
-    imageFormat: 'png'
+    imageFormat: 'png',
+    borderless: false
   }
 );
 

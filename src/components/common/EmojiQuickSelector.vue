@@ -46,7 +46,7 @@
       </div>
 
       <!-- Fila 2: Barra de iconos de opciones rápidas en 1 sola fila + Botón de abrir buscador de iconos al final -->
-      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5" data-purpose="quick-emoji-scroll-row">
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-1" data-purpose="quick-emoji-scroll-row">
         <button
           v-for="char in shortcutEmojis"
           :key="char"
