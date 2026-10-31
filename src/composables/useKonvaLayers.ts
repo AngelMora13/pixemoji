@@ -733,6 +733,14 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     }
 
     node.setAttr('cropInset', next);
+    node._clearCache?.();
+
+    const stage = node.getStage();
+    const tr = stage?.findOne?.('Transformer');
+    if (tr) {
+      tr.nodes([node]);
+      tr.update();
+    }
 
     node.getLayer()?.batchDraw();
     layerInstance.value.batchDraw();

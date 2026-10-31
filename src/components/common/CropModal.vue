@@ -43,8 +43,8 @@
               height: `${containerDimensions.height}px`
             }"
             @pointermove="onPointerMove"
-            @pointerup="activeDrag = null"
-            @pointercancel="activeDrag = null"
+            @pointerup="endDrag"
+            @pointercancel="endDrag"
           >
             <!-- Content Target: Rendered with zero letterboxing padding -->
             <img
@@ -56,30 +56,52 @@
               crossorigin="anonymous"
             />
 
-            <!-- Shaded Outside Crop Regions -->
-            <div class="absolute inset-x-0 top-0 bg-neutral-950/75 pointer-events-none" :style="{ height: `${crop.top}%` }"></div>
-            <div class="absolute inset-x-0 bottom-0 bg-neutral-950/75 pointer-events-none" :style="{ height: `${crop.bottom}%` }"></div>
+            <!-- Shaded Outside Crop Regions (Interactive: tap to reposition crop frame) -->
             <div
-              class="absolute inset-y-0 left-0 bg-neutral-950/75 pointer-events-none"
-              :style="{ top: `${crop.top}%`, bottom: `${crop.bottom}%`, width: `${crop.left}%` }"
+              class="absolute inset-x-0 top-0 bg-neutral-950/75 pointer-events-auto cursor-pointer"
+              :style="{ height: `${crop.top}%` }"
+              @pointerdown="onBackdropPointerDown"
             ></div>
             <div
-              class="absolute inset-y-0 right-0 bg-neutral-950/75 pointer-events-none"
+              class="absolute inset-x-0 bottom-0 bg-neutral-950/75 pointer-events-auto cursor-pointer"
+              :style="{ height: `${crop.bottom}%` }"
+              @pointerdown="onBackdropPointerDown"
+            ></div>
+            <div
+              class="absolute inset-y-0 left-0 bg-neutral-950/75 pointer-events-auto cursor-pointer"
+              :style="{ top: `${crop.top}%`, bottom: `${crop.bottom}%`, width: `${crop.left}%` }"
+              @pointerdown="onBackdropPointerDown"
+            ></div>
+            <div
+              class="absolute inset-y-0 right-0 bg-neutral-950/75 pointer-events-auto cursor-pointer"
               :style="{ top: `${crop.top}%`, bottom: `${crop.bottom}%`, width: `${crop.right}%` }"
+              @pointerdown="onBackdropPointerDown"
             ></div>
 
-            <!-- Active Draggable Crop Box with Rule of Thirds -->
+            <!-- Active Draggable Crop Box (Free movement anywhere over the content) -->
             <div
-              class="absolute border-2 border-white shadow-2xl pointer-events-auto"
+              class="absolute border-2 border-white shadow-2xl pointer-events-auto cursor-move select-none touch-none"
+              :class="{ 'cursor-grabbing': activeDrag === 'box' }"
               :style="{
                 top: `${crop.top}%`,
                 left: `${crop.left}%`,
                 right: `${crop.right}%`,
                 bottom: `${crop.bottom}%`
               }"
+              @pointerdown="startDrag('box', $event)"
             >
+              <!-- Rule of Thirds Grid -->
               <div class="absolute inset-0 pointer-events-none opacity-20 grid grid-cols-3 grid-rows-3">
                 <div v-for="i in 9" :key="i" class="border-r border-b border-white"></div>
+              </div>
+
+              <!-- Center Move Grabber Icon indicator -->
+              <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40 hover:opacity-80 transition-opacity">
+                <div class="w-7 h-7 rounded-full bg-black/50 backdrop-blur-xs flex items-center justify-center text-white text-xs shadow-md border border-white/20">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8l-2 4m0 0l2 4m-2-4h20m-2-4l2 4m0 0l-2 4M8 4l4-2m0 0l4 2m-4-2v20m-4-2l4 2m0 0l4-2" />
+                  </svg>
+                </div>
               </div>
 
               <!-- Draggable Edge Handles -->
@@ -87,23 +109,23 @@
                 v-for="h in EDGE_HANDLES"
                 :key="h.id"
                 @pointerdown.stop="startDrag(h.id, $event)"
-                :class="[h.classes, 'absolute flex items-center justify-center bg-white border border-neutral-700 rounded-full shadow-md hover:scale-110 active:scale-95 transition-transform']"
+                :class="[h.classes, 'absolute flex items-center justify-center bg-white border border-neutral-700 rounded-full shadow-md hover:scale-110 active:scale-95 transition-transform z-10']"
               >
                 <div :class="h.barClasses"></div>
               </div>
 
-              <!-- Draggable Corner Handles -->
+              <!-- Draggable Corner Handles (Circular design) -->
               <div
                 v-for="c in CORNER_HANDLES"
                 :key="c.id"
                 @pointerdown.stop="startDrag(c.id, $event)"
-                :class="[c.classes, 'absolute w-4 h-4 bg-primary-500 border-2 border-white rounded-md shadow-md hover:scale-125 transition-transform']"
+                :class="[c.classes, 'absolute w-4 h-4 bg-primary-500 border-2 border-white rounded-full shadow-md hover:scale-125 transition-transform z-10']"
               ></div>
             </div>
           </div>
 
           <p class="text-[11px] text-neutral-400 mt-3 text-center">
-            Arrastra los controles blancos o esquinas naranjas para recortar sin márgenes vacíos.
+            Arrastra el recuadro libremente para encuadrar la imagen, o tira de sus controles circulares para cambiar el tamaño.
           </p>
         </div>
 
@@ -202,6 +224,9 @@ const emit = defineEmits<{
 const containerRef = ref<HTMLElement | null>(null);
 const crop = ref<CropInset>({ top: 0, right: 0, bottom: 0, left: 0 });
 const activeDrag = ref<DragId | null>(null);
+const startPointer = ref<{ x: number; y: number } | null>(null);
+const startCrop = ref<CropInset | null>(null);
+
 const imageNaturalAspect = ref<number | null>(null);
 const trimmedEmoji = ref<GlyphPixelBounds | null>(null);
 
@@ -235,7 +260,7 @@ const aspect = computed(() => {
 });
 
 const containerDimensions = computed(() => {
-  return fitContainerDimensions(aspect.value, 280, 280);
+  return fitContainerDimensions(aspect.value, 320, 320);
 });
 
 watch(
@@ -265,16 +290,78 @@ const visiblePercent = computed(() => {
 
 const startDrag = (id: DragId, e: PointerEvent) => {
   activeDrag.value = id;
+  startPointer.value = { x: e.clientX, y: e.clientY };
+  startCrop.value = { ...crop.value };
   (e.target as HTMLElement)?.setPointerCapture?.(e.pointerId);
+};
+
+const endDrag = (e?: PointerEvent) => {
+  if (e && (e.target as HTMLElement)?.hasPointerCapture?.(e.pointerId)) {
+    (e.target as HTMLElement)?.releasePointerCapture?.(e.pointerId);
+  }
+  activeDrag.value = null;
+  startPointer.value = null;
+  startCrop.value = null;
 };
 
 const onPointerMove = (e: PointerEvent) => {
   if (!activeDrag.value || !containerRef.value) return;
   const rect = containerRef.value.getBoundingClientRect();
   if (rect.width <= 0 || rect.height <= 0) return;
+
+  // Free movement of the entire crop box across the canvas
+  if (activeDrag.value === 'box' && startPointer.value && startCrop.value) {
+    const deltaPxX = e.clientX - startPointer.value.x;
+    const deltaPxY = e.clientY - startPointer.value.y;
+    const deltaPctX = (deltaPxX / rect.width) * 100;
+    const deltaPctY = (deltaPxY / rect.height) * 100;
+
+    const widthPct = Math.max(5, 100 - startCrop.value.left - startCrop.value.right);
+    const heightPct = Math.max(5, 100 - startCrop.value.top - startCrop.value.bottom);
+
+    const targetLeft = startCrop.value.left + deltaPctX;
+    const targetTop = startCrop.value.top + deltaPctY;
+
+    const newLeft = Math.max(0, Math.min(100 - widthPct, targetLeft));
+    const newTop = Math.max(0, Math.min(100 - heightPct, targetTop));
+
+    crop.value.left = Math.round(newLeft * 10) / 10;
+    crop.value.right = Math.round((100 - widthPct - newLeft) * 10) / 10;
+    crop.value.top = Math.round(newTop * 10) / 10;
+    crop.value.bottom = Math.round((100 - heightPct - newTop) * 10) / 10;
+    return;
+  }
+
+  // Handle edge and corner resizing
   const pctX = Math.round((Math.max(0, Math.min(rect.width, e.clientX - rect.left)) / rect.width) * 100);
   const pctY = Math.round((Math.max(0, Math.min(rect.height, e.clientY - rect.top)) / rect.height) * 100);
   updateCropFromPointer(activeDrag.value, pctX, pctY, crop.value);
+};
+
+// Clicking in the shaded backdrop centers the crop frame and allows dragging immediately
+const onBackdropPointerDown = (e: PointerEvent) => {
+  if (activeDrag.value || !containerRef.value) return;
+  const rect = containerRef.value.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return;
+
+  const clickPctX = ((e.clientX - rect.left) / rect.width) * 100;
+  const clickPctY = ((e.clientY - rect.top) / rect.height) * 100;
+
+  const widthPct = Math.max(5, 100 - crop.value.left - crop.value.right);
+  const heightPct = Math.max(5, 100 - crop.value.top - crop.value.bottom);
+
+  const targetLeft = clickPctX - widthPct / 2;
+  const targetTop = clickPctY - heightPct / 2;
+
+  const newLeft = Math.max(0, Math.min(100 - widthPct, targetLeft));
+  const newTop = Math.max(0, Math.min(100 - heightPct, targetTop));
+
+  crop.value.left = Math.round(newLeft * 10) / 10;
+  crop.value.right = Math.round((100 - widthPct - newLeft) * 10) / 10;
+  crop.value.top = Math.round(newTop * 10) / 10;
+  crop.value.bottom = Math.round((100 - heightPct - newTop) * 10) / 10;
+
+  startDrag('box', e);
 };
 
 const commitCrop = () => {

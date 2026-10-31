@@ -16,8 +16,8 @@
           ✨
         </span>
         <div class="leading-tight min-w-0">
-          <div class="truncate">Borde Sticker</div>
-          <span class="text-[10px] text-text-muted font-medium truncate block">Borde blanco WA</span>
+          <div class="truncate">Sombra WA</div>
+          <span class="text-[10px] text-text-muted font-medium truncate block">Sombra de elevación</span>
         </div>
       </button>
 
