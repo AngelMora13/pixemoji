@@ -44,6 +44,7 @@ export function useKonvaStage() {
   const bgColor = ref('#ffffff');
   const activeGradient = ref<GradientPreset | null>(null);
   const selectedNode = shallowRef<any>(null);
+  let resizeHandler: (() => void) | null = null;
 
   const selectNode = (node: any) => {
     if (!layerInstance.value || !transformerInstance.value) return;
@@ -109,20 +110,70 @@ export function useKonvaStage() {
     });
     layer.add(bgRect);
 
-    // Transformer
+    // Transformer con controles circulares táctiles y amigables para mobile
+    const isTouchOrMobile = typeof window !== 'undefined' && (
+      'ontouchstart' in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.innerWidth < 768
+    );
+    const initialAnchorSize = isTouchOrMobile ? 22 : 14;
+    const initialRotateOffset = isTouchOrMobile ? 38 : 28;
+    const initialAnchorStrokeWidth = isTouchOrMobile ? 2.5 : 2;
+
     const tr = new KonvaModule.value.Transformer({
-      rotateAnchorOffset: 20,
-      anchorStroke: '#d97736',
+      rotateAnchorOffset: initialRotateOffset,
+      rotateLineVisible: true,
+      padding: 4,
+      anchorStroke: '#ea580c',
       anchorFill: '#ffffff',
-      anchorSize: 9,
-      borderStroke: '#d97736',
+      anchorStrokeWidth: initialAnchorStrokeWidth,
+      anchorSize: initialAnchorSize,
+      anchorCornerRadius: 100, // Hace los controles completamente circulares
+      borderStroke: '#ea580c',
       borderDash: [4, 4],
+      borderStrokeWidth: 1.5,
+      enabledAnchors: [
+        'top-left',
+        'top-center',
+        'top-right',
+        'middle-left',
+        'middle-right',
+        'bottom-left',
+        'bottom-center',
+        'bottom-right'
+      ],
       boundBoxFunc: (oldBox: any, newBox: any) => {
         if (newBox.width < 15 || newBox.height < 15) return oldBox;
         return newBox;
       }
     });
     layer.add(tr);
+
+    // Ajuste dinámico de tamaño de controles si cambia la resolución o rotación de pantalla
+    if (typeof window !== 'undefined') {
+      if (resizeHandler) {
+        window.removeEventListener('resize', resizeHandler);
+      }
+      resizeHandler = () => {
+        if (!transformerInstance.value) return;
+        const isMobile = (
+          'ontouchstart' in window ||
+          navigator.maxTouchPoints > 0 ||
+          window.innerWidth < 768
+        );
+        const size = isMobile ? 22 : 14;
+        const offset = isMobile ? 38 : 28;
+        const strokeW = isMobile ? 2.5 : 2;
+        transformerInstance.value.anchorSize(size);
+        transformerInstance.value.anchorCornerRadius(100);
+        transformerInstance.value.rotateAnchorOffset(offset);
+        transformerInstance.value.anchorStrokeWidth(strokeW);
+        if (layerInstance.value) {
+          layerInstance.value.batchDraw();
+        }
+      };
+      window.addEventListener('resize', resizeHandler);
+    }
 
     stageInstance.value = stage;
     layerInstance.value = layer;
@@ -242,6 +293,10 @@ export function useKonvaStage() {
   };
 
   const destroyStage = () => {
+    if (typeof window !== 'undefined' && resizeHandler) {
+      window.removeEventListener('resize', resizeHandler);
+      resizeHandler = null;
+    }
     if (stageInstance.value) {
       stageInstance.value.destroy();
       stageInstance.value = null;
