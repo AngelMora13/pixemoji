@@ -40,6 +40,25 @@
   --color-app-card-solid: #ffffff;
   --color-app-header: #faf4ec;
 
+  /* Control Surfaces & Layout Sheet Tokens */
+  --color-control-bg: #faf6ee;
+  --color-control-bg-hover: #f3ede0;
+  --color-control-bg-active: #fff6ee;
+  --color-control-border: #e8dec9;
+  --color-sheet-bg: #fffdf9;
+  --color-sheet-border: #eae1d2;
+
+  /* WhatsApp Action Tokens */
+  --color-whatsapp-brand: #25d366;
+  --color-whatsapp-brand-hover: #20bd5a;
+  --color-whatsapp-brand-border: #1da851;
+
+  /* Instant Effect Chip Tokens */
+  --color-effect-neon-primary-bg: #e0f8ff;
+  --color-effect-neon-primary-text: #0891b2;
+  --color-effect-neon-secondary-bg: #ffeaf3;
+  --color-effect-neon-secondary-text: #db2777;
+
   /* Borders */
   --color-app-border: #ebd8ca;
   --color-app-border-strong: #debfa8;
@@ -84,6 +103,25 @@
   --color-app-border: var(--color-app-border);
   --color-app-border-strong: var(--color-app-border-strong);
   --color-app-border-subtle: var(--color-app-border-subtle);
+
+  /* Control surfaces */
+  --color-control-bg: var(--color-control-bg);
+  --color-control-bg-hover: var(--color-control-bg-hover);
+  --color-control-bg-active: var(--color-control-bg-active);
+  --color-control-border: var(--color-control-border);
+  --color-sheet-bg: var(--color-sheet-bg);
+  --color-sheet-border: var(--color-sheet-border);
+
+  /* WhatsApp Brand */
+  --color-whatsapp-brand: var(--color-whatsapp-brand);
+  --color-whatsapp-brand-hover: var(--color-whatsapp-brand-hover);
+  --color-whatsapp-brand-border: var(--color-whatsapp-brand-border);
+
+  /* Neon Chips */
+  --color-effect-neon-primary-bg: var(--color-effect-neon-primary-bg);
+  --color-effect-neon-primary-text: var(--color-effect-neon-primary-text);
+  --color-effect-neon-secondary-bg: var(--color-effect-neon-secondary-bg);
+  --color-effect-neon-secondary-text: var(--color-effect-neon-secondary-text);
 
   /* Typography tokens (text-text-main, text-text-muted, etc.) */
   --color-text-main: var(--color-text-main);
@@ -185,6 +223,16 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary-600);
+}
+
+/* Hide scrollbars while preserving touch/wheel scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Animations */

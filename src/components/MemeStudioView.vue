@@ -19,10 +19,12 @@
       >
         <ToolsSidebarContent
           show-close-button
+          :templates="templates.availableTemplates"
           @close="isLeftSidebarOpen = false"
           @add-text="handleAddText"
           @select-emoji="handleAddEmoji"
           @add-image="handleAddImage"
+          @select-template="handleTemplateSelect"
         />
       </aside>
 
@@ -50,12 +52,10 @@
         :bg-color="stage.bgColor.value"
         :can-undo="history.canUndo.value"
         :can-redo="history.canRedo.value"
-        :templates="templates.availableTemplates"
         :frame="frame"
         @undo="history.undo"
         @redo="history.redo"
         @open-inspector="openInspectorPanel"
-        @select-template="handleTemplateSelect"
       />
 
       <!-- Expand Right Sidebar Tab Button when Collapsed (Desktop) -->

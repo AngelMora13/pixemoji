@@ -23,6 +23,7 @@ export type StudioAction =
   | 'flipH'
   | 'flipV'
   | 'rotate'
+  | 'resetOrientation'
   | 'center'
   | 'lock'
   | 'toggleLock'
@@ -135,6 +136,10 @@ export function createStudioContext(
         break;
       case 'rotate':
         layers.rotateCW(typeof payload === 'number' ? payload : 90);
+        isDiscrete = true;
+        break;
+      case 'resetOrientation':
+        layers.resetOrientation();
         isDiscrete = true;
         break;
       case 'center':

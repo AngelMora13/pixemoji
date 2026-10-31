@@ -1,6 +1,6 @@
 import type { CropInset } from './useKonvaCrop';
 
-export type DragId = 'top' | 'bottom' | 'left' | 'right' | 'nw' | 'ne' | 'sw' | 'se';
+export type DragId = 'top' | 'bottom' | 'left' | 'right' | 'nw' | 'ne' | 'sw' | 'se' | 'box';
 
 export const CROP_PRESETS = [
   { label: 'Sup. 50%', icon: '⬆️', crop: { top: 0, bottom: 50, left: 0, right: 0 } },

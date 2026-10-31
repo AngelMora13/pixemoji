@@ -457,6 +457,17 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     syncActiveElement();
   };
 
+  const resetOrientation = () => {
+    if (!selectedNode.value || !layerInstance.value) return;
+    const currentScaleX = selectedNode.value.scaleX() || 1;
+    const currentScaleY = selectedNode.value.scaleY() || 1;
+    selectedNode.value.scaleX(Math.abs(currentScaleX));
+    selectedNode.value.scaleY(Math.abs(currentScaleY));
+    selectedNode.value.rotation(0);
+    layerInstance.value.draw();
+    syncActiveElement();
+  };
+
   const applyStickerEffect = (options?: StickerOptions) => {
     if (!selectedNode.value || !layerInstance.value) return;
     const node = selectedNode.value;
@@ -722,6 +733,14 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     }
 
     node.setAttr('cropInset', next);
+    node._clearCache?.();
+
+    const stage = node.getStage();
+    const tr = stage?.findOne?.('Transformer');
+    if (tr) {
+      tr.nodes([node]);
+      tr.update();
+    }
 
     node.getLayer()?.batchDraw();
     layerInstance.value.batchDraw();
@@ -876,12 +895,15 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     syncActiveElement();
   };
 
-  const applyTextPreset = (preset: 'meme' | 'sticker' | 'neon' | 'soft-shadow' | 'clean') => {
+  const applyTextPreset = (preset: 'meme' | 'sticker' | 'neon' | 'neon-pink' | 'soft-shadow' | 'clean' | any) => {
     if (!selectedNode.value || !layerInstance.value) return;
     const node = selectedNode.value;
     if (typeof node.text !== 'function') return;
 
-    switch (preset) {
+    const presetName = typeof preset === 'object' ? preset.preset : preset;
+    const neonColor = (typeof preset === 'object' && preset.color) ? preset.color : (preset === 'neon-pink' ? '#ff007f' : '#00f0ff');
+
+    switch (presetName) {
       case 'meme':
         node.fontFamily('Impact');
         node.fill('#ffffff');
@@ -903,10 +925,11 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
         node.shadowOpacity(0.75);
         break;
       case 'neon':
+      case 'neon-pink':
         node.fill('#ffffff');
-        node.stroke('#00f0ff');
+        node.stroke(neonColor);
         node.strokeWidth(1.5);
-        node.shadowColor('#00f0ff');
+        node.shadowColor(neonColor);
         node.shadowBlur(18);
         node.shadowOffsetX(0);
         node.shadowOffsetY(0);
@@ -1031,6 +1054,7 @@ export function useKonvaLayers(stageContext: ReturnType<typeof useKonvaStage>) {
     flipHorizontal,
     flipVertical,
     rotateCW,
+    resetOrientation,
     centerNode,
     applyStickerEffect,
     applyGlowEffect,

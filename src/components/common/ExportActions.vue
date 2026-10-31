@@ -12,24 +12,26 @@
       <span>{{ downloadText }}</span>
     </button>
 
-    <!-- Copy to Clipboard Button -->
+    <!-- Copy to Clipboard Button / WhatsApp Sticker Button -->
     <button
       type="button"
       @click="$emit('copy')"
       :class="[
-        'w-full py-2.5 px-4 rounded-2xl border font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs',
+        'w-full py-2.5 px-4 rounded-2xl border font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md active:scale-[0.98]',
         copied
-          ? 'bg-emerald-500 border-emerald-600 text-white shadow-sm'
-          : 'bg-white border-app-border-strong text-text-main hover:bg-primary-50/80'
+          ? 'bg-emerald-700 border-emerald-800 text-white shadow-emerald-700/20'
+          : 'bg-whatsapp-brand hover:bg-whatsapp-brand-hover border-whatsapp-brand-border text-white shadow-whatsapp-brand/25'
       ]"
     >
       <svg v-if="copied" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 13l4 4L19 7" />
       </svg>
-      <svg v-else class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+      <svg v-else class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
       </svg>
-      <span>{{ copied ? copiedText : copyText }}</span>
+      <!-- WhatsApp label for mobile, generic copy label for desktop -->
+      <span class="sm:hidden">{{ copied ? copiedText : 'Copiar sticker para WhatsApp' }}</span>
+      <span class="hidden sm:inline">{{ copied ? copiedText : copyText }}</span>
     </button>
   </div>
 </template>

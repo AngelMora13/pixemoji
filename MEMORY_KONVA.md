@@ -179,3 +179,61 @@ this._movingAnchorName = null; // <- Se limpia DESPUÉS de disparar los eventos
 1. **No resetear escalas durante `transform`:** Usar aceleración por hardware de Konva durante el drag (60 FPS fluidos); consolidar medidas en `transformend`.
 2. **Usar `shape.getTransform().point(...)`:** Nunca calcular posiciones de esquinas sumando manualmente `x + width`, ya que ignora rotaciones, offsets y escalado.
 3. **Mantener `offsetX` y `offsetY` centrados para rotación:** Para que las rotaciones se produzcan alrededor del centro del objeto, mantener siempre `offsetX = width / 2` y `offsetY = height / 2`.
+4. **Limpieza de caché en mutaciones de atributos:** Cuando se altere un atributo que impacte los límites o recorte (`cropInset`), invocar `node._clearCache()` y `tr.update()` para invalidar `_nodeRectCache` del Transformer.
+
+---
+
+## 7. Recorte No Destructivo y Sincronización con `Konva.Transformer`
+
+### 7.1 El Problema del "Bounding Box Fantasma" al recortar con Canvas 2D Clip
+Cuando se implementa un recorte no destructivo en Konva recortando el contexto en `Shape.prototype._sceneFunc` mediante `ctx.clip()`:
+- El lienzo dibuja únicamente la porción visible.
+- Sin embargo, `Konva.Transformer` obtiene las dimensiones del nodo llamando internamente a `node.getClientRect({ skipTransform: true, skipShadow: true, skipStroke: ignoreStroke })`.
+- `Shape.prototype.getClientRect()` delega la medida base a `this.getSelfRect()`.
+- Por defecto, `getSelfRect()` en `Konva.Image` devuelve `{ x: 0, y: 0, width: w, height: h }` y en `Konva.Text` las métricas de glifo completas.
+- **Consecuencia:** Los anclajes de escala y rotación del Transformer se sitúan alrededor del tamaño original no recortado, flotando en el espacio vacío exterior y dificultando la manipulación táctil o con cursor.
+
+### 7.2 Arquitectura de Solución: Parcheo de `getSelfRect()` y `_hitFunc`
+Para que el Transformer y la interacción reconozcan milimétricamente el área recortada sin destruir los datos de la imagen o emoji original:
+
+```
+[getSelfRect() de Shape]
+       │
+       ├── ¿cropInset activo? (top, right, bottom, left > 0)
+       │      │
+       │      ├── SÍ ──► Calcula clipX, clipY, clipW, clipH en espacio local
+       │      │          Retorna sub-caja exacta: { x: clipX, y: clipY, width: clipW, height: clipH }
+       │      │
+       │      └── NO  ──► Retorna baseRect (medida 100% original)
+```
+
+1. **Transformaciones 2D Transparentes:**
+   - Konva aplica automáticamente la matriz de transformación del nodo (`x, y, rotation, scale, -offsetX, -offsetY`) sobre el rectángulo devuelto por `getSelfRect()`.
+   - Al devolver la sub-caja recortada, el Transformer posiciona sus 8 anclajes y la caja punteada directamente en los bordes del fragmento visible.
+2. **Hit Detection Precisa:**
+   - Se parchea `_hitFunc` para trazar un `rect(clipX, clipY, clipW, clipH)` idéntico.
+   - Las áreas vacías recortadas dejan de ser interactivas, permitiendo seleccionar capas que estén debajo o al lado sin interferencias.
+3. **Invalidación de Caché en Transformer:**
+   - Konva cachea internamente el bounding box en `tr._nodeRectCache`.
+   - Al aplicar o resetear el recorte (`cropInset`), se debe forzar:
+     ```typescript
+     node._clearCache();
+     const tr = node.getStage()?.findOne('Transformer');
+     tr?.update();
+     ```
+
+---
+
+## 8. Ergonomía Táctil en `Konva.Transformer` (Controles Circulares y Mobile)
+
+### 8.1 Controles Circulares Nativos (`anchorCornerRadius`)
+En Konva v10+, los anclajes del Transformer son instancias internas de `Konva.Rect`.
+- Asignar `anchorCornerRadius: 100` (o `anchorSize / 2`) los transforma de forma nativa en **círculos perfectos**, eliminando el aspecto cuadrado anticuado sin necesidad de sobreescribir `anchorStyleFunc` ni inyectar formas pesadas.
+
+### 8.2 Desacople del Pin de Rotación (`rotateAnchorOffset` y `rotateLineVisible`)
+- **`rotateLineVisible: true`:** Dibuja el vástago vertical que une la caja delimitadora con el ancla de rotación.
+- **`rotateAnchorOffset`:** Por defecto es `50`. Para evitar colisiones táctiles con el ancla `top-center` en dispositivos móviles:
+  - En **móvil/touch**: `rotateAnchorOffset: 38`, `anchorSize: 22`, `anchorStrokeWidth: 2.5`.
+  - En **desktop**: `rotateAnchorOffset: 28`, `anchorSize: 14`, `anchorStrokeWidth: 2`.
+- Esto separa físicamente el ancla de rotación del borde superior y de `top-center`, evitando toques erróneos accidentales al manipular con la yema de los dedos.
+

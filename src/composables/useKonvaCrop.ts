@@ -20,7 +20,7 @@ export const DEFAULT_CROP: CropInset = {
  * For Emojis, it uses true ink metrics to include glyph overflows so
  * that canvas clipping matches the cropper modal down to the exact pixel.
  */
-function getNodeContentBounds(node: any): { x: number; y: number; width: number; height: number } {
+export function getNodeContentBounds(node: any): { x: number; y: number; width: number; height: number } {
   const w = node.width();
   const h = node.height();
   const nodeType = node.getAttr?.('nodeType');
@@ -43,11 +43,38 @@ function getNodeContentBounds(node: any): { x: number; y: number; width: number;
 }
 
 /**
+ * Calculates the bounding box of the cropped piece if active,
+ * or returns the full content bounds if not cropped.
+ */
+export function getCroppedBounds(node: any): { x: number; y: number; width: number; height: number; isCropped: boolean } {
+  const bounds = getNodeContentBounds(node);
+  const crop = node.getAttr?.('cropInset') as CropInset | undefined;
+  if (!crop || (crop.top <= 0 && crop.bottom <= 0 && crop.left <= 0 && crop.right <= 0)) {
+    return { ...bounds, isCropped: false };
+  }
+
+  const l = bounds.width * ((crop.left || 0) / 100);
+  const t = bounds.height * ((crop.top || 0) / 100);
+  const r = bounds.width * ((crop.right || 0) / 100);
+  const b = bounds.height * ((crop.bottom || 0) / 100);
+
+  return {
+    x: bounds.x + l,
+    y: bounds.y + t,
+    width: Math.max(0, bounds.width - l - r),
+    height: Math.max(0, bounds.height - t - b),
+    isCropped: true
+  };
+}
+
+/**
  * Patch Konva.Text and Konva.Image to support non-destructive inset cropping.
  * 
- * When a node has the 'cropInset' attribute ({ top, right, bottom, left } in percentage 0..90),
- * the rendering context is clipped so that only the specified uncropped portion of the node
- * is drawn, while preserving filters, shadows, and hit detection.
+ * When a node has the 'cropInset' attribute ({ top, right, bottom, left } in percentage 0..90):
+ * 1. The scene context is clipped so that only the cropped portion is drawn.
+ * 2. Hit testing (_hitFunc) matches only the visible cropped region.
+ * 3. getSelfRect() returns the exact cropped rectangle, so that Konva.Transformer
+ *    and client rect bounds match the cropped element's true size and position without empty padding.
  */
 export function patchKonvaCrop(Konva: any) {
   if (!Konva || (Konva as any).__pixemojiCropPatched) return;
@@ -55,26 +82,17 @@ export function patchKonvaCrop(Konva: any) {
   const patchShape = (ShapeClass: any) => {
     if (!ShapeClass || !ShapeClass.prototype) return;
 
+    // 1. Patch scene drawing with clip
     const origSceneFunc = ShapeClass.prototype._sceneFunc;
     if (origSceneFunc && !ShapeClass.prototype.__cropScenePatched) {
       ShapeClass.prototype._sceneFunc = function (context: any) {
-        const crop = this.getAttr?.('cropInset') as CropInset | undefined;
-        if (crop && (crop.top > 0 || crop.bottom > 0 || crop.left > 0 || crop.right > 0)) {
+        const cropRes = getCroppedBounds(this);
+        if (cropRes.isCropped) {
           const rawCtx = context._context;
           rawCtx.save();
 
-          const bounds = getNodeContentBounds(this);
-          const l = bounds.width * ((crop.left || 0) / 100);
-          const t = bounds.height * ((crop.top || 0) / 100);
-          const r = bounds.width * ((crop.right || 0) / 100);
-          const b = bounds.height * ((crop.bottom || 0) / 100);
-          const clipX = bounds.x + l;
-          const clipY = bounds.y + t;
-          const clipW = Math.max(0, bounds.width - l - r);
-          const clipH = Math.max(0, bounds.height - t - b);
-
           rawCtx.beginPath();
-          rawCtx.rect(clipX, clipY, clipW, clipH);
+          rawCtx.rect(cropRes.x, cropRes.y, cropRes.width, cropRes.height);
           rawCtx.clip();
 
           origSceneFunc.call(this, context);
@@ -87,40 +105,43 @@ export function patchKonvaCrop(Konva: any) {
       ShapeClass.prototype.__cropScenePatched = true;
     }
 
+    // 2. Patch hit detection so only the visible cropped area is interactive
     const origHitFunc = ShapeClass.prototype._hitFunc;
     if (!ShapeClass.prototype.__cropHitPatched) {
       ShapeClass.prototype._hitFunc = function (context: any) {
-        const crop = this.getAttr?.('cropInset') as CropInset | undefined;
-        if (crop && (crop.top > 0 || crop.bottom > 0 || crop.left > 0 || crop.right > 0)) {
-          const rawCtx = context._context;
-          rawCtx.save();
-
-          const bounds = getNodeContentBounds(this);
-          const l = bounds.width * ((crop.left || 0) / 100);
-          const t = bounds.height * ((crop.top || 0) / 100);
-          const r = bounds.width * ((crop.right || 0) / 100);
-          const b = bounds.height * ((crop.bottom || 0) / 100);
-          const clipX = bounds.x + l;
-          const clipY = bounds.y + t;
-          const clipW = Math.max(0, bounds.width - l - r);
-          const clipH = Math.max(0, bounds.height - t - b);
-
-          rawCtx.beginPath();
-          rawCtx.rect(clipX, clipY, clipW, clipH);
-          rawCtx.clip();
-
-          if (origHitFunc) {
-            origHitFunc.call(this, context);
-          } else if (ShapeClass.prototype._sceneFunc) {
-            ShapeClass.prototype._sceneFunc.call(this, context);
-          }
-
-          rawCtx.restore();
-        } else if (origHitFunc) {
+        const cropRes = getCroppedBounds(this);
+        if (cropRes.isCropped) {
+          context.beginPath();
+          context.rect(cropRes.x, cropRes.y, cropRes.width, cropRes.height);
+          context.closePath();
+          context.fillStrokeShape(this);
+          return;
+        }
+        if (origHitFunc) {
           origHitFunc.call(this, context);
+        } else if (ShapeClass.prototype._sceneFunc) {
+          ShapeClass.prototype._sceneFunc.call(this, context);
         }
       };
       ShapeClass.prototype.__cropHitPatched = true;
+    }
+
+    // 3. Patch getSelfRect so Transformer bounding box matches the cropped piece exactly
+    const origGetSelfRect = ShapeClass.prototype.getSelfRect;
+    if (origGetSelfRect && !ShapeClass.prototype.__cropSelfRectPatched) {
+      ShapeClass.prototype.getSelfRect = function () {
+        const cropRes = getCroppedBounds(this);
+        if (cropRes.isCropped) {
+          return {
+            x: cropRes.x,
+            y: cropRes.y,
+            width: cropRes.width,
+            height: cropRes.height
+          };
+        }
+        return origGetSelfRect.call(this);
+      };
+      ShapeClass.prototype.__cropSelfRectPatched = true;
     }
   };
 

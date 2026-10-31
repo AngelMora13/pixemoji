@@ -76,8 +76,8 @@ export function getHomeSchema(
   const base = getBaseUrl(siteUrl);
   const rootUrl = `${base}/`;
   const pageTitle = isEs
-    ? `${SERVICE_NAME} — Exportador de Emojis a PNG Transparente`
-    : `${SERVICE_NAME} — Transparent PNG Emoji Exporter`;
+    ? `${SERVICE_NAME} | Exportador de Emojis a PNG Transparente`
+    : `${SERVICE_NAME} | Transparent PNG Emoji Exporter`;
 
   return {
     "@context": "https://schema.org",
@@ -165,8 +165,8 @@ export function getStudioSchema(
   const base = getBaseUrl(siteUrl);
   const studioUrl = `${base}/meme`;
   const pageTitle = isEs
-    ? `Meme & Sticker Studio — ${SERVICE_NAME}`
-    : `Meme & Sticker Studio — ${SERVICE_NAME}`;
+    ? `Meme & Sticker Studio | ${SERVICE_NAME}`
+    : `Meme & Sticker Studio | ${SERVICE_NAME}`;
 
   return {
     "@context": "https://schema.org",

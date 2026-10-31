@@ -35,7 +35,7 @@ export interface RouteMetadata {
 export const ROUTES: Record<string, RouteMetadata> = {
   home: {
     path: "/",
-    title: "PixEmoji — Exportador de Emojis",
+    title: "PixEmoji | Exportador de Emojis a imagen",
     description:
       "Exporta cualquier emoji a imagen PNG en alta resolución (256px a 2048px) con fondo transparente y posicionamiento interactivo sobre lienzo.",
     changefreq: "weekly",
@@ -44,7 +44,7 @@ export const ROUTES: Record<string, RouteMetadata> = {
   },
   meme: {
     path: "/meme",
-    title: "Meme & Sticker Studio — PixEmoji",
+    title: "Meme & Sticker Studio | PixEmoji",
     description:
       "Crea memes, stickers e imágenes personalizadas combinando emojis, textos tipográficos con contorno, fotos y fondos transparentes o degradados.",
     changefreq: "weekly",
@@ -53,7 +53,7 @@ export const ROUTES: Record<string, RouteMetadata> = {
   },
   terms: {
     path: "/terminos-condiciones",
-    title: "Términos y Condiciones de Uso — PixEmoji",
+    title: "Términos y Condiciones de Uso | PixEmoji",
     description:
       "Términos y condiciones legales para el uso de PixEmoji y sus herramientas de edición y exportación gráfica.",
     changefreq: "monthly",
@@ -62,7 +62,7 @@ export const ROUTES: Record<string, RouteMetadata> = {
   },
   privacy: {
     path: "/politicas-privacidad",
-    title: "Política de Privacidad — PixEmoji",
+    title: "Política de Privacidad | PixEmoji",
     description:
       "Conoce cómo PixEmoji protege tu privacidad mediante procesamiento 100% local en tu navegador sin recopilar tus creaciones ni datos personales.",
     changefreq: "monthly",
@@ -71,7 +71,7 @@ export const ROUTES: Record<string, RouteMetadata> = {
   },
   notFound: {
     path: "/404",
-    title: "404 — Página no encontrada | PixEmoji",
+    title: "404 | Página no encontrada | PixEmoji",
     description: "La página que buscas no existe o ha sido movida.",
     noIndex: true,
   },
