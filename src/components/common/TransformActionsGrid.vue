@@ -4,7 +4,7 @@
     <button
       type="button"
       @click="triggerAction('flipH')"
-      class="flex-1 py-2 px-2 bg-[#FAF6EE] hover:bg-[#F3EDE0] border border-[#E8DEC9] rounded-xl text-xs font-bold text-text-main flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-2xs cursor-pointer"
+      class="flex-1 py-2 px-2 bg-control-bg hover:bg-control-bg-hover border border-control-border rounded-xl text-xs font-bold text-text-main flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-2xs cursor-pointer"
       title="Reflejar horizontalmente"
     >
       <svg class="w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -17,7 +17,7 @@
     <button
       type="button"
       @click="triggerAction('rotate', 90)"
-      class="flex-1 py-2 px-2 bg-[#FAF6EE] hover:bg-[#F3EDE0] border border-[#E8DEC9] rounded-xl text-xs font-bold text-text-main flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-2xs cursor-pointer"
+      class="flex-1 py-2 px-2 bg-control-bg hover:bg-control-bg-hover border border-control-border rounded-xl text-xs font-bold text-text-main flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-2xs cursor-pointer"
       title="Girar 90 grados"
     >
       <svg class="w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,7 +33,7 @@
     <button
       type="button"
       @click="triggerAction('resetOrientation')"
-      class="flex-1 py-2 px-2 bg-[#FAF6EE] hover:bg-[#F3EDE0] border border-[#E8DEC9] rounded-xl text-xs font-bold text-text-main flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-2xs cursor-pointer"
+      class="flex-1 py-2 px-2 bg-control-bg hover:bg-control-bg-hover border border-control-border rounded-xl text-xs font-bold text-text-main flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-2xs cursor-pointer"
       title="Restablecer a 0° y sin reflejo"
     >
       <svg class="w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">

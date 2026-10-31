@@ -10,155 +10,189 @@
     />
 
     <!-- 1. DRAGGABLE MOBILE BOTTOM SHEET (Above Bottom Action Bar) -->
-    <section
-      v-show="isSheetOpen"
-      class="fixed inset-x-0 bottom-[54px] z-30 bg-white rounded-t-[28px] border-t border-[#EAE1D2] shadow-sheet flex flex-col transition-[height] duration-150 ease-out"
-      :style="{ height: `${sheetHeight}vh` }"
-      data-purpose="mobile-bottom-sheet-controls"
-    >
-      <!-- Drag Handle / Grab indicator -->
-      <div
-        class="w-full pt-2 pb-1.5 flex justify-center cursor-grab active:cursor-grabbing touch-none shrink-0"
-        @mousedown="onDragStart"
-        @touchstart="onDragStart"
-        title="Arrastra para ajustar la altura del panel"
+    <Transition name="sheet-slide">
+      <section
+        v-if="isSheetOpen"
+        class="fixed inset-x-0 bottom-[54px] z-30 bg-white rounded-t-[28px] border-t border-sheet-border shadow-sheet flex flex-col will-change-transform"
+        :class="{ 'transition-[height] duration-150 ease-out': !isDragging }"
+        :style="{ height: `${sheetHeight}vh` }"
+        data-purpose="mobile-bottom-sheet-controls"
       >
-        <div class="w-12 h-1.2 bg-stone-300 hover:bg-stone-400 rounded-full transition-colors"></div>
-      </div>
-
-      <!-- Header row with navigation & actions -->
-      <div class="px-4 py-2 border-b border-[#F0E6D8] flex items-center justify-between shrink-0 bg-[#FFFDF9]/80">
-        <!-- Left: Context title or Back buttons -->
-        <div class="flex items-center gap-2 min-w-0">
-          <!-- Back from Background to Layers -->
-          <button
-            v-if="sheetTab === 'background'"
-            type="button"
-            @click="sheetTab = 'layers'"
-            class="flex items-center gap-1 text-xs font-bold text-primary-600 hover:text-primary-700 bg-primary-50 px-2.5 py-1 rounded-xl transition-colors cursor-pointer"
-          >
-            <span>&larr;</span>
-            <span>Volver a Capas</span>
-          </button>
-
-          <!-- Back from Layers to Element (if element selected) -->
-          <button
-            v-else-if="sheetTab === 'layers' && hasSelectedNode"
-            type="button"
-            @click="sheetTab = 'element'"
-            class="flex items-center gap-1 text-xs font-bold text-primary-600 hover:text-primary-700 bg-primary-50 px-2.5 py-1 rounded-xl transition-colors cursor-pointer"
-          >
-            <span>&larr;</span>
-            <span>Volver a {{ activeElement?.type || 'Elemento' }}</span>
-          </button>
-
-          <!-- Standard title when in Element mode -->
-          <div v-else-if="sheetTab === 'element' && activeElement" class="flex items-center gap-1.5 min-w-0">
-            <span class="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-primary-100 text-primary-800 border border-primary-200 shrink-0">
-              {{ activeElement.type }}
-            </span>
-            <span class="text-xs font-bold text-text-main truncate max-w-[150px]">
-              {{ activeElement.label }}
-            </span>
-          </div>
-
-          <!-- Title for Layers tab without active element -->
-          <div v-else class="flex items-center gap-1.5">
-            <span class="text-sm">📚</span>
-            <span class="text-xs font-bold text-text-main">
-              Capas del Lienzo
-            </span>
-          </div>
-        </div>
-
-        <!-- Right: Close / Collapse sheet button -->
-        <button
-          type="button"
-          @click="isSheetOpen = false"
-          class="w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-xs font-bold text-text-subtle hover:text-text-main transition-colors cursor-pointer"
-          title="Ocultar panel"
+        <!-- Drag Zone: Entire top header is draggable -->
+        <div
+          class="w-full shrink-0 select-none cursor-grab active:cursor-grabbing touch-none"
+          @mousedown="onDragStart"
+          @touchstart="onDragStart"
+          title="Arrastra para ajustar la altura del panel"
         >
-          ✕
-        </button>
-      </div>
+          <!-- Drag Handle Indicator -->
+          <div class="w-full pt-2 pb-1.5 flex justify-center">
+            <div
+              :class="[
+                'h-1.5 rounded-full transition-all duration-200',
+                isDragging ? 'w-16 bg-primary-500 shadow-sm' : 'w-12 bg-stone-300 hover:bg-stone-400'
+              ]"
+            ></div>
+          </div>
 
-      <!-- Scrollable Tab Content Container -->
-      <div class="px-4 py-3 space-y-4 overflow-y-auto no-scrollbar flex-1" id="tab-content-container">
-        <!-- TAB 1: ELEMENT PROPERTIES INSPECTOR -->
-        <div v-if="sheetTab === 'element'">
-          <TextInspector v-if="activeElement && activeElement.type === 'Texto'" />
-          <EmojiInspector v-else-if="activeElement && activeElement.type === 'Emoji'" />
-          <ImageInspector v-else-if="activeElement && (activeElement.type === 'Imagen' || activeElement.type === 'Objeto')" />
-          <div v-else class="text-center py-6 space-y-2 text-text-muted">
-            <span class="text-3xl block">👆</span>
-            <p class="text-xs font-semibold">Toca cualquier elemento del lienzo para editarlo aquí.</p>
+          <!-- Header row with navigation & actions -->
+          <div class="px-4 py-1.5 border-b border-sheet-border flex items-center justify-between bg-sheet-bg/80">
+            <!-- Left: Context title or Back buttons -->
+            <div class="flex items-center gap-2 min-w-0" @mousedown.stop @touchstart.stop>
+              <!-- Back from Background to Layers -->
+              <button
+                v-if="sheetTab === 'background'"
+                type="button"
+                @click="sheetTab = 'layers'"
+                class="flex items-center gap-1 text-xs font-bold text-primary-600 hover:text-primary-700 bg-primary-50 px-2.5 py-1 rounded-xl transition-colors cursor-pointer"
+              >
+                <span>&larr;</span>
+                <span>Volver a Capas</span>
+              </button>
+
+              <!-- Back from Layers to Element (if element selected) -->
+              <button
+                v-else-if="sheetTab === 'layers' && hasSelectedNode"
+                type="button"
+                @click="sheetTab = 'element'"
+                class="flex items-center gap-1 text-xs font-bold text-primary-600 hover:text-primary-700 bg-primary-50 px-2.5 py-1 rounded-xl transition-colors cursor-pointer"
+              >
+                <span>&larr;</span>
+                <span>Volver a {{ activeElement?.type || 'Elemento' }}</span>
+              </button>
+
+              <!-- Standard title when in Element mode -->
+              <div v-else-if="sheetTab === 'element' && activeElement" class="flex items-center gap-1.5 min-w-0">
+                <span class="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-primary-100 text-primary-800 border border-primary-200 shrink-0">
+                  {{ activeElement.type }}
+                </span>
+                <span class="text-xs font-bold text-text-main truncate max-w-[150px]">
+                  {{ activeElement.label }}
+                </span>
+              </div>
+
+              <!-- Title for Layers tab without active element -->
+              <div v-else class="flex items-center gap-1.5">
+                <span class="text-sm">📚</span>
+                <span class="text-xs font-bold text-text-main">
+                  Capas del Lienzo
+                </span>
+              </div>
+            </div>
+
+            <!-- Right: Actions (Lock Element & Close Sheet) -->
+            <div class="flex items-center gap-1.5" @mousedown.stop @touchstart.stop>
+              <!-- Candado para bloquear / desbloquear capa activa -->
+              <button
+                v-if="sheetTab === 'element' && activeElement"
+                type="button"
+                @click="onToggleLock()"
+                :class="[
+                  'w-7 h-7 rounded-full transition-all cursor-pointer text-xs shrink-0 flex items-center justify-center shadow-2xs',
+                  activeElement.isLocked
+                    ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                    : 'bg-stone-100 text-text-muted hover:text-text-main hover:bg-stone-200'
+                ]"
+                :title="activeElement.isLocked ? 'Desbloquear elemento (Permitir mover)' : 'Bloquear elemento (Fijar posición)'"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  ></path>
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                @click="closeSheet"
+                class="w-7 h-7 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-xs font-bold text-text-subtle hover:text-text-main transition-colors cursor-pointer"
+                title="Ocultar panel"
+              >
+                ✕
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- TAB 2: LAYERS LIST -->
-        <div v-else-if="sheetTab === 'layers'" class="space-y-3">
-          <LayersPanel
-            :layers="currentLayersList"
-            :selected-node="currentSelectedNode"
-            @select="onSelectLayer"
-            @toggle-lock="onToggleLock"
-            @duplicate="onDuplicate"
-            @move-up="onMoveUp"
-            @move-down="onMoveDown"
-            @reorder="onReorder"
-            @remove="onRemove"
-            @clear-all="onClearAll"
-          />
+        <!-- Scrollable Tab Content Container -->
+        <div class="px-4 py-3 space-y-4 overflow-y-auto no-scrollbar flex-1" id="tab-content-container">
+          <!-- TAB 1: ELEMENT PROPERTIES INSPECTOR -->
+          <div v-if="sheetTab === 'element'">
+            <TextInspector v-if="activeElement && activeElement.type === 'Texto'" />
+            <EmojiInspector v-else-if="activeElement && activeElement.type === 'Emoji'" />
+            <ImageInspector v-else-if="activeElement && (activeElement.type === 'Imagen' || activeElement.type === 'Objeto')" />
+            <div v-else class="text-center py-6 space-y-2 text-text-muted">
+              <span class="text-3xl block">👆</span>
+              <p class="text-xs font-semibold">Toca cualquier elemento del lienzo para editarlo aquí.</p>
+            </div>
+          </div>
 
-          <!-- Canvas Background Trigger Button at the end of Layers -->
-          <div class="pt-2 border-t border-app-border">
-            <button
-              type="button"
-              @click="sheetTab = 'background'"
-              class="w-full p-2.5 rounded-2xl border border-app-border bg-stone-50 hover:bg-primary-50/80 hover:border-primary-300 transition-all flex items-center justify-between text-xs font-bold text-text-main cursor-pointer shadow-2xs group"
-              title="Configurar color, degradado o fondo transparente"
-            >
-              <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-xl bg-white border border-app-border flex items-center justify-center text-sm shadow-2xs group-hover:scale-105 transition-transform">
-                  🎨
+          <!-- TAB 2: LAYERS LIST -->
+          <div v-else-if="sheetTab === 'layers'" class="space-y-3">
+            <LayersPanel
+              :layers="currentLayersList"
+              :selected-node="currentSelectedNode"
+              @select="onSelectLayer"
+              @toggle-lock="onToggleLock"
+              @duplicate="onDuplicate"
+              @move-up="onMoveUp"
+              @move-down="onMoveDown"
+              @reorder="onReorder"
+              @remove="onRemove"
+              @clear-all="onClearAll"
+            />
+
+            <!-- Canvas Background Trigger Button at the end of Layers -->
+            <div class="pt-2 border-t border-app-border">
+              <button
+                type="button"
+                @click="sheetTab = 'background'"
+                class="w-full p-2.5 rounded-2xl border border-app-border bg-stone-50 hover:bg-primary-50/80 hover:border-primary-300 transition-all flex items-center justify-between text-xs font-bold text-text-main cursor-pointer shadow-2xs group"
+                title="Configurar color, degradado o fondo transparente"
+              >
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-white border border-app-border flex items-center justify-center text-sm shadow-2xs group-hover:scale-105 transition-transform">
+                    🎨
+                  </div>
+                  <div class="text-left">
+                    <span class="block text-xs font-bold text-text-main">Fondo del Lienzo</span>
+                    <span class="block text-[10px] text-text-muted font-medium">
+                      {{ currentIsBgTransparent ? 'Transparente' : currentBgMode === 'gradient' ? 'Degradado activo' : 'Color ' + currentBgColor }}
+                    </span>
+                  </div>
                 </div>
-                <div class="text-left">
-                  <span class="block text-xs font-bold text-text-main">Fondo del Lienzo</span>
-                  <span class="block text-[10px] text-text-muted font-medium">
-                    {{ currentIsBgTransparent ? 'Transparente' : currentBgMode === 'gradient' ? 'Degradado activo' : 'Color ' + currentBgColor }}
-                  </span>
+                <div class="flex items-center gap-1 text-[11px] text-primary-600 font-bold group-hover:translate-x-0.5 transition-transform">
+                  <span>Modificar</span>
+                  <span>&rarr;</span>
                 </div>
-              </div>
-              <div class="flex items-center gap-1 text-[11px] text-primary-600 font-bold group-hover:translate-x-0.5 transition-transform">
-                <span>Modificar</span>
-                <span>&rarr;</span>
-              </div>
-            </button>
+              </button>
+            </div>
+          </div>
+
+          <!-- TAB 3: CANVAS BACKGROUND EDITOR -->
+          <div v-else-if="sheetTab === 'background'" class="space-y-3">
+            <BackgroundTool
+              :is-transparent="currentIsBgTransparent"
+              :bg-mode="currentBgMode"
+              :bgColor="currentBgColor"
+              :active-gradient="currentActiveGradient"
+              :gradient-presets="currentGradientPresets"
+              :frame="studio?.frame"
+              @set-transparent="onSetTransparent"
+              @set-color="onSetColor"
+              @set-gradient="onSetGradient"
+              @fill-pattern="onFillPattern"
+              @clear-pattern="onClearPattern"
+            />
           </div>
         </div>
-
-        <!-- TAB 3: CANVAS BACKGROUND EDITOR -->
-        <div v-else-if="sheetTab === 'background'" class="space-y-3">
-          <BackgroundTool
-            :is-transparent="currentIsBgTransparent"
-            :bg-mode="currentBgMode"
-            :bgColor="currentBgColor"
-            :active-gradient="currentActiveGradient"
-            :gradient-presets="currentGradientPresets"
-            :frame="studio?.frame"
-            @set-transparent="onSetTransparent"
-            @set-color="onSetColor"
-            @set-gradient="onSetGradient"
-            @fill-pattern="onFillPattern"
-            @clear-pattern="onClearPattern"
-          />
-        </div>
-      </div>
-    </section>
+      </section>
+    </Transition>
 
     <!-- 2. FIXED BOTTOM ACTION BAR (Outside of the bottom sheet) -->
     <nav
-      class="fixed bottom-0 inset-x-0 z-40 bg-[#FFFDF9]/95 backdrop-blur-md border-t border-[#F0E6D8] py-1 px-4 flex items-center justify-around pb-safe shadow-lg"
+      class="fixed bottom-0 inset-x-0 z-40 bg-sheet-bg/95 backdrop-blur-md border-t border-sheet-border py-1 px-4 flex items-center justify-around pb-safe shadow-lg"
       data-purpose="mobile-bottom-action-bar"
     >
       <!-- Action 1: Emoji -->
@@ -239,6 +273,8 @@ const fileInputRef = ref<HTMLInputElement | null>(null);
 const isSheetOpen = ref(false);
 const sheetTab = ref<'element' | 'layers' | 'background'>('element');
 const sheetHeight = ref(40); // default 40%
+const lastValidHeight = ref(40);
+const isDragging = ref(false);
 
 const STORAGE_KEY = 'pixemoji_mobile_sheet_height';
 
@@ -248,8 +284,13 @@ onMounted(() => {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const val = parseInt(saved, 10);
-        if (val >= 25 && val <= 85) {
+        if (val < 30) {
+          // Si en localStorage sale menor al 30%, situar en el 30%
+          sheetHeight.value = 30;
+          lastValidHeight.value = 30;
+        } else if (val <= 85) {
           sheetHeight.value = val;
+          lastValidHeight.value = val;
         }
       }
     } catch (_) {}
@@ -258,6 +299,7 @@ onMounted(() => {
 
 // Drag to Resize Logic
 const onDragStart = (e: MouseEvent | TouchEvent) => {
+  isDragging.value = true;
   const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
   const startY = clientY;
   const startHeight = sheetHeight.value;
@@ -266,18 +308,29 @@ const onDragStart = (e: MouseEvent | TouchEvent) => {
     const currentY = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
     const deltaY = startY - currentY;
     const deltaVh = (deltaY / window.innerHeight) * 100;
-    const newHeight = Math.min(85, Math.max(25, Math.round(startHeight + deltaVh)));
+    // Permitir bajar visualmente hasta 20vh para dar feedback antes de cerrarse
+    const newHeight = Math.min(85, Math.max(18, Math.round(startHeight + deltaVh)));
     sheetHeight.value = newHeight;
   };
 
   const onDragEnd = () => {
+    isDragging.value = false;
     window.removeEventListener('mousemove', onDragMove);
     window.removeEventListener('mouseup', onDragEnd);
     window.removeEventListener('touchmove', onDragMove);
     window.removeEventListener('touchend', onDragEnd);
-    try {
-      localStorage.setItem(STORAGE_KEY, sheetHeight.value.toString());
-    } catch (_) {}
+
+    // Si el height es inferior al 30%, cerrar el bottom sheet y no guardar en localStorage
+    if (sheetHeight.value < 30) {
+      isSheetOpen.value = false;
+      // Restaurar a un valor seguro >= 30% para la próxima vez que se abra
+      sheetHeight.value = Math.max(30, lastValidHeight.value || 40);
+    } else {
+      lastValidHeight.value = sheetHeight.value;
+      try {
+        localStorage.setItem(STORAGE_KEY, sheetHeight.value.toString());
+      } catch (_) {}
+    }
   };
 
   window.addEventListener('mousemove', onDragMove);
@@ -309,6 +362,20 @@ watch(
   }
 );
 
+const closeSheet = () => {
+  isSheetOpen.value = false;
+  if (studio?.stage.selectedNode.value) {
+    studio.selectNode(null);
+  }
+};
+
+// Al cerrar el sheet, deseleccionar el elemento activo del lienzo
+watch(isSheetOpen, (isOpen) => {
+  if (!isOpen && studio?.stage.selectedNode.value) {
+    studio.selectNode(null);
+  }
+});
+
 // Navigation & Actions
 const openInspector = () => {
   isSheetOpen.value = true;
@@ -322,7 +389,7 @@ const openTools = () => {
 
 const openSettings = () => {
   if (isSheetOpen.value && (sheetTab.value === 'layers' || sheetTab.value === 'background')) {
-    isSheetOpen.value = false;
+    closeSheet();
   } else {
     isSheetOpen.value = true;
     sheetTab.value = 'layers';
@@ -349,7 +416,9 @@ const onAddTextClick = () => {
 };
 
 const onAddImageClick = () => {
-  fileInputRef.value?.click();
+  emit('quick-add', 'image');
+  isSheetOpen.value = true;
+  sheetTab.value = 'element';
 };
 
 const onFileSelected = (e: Event) => {
@@ -438,3 +507,22 @@ defineExpose({
   openTools
 });
 </script>
+
+<style scoped>
+.sheet-slide-enter-active,
+.sheet-slide-leave-active {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.sheet-slide-enter-from,
+.sheet-slide-leave-to {
+  transform: translateY(100%);
+  opacity: 0.8;
+}
+
+.sheet-slide-enter-to,
+.sheet-slide-leave-from {
+  transform: translateY(0);
+  opacity: 1;
+}
+</style>

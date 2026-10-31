@@ -6,7 +6,7 @@
       <div class="flex items-center gap-1.5">
         <!-- Emoji Badge / Icono al inicio -->
         <div
-          class="w-10 h-10 rounded-2xl bg-[#FFF6EE] border border-orange-200 flex items-center justify-center text-2xl shrink-0 select-none shadow-2xs"
+          class="w-10 h-10 rounded-2xl bg-control-bg-active border border-primary-200 flex items-center justify-center text-2xl shrink-0 select-none shadow-2xs"
           :title="`Emoji activo: ${modelValue}`"
         >
           {{ modelValue }}
@@ -21,7 +21,7 @@
             @input="onInputQueryChange"
             @paste="onInputPaste"
             placeholder="Pega o escribe un emoji..."
-            class="w-full h-10 pl-3 pr-8 bg-[#FAF6EE] border border-[#E2D8C7] rounded-2xl text-xs font-semibold text-text-main placeholder-text-hint focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 shadow-2xs transition-colors"
+            class="w-full h-10 pl-3 pr-8 bg-control-bg border border-control-border rounded-2xl text-xs font-semibold text-text-main placeholder-text-hint focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 shadow-2xs transition-colors"
           />
           <button
             v-if="inputQuery"
@@ -38,7 +38,7 @@
         <button
           type="button"
           @click="pasteFromClipboard"
-          class="h-10 px-3 bg-white hover:bg-orange-50 border border-[#E0D5C3] text-primary-600 rounded-2xl text-xs font-bold shadow-2xs active:scale-95 transition-all flex items-center gap-1 cursor-pointer shrink-0"
+          class="h-10 px-3 bg-white hover:bg-control-bg-hover border border-control-border text-primary-600 rounded-2xl text-xs font-bold shadow-2xs active:scale-95 transition-all flex items-center gap-1 cursor-pointer shrink-0"
           :title="pasteSuccess ? '¡Pegado!' : 'Pegar del portapapeles'"
         >
           <span>{{ pasteSuccess ? '✅' : '📋' }}</span>
@@ -56,8 +56,8 @@
           :class="[
             'flex-none w-9 h-9 rounded-xl border flex items-center justify-center text-lg active:scale-90 transition-all cursor-pointer shadow-2xs select-none',
             modelValue === char
-              ? 'bg-[#FFF6EE] border-primary-500 ring-2 ring-primary-500/20 scale-105'
-              : 'bg-[#FAF6EE] border-[#E9DFCF] hover:bg-white'
+              ? 'bg-control-bg-active border-primary-500 ring-2 ring-primary-500/20 scale-105'
+              : 'bg-control-bg border-control-border hover:bg-white'
           ]"
           :title="`Usar ${char}`"
         >

@@ -54,7 +54,7 @@ export function useKonvaTemplates(
   const applyTemplate = (templateId: string) => {
     switch (templateId) {
       case 'meme': {
-        if (onPresetChangeReq) onPresetChangeReq(512, 512, 'square-post');
+        if (onPresetChangeReq) onPresetChangeReq(512, 512, 'sticker-compact');
         else changeDimensions(512, 512);
 
         setBgColor('#ffffff');
@@ -83,7 +83,7 @@ export function useKonvaTemplates(
       }
 
       case 'versus': {
-        if (onPresetChangeReq) onPresetChangeReq(512, 512, 'square-post');
+        if (onPresetChangeReq) onPresetChangeReq(512, 512, 'sticker-compact');
         else changeDimensions(512, 512);
 
         const flameGrad = gradientPresets.find((g: GradientPreset) => g.id === 'fire') || gradientPresets[0];
@@ -112,7 +112,7 @@ export function useKonvaTemplates(
       }
 
       case 'sticker-glow': {
-        if (onPresetChangeReq) onPresetChangeReq(512, 512, 'square-post');
+        if (onPresetChangeReq) onPresetChangeReq(512, 512, 'sticker-compact');
         else changeDimensions(512, 512);
 
         const darkGrad = gradientPresets.find((g: GradientPreset) => g.id === 'dark') || gradientPresets[8];

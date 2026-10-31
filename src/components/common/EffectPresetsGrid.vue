@@ -10,9 +10,9 @@
       <button
         type="button"
         @click="applyPreset('sticker')"
-        class="flex items-center gap-2 p-2 rounded-2xl border border-[#E8DEC9] hover:border-primary-400 bg-[#FFF5EE] text-text-main font-bold text-xs shadow-2xs text-left active:scale-95 transition-all cursor-pointer group"
+        class="flex items-center gap-2 p-2 rounded-2xl border border-control-border hover:border-primary-400 bg-control-bg-active text-text-main font-bold text-xs shadow-2xs text-left active:scale-95 transition-all cursor-pointer group"
       >
-        <span class="w-7 h-7 rounded-xl bg-gradient-to-br from-primary-500 to-amber-500 text-white flex items-center justify-center text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+        <span class="w-7 h-7 rounded-xl bg-primary-gradient text-white flex items-center justify-center text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
           ✨
         </span>
         <div class="leading-tight min-w-0">
@@ -25,9 +25,9 @@
       <button
         type="button"
         @click="applyPreset({ preset: 'neon', color: '#00D1FF' })"
-        class="flex items-center gap-2 p-2 rounded-2xl border border-[#E8DEC9] hover:border-cyan-400 bg-[#FAF6EE] text-text-main font-bold text-xs shadow-2xs text-left active:scale-95 transition-all cursor-pointer group"
+        class="flex items-center gap-2 p-2 rounded-2xl border border-control-border hover:border-cyan-400 bg-control-bg text-text-main font-bold text-xs shadow-2xs text-left active:scale-95 transition-all cursor-pointer group"
       >
-        <span class="w-7 h-7 rounded-xl bg-[#E0F8FF] text-cyan-600 flex items-center justify-center text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+        <span class="w-7 h-7 rounded-xl bg-effect-neon-primary-bg text-effect-neon-primary-text flex items-center justify-center text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
           💎
         </span>
         <div class="leading-tight min-w-0">
@@ -40,9 +40,9 @@
       <button
         type="button"
         @click="applyPreset({ preset: 'neon', color: '#FF4D8D' })"
-        class="flex items-center gap-2 p-2 rounded-2xl border border-[#E8DEC9] hover:border-pink-400 bg-[#FAF6EE] text-text-main font-bold text-xs shadow-2xs text-left active:scale-95 transition-all cursor-pointer group"
+        class="flex items-center gap-2 p-2 rounded-2xl border border-control-border hover:border-pink-400 bg-control-bg text-text-main font-bold text-xs shadow-2xs text-left active:scale-95 transition-all cursor-pointer group"
       >
-        <span class="w-7 h-7 rounded-xl bg-[#FFEAF3] text-pink-600 flex items-center justify-center text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+        <span class="w-7 h-7 rounded-xl bg-effect-neon-secondary-bg text-effect-neon-secondary-text flex items-center justify-center text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
           💖
         </span>
         <div class="leading-tight min-w-0">
@@ -55,7 +55,7 @@
       <button
         type="button"
         @click="applyPreset('clean')"
-        class="flex items-center gap-2 p-2 rounded-2xl border border-[#E8DEC9] hover:border-stone-400 bg-[#FAF6EE] text-text-main font-bold text-xs shadow-2xs text-left active:scale-95 transition-all cursor-pointer group"
+        class="flex items-center gap-2 p-2 rounded-2xl border border-control-border hover:border-stone-400 bg-control-bg text-text-main font-bold text-xs shadow-2xs text-left active:scale-95 transition-all cursor-pointer group"
       >
         <span class="w-7 h-7 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center text-xs shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
           🫧

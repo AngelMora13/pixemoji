@@ -18,16 +18,16 @@ export interface FormatPreset {
 
 export const baseFormatPresets: FormatPreset[] = [
   {
-    id: 'square-post',
-    name: 'Cuadrado Feed / Avatar',
+    id: 'sticker-compact',
+    name: 'Sticker / Icono',
     category: 'square',
     ratioLabel: '1:1',
-    platform: 'Instagram / FB / Avatar',
-    icon: '🟦',
+    platform: 'WhatsApp / Telegram / Stickers',
+    icon: '✨',
     baseWidth: 512,
     baseHeight: 512,
     export2xLabel: '1024 × 1024 px',
-    description: 'Universal para feed de Instagram, Facebook y fotos de perfil'
+    description: 'Tamaño estándar para stickers de WhatsApp y mensajería'
   },
   {
     id: 'portrait-post',
@@ -76,18 +76,6 @@ export const baseFormatPresets: FormatPreset[] = [
     baseHeight: 268,
     export2xLabel: '1024 × 536 px',
     description: 'Optimizado para links compartidos y banners de LinkedIn'
-  },
-  {
-    id: 'sticker-compact',
-    name: 'Sticker / Icono WA',
-    category: 'square',
-    ratioLabel: '1:1',
-    platform: 'WhatsApp / Telegram / Stickers',
-    icon: '✨',
-    baseWidth: 512,
-    baseHeight: 512,
-    export2xLabel: '1024 × 1024 px',
-    description: 'Tamaño estándar para stickers de WhatsApp y mensajería'
   }
 ];
 

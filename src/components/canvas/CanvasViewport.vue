@@ -98,7 +98,7 @@
     </div>
 
     <!-- Contextual Quick-Action Floating Bar -->
-    <CanvasToolbar @open-inspector="$emit('open-inspector')" />
+    <CanvasToolbar />
 
     <!-- Main Working Stage (Konva Canvas Pan & Zoom) -->
     <div class="flex-1 w-full h-full relative overflow-hidden flex items-center justify-center pointer-events-none">
@@ -129,6 +129,9 @@ import KonvaStage from './KonvaStage.vue';
 import CanvasToolbar from './CanvasToolbar.vue';
 import { useViewportPanZoom } from '../../composables/useViewportPanZoom';
 import type { useCanvasFrame } from '../../composables/useCanvasFrame';
+import { useCanvasStudio } from '../../composables/useCanvasStudioContext';
+
+const studio = useCanvasStudio();
 
 const props = defineProps<{
   width: number;
@@ -215,9 +218,28 @@ watch([() => props.width, () => props.height], () => {
   triggerFit();
 });
 
+// En móvil: alternar modo según la selección de elementos
+watch(
+  () => studio?.stage.selectedNode.value,
+  (node) => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      if (node) {
+        setTool('select');
+      } else {
+        setTool('hand');
+      }
+    }
+  }
+);
+
 onMounted(() => {
   // Ajuste inicial adaptativo según la pantalla del dispositivo
   triggerFit();
+
+  // En mobile, modo hand activo por defecto para facilitar el arrastre del lienzo
+  if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+    setTool('hand');
+  }
 
   if (typeof ResizeObserver !== 'undefined' && viewportRef.value) {
     resizeObserver = new ResizeObserver(() => {

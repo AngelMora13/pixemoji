@@ -2,11 +2,11 @@
   <!-- Floating Contextual Bar for Active Selected Element -->
   <div v-if="selectedInfo">
     <div
-      class="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900/95 text-white rounded-full shadow-2xl text-xs backdrop-blur-md border border-neutral-700/80 animate-fade-in select-none"
+      class="absolute top-16 sm:top-[68px] left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 sm:gap-1.5 px-3.5 py-1.5 bg-neutral-900/95 text-white rounded-full shadow-2xl text-xs backdrop-blur-md border border-neutral-700/80 animate-fade-in select-none"
       data-purpose="floating-context-bar"
     >
       <!-- Element Type Badge -->
-      <span class="font-extrabold text-[10px] text-primary-400 uppercase tracking-wider pl-1">
+      <span class="font-extrabold text-[11px] text-primary-400 uppercase tracking-wider pl-1">
         {{ selectedInfo.type }}
       </span>
 
@@ -14,16 +14,16 @@
         {{ selectedInfo.label }}
       </span>
 
-      <div class="h-3 w-px bg-neutral-700 mx-0.5"></div>
+      <div class="h-3.5 w-px bg-neutral-700 mx-1"></div>
 
       <!-- Duplicate Button -->
       <button
         type="button"
         @click="trigger('duplicate')"
-        class="p-1 hover:bg-neutral-800 rounded transition-colors text-neutral-300 hover:text-white cursor-pointer"
+        class="p-1.5 hover:bg-neutral-800 rounded-lg transition-colors text-neutral-300 hover:text-white cursor-pointer"
         title="Duplicar elemento"
       >
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <rect height="13" rx="2" stroke-width="2" width="13" x="9" y="9"></rect>
           <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-width="2"></path>
         </svg>
@@ -34,12 +34,12 @@
         type="button"
         @click="trigger('toggleLock')"
         :class="[
-          'p-1 rounded transition-colors cursor-pointer',
+          'p-1.5 rounded-lg transition-colors cursor-pointer',
           selectedInfo.isLocked ? 'text-amber-400 bg-amber-900/40' : 'text-neutral-300 hover:text-white hover:bg-neutral-800'
         ]"
         :title="selectedInfo.isLocked ? 'Desbloquear posición' : 'Bloquear posición'"
       >
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
             stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -51,10 +51,10 @@
       <button
         type="button"
         @click="trigger('bringToFront')"
-        class="p-1 hover:bg-neutral-800 rounded transition-colors text-neutral-300 hover:text-white cursor-pointer"
+        class="p-1.5 hover:bg-neutral-800 rounded-lg transition-colors text-neutral-300 hover:text-white cursor-pointer"
         title="Traer al frente"
       >
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path d="M5 10l7-7m0 0l7 7m-7-7v18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
         </svg>
       </button>
@@ -64,36 +64,23 @@
         v-if="selectedInfo.type === 'Imagen' || selectedInfo.type === 'Emoji'"
         type="button"
         @click="isCropModalOpen = true"
-        class="p-1 hover:bg-neutral-800 rounded transition-colors text-amber-400 hover:text-amber-300 cursor-pointer flex items-center gap-1"
+        class="p-1.5 hover:bg-neutral-800 rounded-lg transition-colors text-amber-400 hover:text-amber-300 cursor-pointer flex items-center gap-1"
         title="Recortar dimensiones (Crop)"
       >
-        <span class="text-xs leading-none">✂️</span>
-        <span class="text-[10px] font-bold hidden sm:inline">Recortar</span>
+        <span class="text-sm leading-none">✂️</span>
+        <span class="text-[11px] font-bold hidden sm:inline">Recortar</span>
       </button>
 
-      <!-- Open Properties Inspector -->
-      <button
-        type="button"
-        @click="$emit('openInspector')"
-        class="p-1 hover:bg-neutral-800 rounded transition-colors text-primary-400 hover:text-primary-300 cursor-pointer flex items-center gap-1"
-        title="Abrir inspector de propiedades"
-      >
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-        </svg>
-        <span class="text-[10px] font-bold hidden sm:inline">Ajustes</span>
-      </button>
-
-      <div class="h-3 w-px bg-neutral-700 mx-0.5"></div>
+      <div class="h-3.5 w-px bg-neutral-700 mx-1"></div>
 
       <!-- Delete Button -->
       <button
         type="button"
         @click="trigger('delete')"
-        class="p-1 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded transition-colors cursor-pointer"
+        class="p-1.5 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors cursor-pointer"
         title="Eliminar elemento (Supr)"
       >
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
             stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -126,10 +113,6 @@ import CropModal from '../common/CropModal.vue';
 const studio = useCanvasStudio();
 
 const isCropModalOpen = ref(false);
-
-defineEmits<{
-  (e: 'openInspector'): void;
-}>();
 
 const selectedInfo = computed(() => {
   const el = studio?.activeElement.value;

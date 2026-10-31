@@ -1,6 +1,6 @@
 <template>
   <header
-    class="w-full bg-[#FFFDF9]/95 backdrop-blur-md border-b border-[#EFE7D8] px-3 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 shrink-0 z-30 select-none"
+    class="bg-grid-pattern-tiny relative w-full bg-app-header/90 backdrop-blur-md border-b border-app-border px-3 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 shrink-0 z-30 select-none shadow-xs"
     data-purpose="studio-unified-header"
   >
     <!-- Left: Brand Logo & Navigation Dropdown (Mobile) / Full Brand & Switcher (Desktop) -->
@@ -11,7 +11,7 @@
           type="button"
           @click="isRouteMenuOpen = !isRouteMenuOpen"
           aria-label="Menú de rutas"
-          class="w-9 h-9 rounded-2xl bg-gradient-to-br from-primary-500 to-amber-500 hover:from-primary-600 hover:to-amber-600 flex items-center justify-center text-white text-lg shadow-sm shadow-orange-300 active:scale-95 transition-transform cursor-pointer"
+          class="w-9 h-9 rounded-2xl flex items-center justify-center text-lg shadow-md shadow-primary-600/20 active:scale-95 transition-transform cursor-pointer"
         >
           👾
         </button>
@@ -85,7 +85,7 @@
       <div class="hidden md:flex items-center gap-4">
         <a href="/" class="flex items-center gap-2.5 group transition-transform hover:scale-[1.02]">
           <div
-            class="w-9 h-9 rounded-2xl bg-gradient-to-br from-primary-500 to-amber-500 flex items-center justify-center text-white text-lg font-black shadow-sm shadow-orange-300"
+            class="w-9 h-9 rounded-2xl flex items-center justify-center text-lg font-black shadow-md shadow-primary-600/20"
           >
             👾
           </div>
@@ -136,7 +136,7 @@
             :value="currentPreset.id"
             @change="onPresetSelect"
             aria-label="Seleccionar formato de lienzo"
-            class="appearance-none pl-6 pr-6 sm:pr-8 py-1.5 bg-[#F4EDE0] hover:bg-[#ece2d1] border border-[#E8DEC9] text-text-main text-xs font-bold rounded-xl cursor-pointer shadow-2xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            class="appearance-none pl-6 pr-6 sm:pr-8 py-1.5 bg-control-bg hover:bg-control-bg-hover border border-control-border text-text-main text-xs font-bold rounded-xl cursor-pointer shadow-2xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             title="Formato y proporción del lienzo"
           >
             <option v-for="p in formatPresets" :key="p.id" :value="p.id">
