@@ -93,7 +93,7 @@ export const DONATION_CONFIG: DonationConfig = {
     alias: 'Indi13',
     userId: '312056582', // Reemplazar con tu ID real de Binance / Binance Pay
     qrImage: '/QR_Binance.jpg', // Placeholder: logo del proyecto. Reemplazar con '/tu-qr-binance.png'
-    appUrl: 'https://app.binance.com', // Enlace para abrir Binance o Binance Pay
+    appUrl: 'https://app.binance.com/uni-qr/7x1vB7xi', // Enlace para abrir Binance o Binance Pay
     merchantName: 'PixEmoji Creator'
   },
 
