@@ -267,3 +267,38 @@ body {
 .animate-slide-up {
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ==========================================================================
+   Optimizaciones de Viewport y Safe Area para iPhone / Mobile Safari
+   ========================================================================== */
+html,
+body {
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+/* Soporte Safe Area Insets para iPhone (Notch y Home Indicator) */
+.pb-safe {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+.pt-safe {
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+}
+
+.mb-safe {
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.bottom-safe {
+  bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Prevenir retraso de 300ms y doble toque accidental de zoom en iPhone */
+button,
+a,
+select,
+input,
+[role="button"] {
+  touch-action: manipulation;
+}

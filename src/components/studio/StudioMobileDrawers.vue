@@ -13,9 +13,9 @@
     <Transition name="sheet-slide">
       <section
         v-if="isSheetOpen"
-        class="fixed inset-x-0 bottom-[54px] z-30 bg-white rounded-t-[28px] border-t border-sheet-border shadow-sheet flex flex-col will-change-transform"
+        class="fixed inset-x-0 bottom-[calc(54px+env(safe-area-inset-bottom,0px))] z-30 bg-white rounded-t-[28px] border-t border-sheet-border shadow-sheet flex flex-col will-change-transform"
         :class="{ 'transition-[height] duration-150 ease-out': !isDragging }"
-        :style="{ height: `${sheetHeight}vh` }"
+        :style="{ height: `${sheetHeight}dvh` }"
         data-purpose="mobile-bottom-sheet-controls"
       >
         <!-- Drag Zone: Entire top header is draggable -->
@@ -278,17 +278,20 @@ const isDragging = ref(false);
 
 const STORAGE_KEY = 'pixemoji_mobile_sheet_height';
 
+const MIN_SHEET_HEIGHT = 15;
+const MAX_SHEET_HEIGHT = 85;
+
 onMounted(() => {
   if (typeof window !== 'undefined') {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const val = parseInt(saved, 10);
-        if (val < 30) {
-          // Si en localStorage sale menor al 30%, situar en el 30%
-          sheetHeight.value = 30;
-          lastValidHeight.value = 30;
-        } else if (val <= 85) {
+        if (val < MIN_SHEET_HEIGHT) {
+          // Si en localStorage sale menor al 25%, situar en el 25%
+          sheetHeight.value = MIN_SHEET_HEIGHT;
+          lastValidHeight.value = MIN_SHEET_HEIGHT;
+        } else if (val <= MAX_SHEET_HEIGHT) {
           sheetHeight.value = val;
           lastValidHeight.value = val;
         }
@@ -297,35 +300,61 @@ onMounted(() => {
   }
 });
 
-// Drag to Resize Logic
+// Drag to Resize & Fling-to-Close Logic
 const onDragStart = (e: MouseEvent | TouchEvent) => {
   isDragging.value = true;
   const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
   const startY = clientY;
+  const startTime = Date.now();
   const startHeight = sheetHeight.value;
+
+  let lastY = clientY;
+  let lastTime = startTime;
+  let velocityY = 0; // px / ms (positivo hacia abajo)
 
   const onDragMove = (ev: MouseEvent | TouchEvent) => {
     const currentY = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
+    const now = Date.now();
+    const dt = now - lastTime;
+    if (dt > 8) {
+      velocityY = (currentY - lastY) / dt;
+      lastY = currentY;
+      lastTime = now;
+    }
+
     const deltaY = startY - currentY;
     const deltaVh = (deltaY / window.innerHeight) * 100;
-    // Permitir bajar visualmente hasta 20vh para dar feedback antes de cerrarse
-    const newHeight = Math.min(85, Math.max(18, Math.round(startHeight + deltaVh)));
+    // El límite inferior se respeta en 25vh, no se cierra al bajar lentamente
+    const newHeight = Math.min(MAX_SHEET_HEIGHT, Math.max(MIN_SHEET_HEIGHT, Math.round(startHeight + deltaVh)));
     sheetHeight.value = newHeight;
   };
 
-  const onDragEnd = () => {
+  const onDragEnd = (ev: MouseEvent | TouchEvent) => {
     isDragging.value = false;
     window.removeEventListener('mousemove', onDragMove);
     window.removeEventListener('mouseup', onDragEnd);
     window.removeEventListener('touchmove', onDragMove);
     window.removeEventListener('touchend', onDragEnd);
 
-    // Si el height es inferior al 30%, cerrar el bottom sheet y no guardar en localStorage
-    if (sheetHeight.value < 30) {
-      isSheetOpen.value = false;
-      // Restaurar a un valor seguro >= 30% para la próxima vez que se abra
-      sheetHeight.value = Math.max(30, lastValidHeight.value || 40);
+    const endY = 'changedTouches' in ev && ev.changedTouches.length > 0 ? ev.changedTouches[0].clientY : lastY;
+    const totalDeltaY = endY - startY; // positivo = hacia abajo
+    const totalDuration = Date.now() - startTime;
+
+    // Solo se cierra si el usuario lo baja de manera BRUSCA (flick o swipe rápido hacia abajo):
+    // 1. Velocidad rápida al soltar (> 0.45 px/ms) con desplazamiento hacia abajo (> 25px)
+    // O
+    // 2. Gesto corto en el tiempo (< 320ms) con desplazamiento hacia abajo (> 40px)
+    const isBrusqueDownwardFlick =
+      (velocityY > 0.45 && totalDeltaY > 25) ||
+      (totalDuration < 320 && totalDeltaY > 40);
+
+    if (isBrusqueDownwardFlick) {
+      closeSheet();
+      // Restaurar a un valor seguro (>= 25%) para la próxima vez que se abra
+      sheetHeight.value = Math.max(MIN_SHEET_HEIGHT, lastValidHeight.value || 40);
     } else {
+      // Arrastre lento o reposicionamiento: NO se cierra, se queda en su límite inferior
+      sheetHeight.value = Math.max(MIN_SHEET_HEIGHT, Math.min(MAX_SHEET_HEIGHT, sheetHeight.value));
       lastValidHeight.value = sheetHeight.value;
       try {
         localStorage.setItem(STORAGE_KEY, sheetHeight.value.toString());
@@ -364,17 +393,7 @@ watch(
 
 const closeSheet = () => {
   isSheetOpen.value = false;
-  if (studio?.stage.selectedNode.value) {
-    studio.selectNode(null);
-  }
 };
-
-// Al cerrar el sheet, deseleccionar el elemento activo del lienzo
-watch(isSheetOpen, (isOpen) => {
-  if (!isOpen && studio?.stage.selectedNode.value) {
-    studio.selectNode(null);
-  }
-});
 
 // Navigation & Actions
 const openInspector = () => {

@@ -58,25 +58,18 @@
             </span>
           </div>
 
-          <div class="pt-1 border-t border-app-border space-y-1">
-            <a
-              href="https://buymeacoffee.com/angelmora"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-700 hover:bg-amber-50 transition-colors"
+          <div class="pt-1 border-t border-app-border">
+            <button
+              type="button"
+              @click="openDonationModal"
+              class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100/80 transition-colors cursor-pointer text-left"
             >
-              <span>☕</span>
-              <span>Invitar un café</span>
-            </a>
-            <a
-              :href="GITHUB_URL"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-text-muted hover:text-text-main hover:bg-stone-50 transition-colors"
-            >
-              <span>⭐</span>
-              <span>Código abierto GitHub</span>
-            </a>
+              <span class="text-base">{{ isSupporter ? '💖' : '☕' }}</span>
+              <div class="leading-tight flex-1">
+                <div class="font-bold">{{ isSupporter ? DONATION_CONFIG.texts.headerButtonSupporter : DONATION_CONFIG.texts.headerButtonNew }}</div>
+                <span class="text-[10px] text-amber-700/80 font-normal">Binance Pay</span>
+              </div>
+            </button>
           </div>
         </div>
       </div>
@@ -190,6 +183,13 @@
         <span class="hidden sm:inline">Descargar</span>
       </button>
     </div>
+
+    <!-- Fallback modal si el contexto global de donación no estuviera presente -->
+    <DonationModal
+      v-if="!donationModal"
+      :is-open="localDonationOpen"
+      @close="localDonationOpen = false"
+    />
   </header>
 </template>
 
@@ -197,7 +197,9 @@
 import { ref } from 'vue';
 import type { FormatPreset } from '../../composables/useSocialPresets';
 import BuyMeCoffeeButton from '../common/BuyMeCoffeeButton.vue';
-import { GITHUB_URL } from '../../utils/constant';
+import DonationModal from '../common/DonationModal.vue';
+import { useDonationModal, useSupporter } from '../../composables/useDonationModal';
+import { DONATION_CONFIG } from '../../utils/donationConfig';
 
 const props = defineProps<{
   currentPreset: FormatPreset;
@@ -211,6 +213,18 @@ const emit = defineEmits<{
 }>();
 
 const isRouteMenuOpen = ref(false);
+const donationModal = useDonationModal();
+const { isSupporter } = useSupporter();
+const localDonationOpen = ref(false);
+
+const openDonationModal = () => {
+  isRouteMenuOpen.value = false;
+  if (donationModal) {
+    donationModal.openModal();
+  } else {
+    localDonationOpen.value = true;
+  }
+};
 
 const onPresetSelect = (e: Event) => {
   const target = e.target as HTMLSelectElement;

@@ -104,7 +104,7 @@
     <div class="flex-1 w-full h-full relative overflow-hidden flex items-center justify-center pointer-events-none">
       <div
         class="will-change-transform pointer-events-auto"
-        :class="{ 'transition-transform duration-150 ease-out': !isPanning && !isTouchPinching }"
+        :class="{ 'transition-transform duration-150 ease-out': isTransitioning }"
         :style="{
           transform: `translate3d(${panX}px, ${panY}px, 0px) scale(${zoomLevel})`,
           transformOrigin: 'center center'
@@ -160,6 +160,7 @@ const {
   panY,
   isPanning,
   isTouchPinching,
+  isTransitioning,
   isSpacePressed,
   activeTool,
   fitToViewport,
@@ -176,21 +177,23 @@ const {
   handleTouchEnd
 } = useViewportPanZoom();
 
-const triggerFit = () => {
+const triggerFit = (animate = false) => {
   if (!viewportRef.value) return;
   const rect = viewportRef.value.getBoundingClientRect();
-  fitToViewport(rect.width, rect.height, props.width, props.height);
+  fitToViewport(rect.width, rect.height, props.width, props.height, animate);
 };
 
 // Pointer and Wheel Event Handlers
 const onViewportPointerDown = (e: PointerEvent) => {
+  if (e.pointerType === 'touch') return;
+
   const target = e.target as HTMLElement;
-  if (target.closest('button, a, input, select, textarea, [data-purpose="canvas-bottom-bar"], [data-purpose="canvas-toolbar"]')) {
+  if (target?.closest?.('button, a, input, select, textarea, [data-purpose="canvas-bottom-bar"], [data-purpose="canvas-toolbar"]')) {
     return;
   }
 
   hasUserManuallyInteracted.value = true;
-  const isStageContent = !!target.closest('#konva-meme-stage');
+  const isStageContent = !!target?.closest?.('#konva-meme-stage');
   const isBackground = !isStageContent || activeTool.value === 'hand';
 
   handlePointerDown(e, isBackground);
@@ -202,11 +205,20 @@ const onWheel = (e: WheelEvent) => {
 };
 
 const onTouchStart = (e: TouchEvent) => {
-  handleTouchStart(e);
+  const target = e.target as HTMLElement;
+  if (target?.closest?.('button, a, input, select, textarea, [data-purpose="canvas-bottom-bar"], [data-purpose="canvas-toolbar"]')) {
+    return;
+  }
+
+  hasUserManuallyInteracted.value = true;
+  const isStageContent = !!target?.closest?.('#konva-meme-stage');
+  const isBackground = !isStageContent || activeTool.value === 'hand';
+
+  handleTouchStart(e, isBackground, viewportRef.value);
 };
 
 const onTouchMove = (e: TouchEvent) => {
-  handleTouchMove(e);
+  handleTouchMove(e, viewportRef.value);
 };
 
 const onTouchEnd = (e: TouchEvent) => {

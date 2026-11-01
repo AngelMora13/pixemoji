@@ -11,17 +11,37 @@ export const CROP_PRESETS = [
 ] as const;
 
 export const EDGE_HANDLES = [
-  { id: 'top' as DragId, classes: '-top-2 left-1/2 -translate-x-1/2 w-8 h-3.5 cursor-ns-resize', barClasses: 'w-3 h-0.5 bg-neutral-600 rounded-full' },
-  { id: 'bottom' as DragId, classes: '-bottom-2 left-1/2 -translate-x-1/2 w-8 h-3.5 cursor-ns-resize', barClasses: 'w-3 h-0.5 bg-neutral-600 rounded-full' },
-  { id: 'left' as DragId, classes: '-left-2 top-1/2 -translate-y-1/2 h-8 w-3.5 cursor-ew-resize', barClasses: 'h-3 w-0.5 bg-neutral-600 rounded-full' },
-  { id: 'right' as DragId, classes: '-right-2 top-1/2 -translate-y-1/2 h-8 w-3.5 cursor-ew-resize', barClasses: 'h-3 w-0.5 bg-neutral-600 rounded-full' }
+  {
+    id: 'top' as DragId,
+    containerClasses: '-top-5 left-1/2 -translate-x-1/2 w-16 h-10 cursor-ns-resize',
+    barClasses: 'w-7 h-2 bg-white border border-neutral-700/80 rounded-full shadow-md flex items-center justify-center pointer-events-none transition-transform group-hover:scale-110',
+    innerLineClasses: 'w-3 h-0.5 bg-neutral-600 rounded-full'
+  },
+  {
+    id: 'bottom' as DragId,
+    containerClasses: '-bottom-5 left-1/2 -translate-x-1/2 w-16 h-10 cursor-ns-resize',
+    barClasses: 'w-7 h-2 bg-white border border-neutral-700/80 rounded-full shadow-md flex items-center justify-center pointer-events-none transition-transform group-hover:scale-110',
+    innerLineClasses: 'w-3 h-0.5 bg-neutral-600 rounded-full'
+  },
+  {
+    id: 'left' as DragId,
+    containerClasses: '-left-5 top-1/2 -translate-y-1/2 h-16 w-10 cursor-ew-resize',
+    barClasses: 'h-7 w-2 bg-white border border-neutral-700/80 rounded-full shadow-md flex items-center justify-center pointer-events-none transition-transform group-hover:scale-110',
+    innerLineClasses: 'h-3 w-0.5 bg-neutral-600 rounded-full'
+  },
+  {
+    id: 'right' as DragId,
+    containerClasses: '-right-5 top-1/2 -translate-y-1/2 h-16 w-10 cursor-ew-resize',
+    barClasses: 'h-7 w-2 bg-white border border-neutral-700/80 rounded-full shadow-md flex items-center justify-center pointer-events-none transition-transform group-hover:scale-110',
+    innerLineClasses: 'h-3 w-0.5 bg-neutral-600 rounded-full'
+  }
 ] as const;
 
 export const CORNER_HANDLES = [
-  { id: 'nw' as DragId, classes: '-top-2 -left-2 cursor-nwse-resize' },
-  { id: 'ne' as DragId, classes: '-top-2 -right-2 cursor-nesw-resize' },
-  { id: 'sw' as DragId, classes: '-bottom-2 -left-2 cursor-nesw-resize' },
-  { id: 'se' as DragId, classes: '-bottom-2 -right-2 cursor-nwse-resize' }
+  { id: 'nw' as DragId, containerClasses: '-top-5 -left-5 cursor-nwse-resize' },
+  { id: 'ne' as DragId, containerClasses: '-top-5 -right-5 cursor-nesw-resize' },
+  { id: 'sw' as DragId, containerClasses: '-bottom-5 -left-5 cursor-nesw-resize' },
+  { id: 'se' as DragId, containerClasses: '-bottom-5 -right-5 cursor-nwse-resize' }
 ] as const;
 
 export function fitContainerDimensions(aspectRatio: number, maxW = 280, maxH = 280) {
