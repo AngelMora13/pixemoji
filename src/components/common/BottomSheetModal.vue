@@ -21,7 +21,7 @@
 
     <!-- Contenedor Bottom Sheet con animación suave por Transform (hardware-accelerated) -->
     <div
-      class="relative w-full max-h-[85vh] bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.12)] flex flex-col z-10 overflow-hidden border border-b-0 border-app-border isolate transition-transform duration-300 ease-out pointer-events-auto"
+      class="relative w-full max-h-[85dvh] bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.12)] flex flex-col z-10 overflow-hidden border border-b-0 border-app-border isolate transition-transform duration-300 ease-out pointer-events-auto pb-[env(safe-area-inset-bottom,0px)]"
       :style="sheetTransformStyle"
     >
       <!-- Cabecera / Handle Bar unificada (sin fondos que sobresalgan de los bordes redondeados) -->
@@ -85,7 +85,7 @@
       </div>
 
       <!-- Contenido principal -->
-      <div class="overflow-y-auto max-h-[calc(85vh-58px)] p-4 overscroll-contain">
+      <div class="overflow-y-auto max-h-[calc(85dvh-58px-env(safe-area-inset-bottom,0px))] p-4 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] overscroll-contain">
         <slot />
       </div>
     </div>
@@ -149,9 +149,9 @@ const sheetTransformStyle = computed(() => {
   if (!props.isOpen) {
     return { transform: 'translateY(100%)' };
   }
-  // If persistent and collapsed: dock at bottom leaving only peekHeight visible
+  // If persistent and collapsed: dock at bottom leaving only peekHeight visible above safe area
   if (props.persistent && !props.isExpanded) {
-    return { transform: `translateY(calc(100% - ${props.peekHeight}px))` };
+    return { transform: `translateY(calc(100% - ${props.peekHeight}px - env(safe-area-inset-bottom, 0px)))` };
   }
   // Expanded or normal open modal: full view
   return { transform: 'translateY(0%)' };

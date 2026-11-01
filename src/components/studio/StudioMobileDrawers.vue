@@ -13,9 +13,9 @@
     <Transition name="sheet-slide">
       <section
         v-if="isSheetOpen"
-        class="fixed inset-x-0 bottom-[54px] z-30 bg-white rounded-t-[28px] border-t border-sheet-border shadow-sheet flex flex-col will-change-transform"
+        class="fixed inset-x-0 bottom-[calc(54px+env(safe-area-inset-bottom,0px))] z-30 bg-white rounded-t-[28px] border-t border-sheet-border shadow-sheet flex flex-col will-change-transform"
         :class="{ 'transition-[height] duration-150 ease-out': !isDragging }"
-        :style="{ height: `${sheetHeight}vh` }"
+        :style="{ height: `${sheetHeight}dvh` }"
         data-purpose="mobile-bottom-sheet-controls"
       >
         <!-- Drag Zone: Entire top header is draggable -->
